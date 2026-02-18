@@ -130,20 +130,18 @@ public/
 - **Session 3** (DONE): Attribution tracking, Meta Pixel, cookie notice, SEO, production polish
 - **Session 4** (DONE): Landing page copy, info animation (Framer Motion), social proof content
 - **Session 5** (DONE): Various fixes and refinements
-- **Session 6** (DONE): Full design overhaul — mobile-first, AI-first, futuristic. Aurora mesh + dot grid background, glassmorphism cards, glow effects, Framer Motion scroll animations, floating particles, animated gradient borders, premium checkout card. ElevenLabsChat promoted to centrepiece (moved above InfoAnimation in page order). All components converted to mobile-first with proper breakpoint scaling.
+- **Session 6** (DONE): Full design overhaul v2 — "Singularity Aesthetic" redesign. Near-black (#050505) background, CSS-only breathing singularity orb as hero centrepiece, Playfair Display serif headlines + Inter body font pairing, radical minimalism with generous clamp()-based spacing. Stripped all glassmorphism, particles, gradient borders, shimmer effects. InfoAnimation consolidated as 3-step summary inside CheckoutSection. SocialProof condensed to metrics-only strip. Header/Footer minimised.
 
-## Design System (Session 6)
-- **Glass cards**: `backdrop-filter: blur(20px)` + semi-transparent bg + viridian border glow
-- **Animated gradient border**: `.gradient-border-wrap` on checkout card (viridian → sandstorm → viridian loop)
-- **Aurora mesh background**: CSS radial gradients with slow position animation (25s cycle)
-- **Dot grid texture**: Very subtle repeating radial-gradient overlay (opacity: 0.04)
-- **Floating particles**: CSS-only dots with `dot-float-*` keyframes (hero, chat sections)
-- **Glow effects**: `glow-pulse`, `glow-pulse-strong` keyframes on interactive elements
-- **Shimmer**: Left-to-right shine on checkout button via `::after` pseudo-element
-- **Text glow**: `.text-glow` class with viridian text-shadow
-- **Section headings**: All sections now have gradient accent underline bar
-- **Framer Motion**: Used in Hero, Chat, InfoAnimation, SocialProof, Checkout, FAQ for scroll-triggered reveals
-- **Page order**: Hero → ElevenLabsChat → InfoAnimation → SocialProof → Checkout → FAQ
+## Design System (Session 6 v2 — Singularity)
+- **Background**: Near-black `#050505` with single subtle radial glow (`.bg-glow`)
+- **Fonts**: Playfair Display (serif, headlines via `--font-serif`) + Inter (body via `--font-sans`)
+- **Singularity orb**: CSS-only breathing orb (`.singularity`, `.singularity-core`, `.singularity-glow`, `.singularity-ring`, `.singularity-ring-outer`) — 5s breathing animation, rotating rings
+- **Cards**: `.card` class — `rgba(255,255,255,0.03)` bg, `rgba(255,255,255,0.08)` border, 1rem radius
+- **Spacing**: `section-spacing` class uses `clamp(4rem, 12vw, 8rem)` padding
+- **Colours**: `--viridian: #1EBA8F`, `--sandstorm: #F7CE46`, `--text-primary: #E8E8E8`, `--text-secondary: #888888`, `--text-muted: #555555`
+- **Borders**: White-based (`rgba(255,255,255,0.08)`) not viridian-based
+- **No**: glass cards, gradient borders, aurora mesh, dot grid, particles, shimmer, glow-pulse
+- **Page order**: Hero → ElevenLabsChat → SocialProof → CheckoutSection → FAQ
 
 ## Attribution & Tracking
 - **Visitor ID**: `_vid` cookie (365 days, `crypto.randomUUID()`) — created by `visitor.ts`
