@@ -128,7 +128,22 @@ public/
 - **Session 1** (DONE): Project scaffold, design system, all components, ElevenLabs widget, deploy
 - **Session 2** (DONE): Stripe checkout, post-purchase automation (Loops, Notion task, Meta CAPI, Turso)
 - **Session 3** (DONE): Attribution tracking, Meta Pixel, cookie notice, SEO, production polish
-- **Session 4**: Landing page copy, info animation (Framer Motion), social proof content
+- **Session 4** (DONE): Landing page copy, info animation (Framer Motion), social proof content
+- **Session 5** (DONE): Various fixes and refinements
+- **Session 6** (DONE): Full design overhaul — mobile-first, AI-first, futuristic. Aurora mesh + dot grid background, glassmorphism cards, glow effects, Framer Motion scroll animations, floating particles, animated gradient borders, premium checkout card. ElevenLabsChat promoted to centrepiece (moved above InfoAnimation in page order). All components converted to mobile-first with proper breakpoint scaling.
+
+## Design System (Session 6)
+- **Glass cards**: `backdrop-filter: blur(20px)` + semi-transparent bg + viridian border glow
+- **Animated gradient border**: `.gradient-border-wrap` on checkout card (viridian → sandstorm → viridian loop)
+- **Aurora mesh background**: CSS radial gradients with slow position animation (25s cycle)
+- **Dot grid texture**: Very subtle repeating radial-gradient overlay (opacity: 0.04)
+- **Floating particles**: CSS-only dots with `dot-float-*` keyframes (hero, chat sections)
+- **Glow effects**: `glow-pulse`, `glow-pulse-strong` keyframes on interactive elements
+- **Shimmer**: Left-to-right shine on checkout button via `::after` pseudo-element
+- **Text glow**: `.text-glow` class with viridian text-shadow
+- **Section headings**: All sections now have gradient accent underline bar
+- **Framer Motion**: Used in Hero, Chat, InfoAnimation, SocialProof, Checkout, FAQ for scroll-triggered reveals
+- **Page order**: Hero → ElevenLabsChat → InfoAnimation → SocialProof → Checkout → FAQ
 
 ## Attribution & Tracking
 - **Visitor ID**: `_vid` cookie (365 days, `crypto.randomUUID()`) — created by `visitor.ts`
