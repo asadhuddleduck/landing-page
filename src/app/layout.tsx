@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "AI Ad Engine for F&B Brands | Huddle Duck",
   description:
-    "The AI-powered advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
+    "The AI-accelerated advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
   metadataBase: new URL("https://start.huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AI Ad Engine for F&B Brands | Huddle Duck",
     description:
-      "The AI-powered advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
+      "The AI-accelerated advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
     url: "https://start.huddleduck.co.uk",
     images: [
       {
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AI Ad Engine for F&B Brands | Huddle Duck",
     description:
-      "The AI-powered advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
+      "The AI-accelerated advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
     images: ["/og-image.jpg"],
   },
 };
