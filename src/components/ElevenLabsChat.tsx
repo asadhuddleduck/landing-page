@@ -48,47 +48,7 @@ interface ElevenLabsChatProps {
 export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProps) {
   const widgetRef = useRef<HTMLDivElement>(null);
   const loadedRef = useRef(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [nudgeClass, setNudgeClass] = useState("");
-
-  // Nudge logic — show subtle prompt if visitor hasn't engaged
-  useEffect(() => {
-    if (hasStarted) {
-      setNudgeClass("");
-      return;
-    }
-
-    // 8-second idle nudge
-    const idleTimer = setTimeout(() => {
-      if (!hasStarted) setNudgeClass("chat-nudge-pulse");
-    }, 8000);
-
-    // Scroll-based nudge (50% of page)
-    const handleScroll = () => {
-      const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      if (scrollPct > 0.5 && !hasStarted) {
-        setNudgeClass("chat-nudge-bounce");
-      }
-    };
-
-    // Exit intent (desktop only)
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !hasStarted) {
-        setNudgeClass("chat-nudge-exit");
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    document.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      clearTimeout(idleTimer);
-      window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, [hasStarted]);
 
   const handleConversationEnd = useCallback(() => {
     localStorage.setItem("hd_has_chatted", "true");
@@ -119,10 +79,9 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     const timeout = setTimeout(() => {
       if (!loadedRef.current) {
         setHasError(true);
-        setIsLoading(false);
         track("widget_error", { reason: "timeout" });
       }
-    }, 10000);
+    }, 15000);
 
     script.onload = () => {
       clearTimeout(timeout);
@@ -130,6 +89,12 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
       if (widgetRef.current && !widgetRef.current.querySelector("elevenlabs-convai")) {
         const widget = document.createElement("elevenlabs-convai");
         widget.setAttribute("agent-id", AGENT_ID);
+        widget.setAttribute("variant", "expanded");
+        widget.setAttribute("dismissible", "false");
+
+        // Brand orb colours
+        widget.setAttribute("avatar-orb-color-1", "#1EBA8F");
+        widget.setAttribute("avatar-orb-color-2", "#00334B");
 
         // Pass dynamic variables (visitor_id, UTMs, returning_visitor, memory)
         try {
@@ -141,8 +106,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
         widgetRef.current.appendChild(widget);
 
         widget.addEventListener("elevenlabs-convai:conversation-started", () => {
-          setHasStarted(true);
-          setNudgeClass("");
           track("conversation_started");
         });
 
@@ -150,14 +113,12 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           handleConversationEnd();
         });
       }
-      setIsLoading(false);
       track("widget_loaded");
     };
 
     script.onerror = () => {
       clearTimeout(timeout);
       setHasError(true);
-      setIsLoading(false);
       track("widget_error", { reason: "script_error" });
     };
 
@@ -169,9 +130,9 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     };
   }, [handleConversationEnd]);
 
-  return (
-    <div className="chat-container">
-      {hasError && (
+  if (hasError) {
+    return (
+      <div className="chat-container">
         <div className="chat-error">
           <p className="chat-error-text">
             Our AI assistant is temporarily unavailable.
@@ -180,56 +141,13 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
             Email us
           </a>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {!hasError && (
-        <div className={`chat-placeholder${nudgeClass ? ` ${nudgeClass}` : ""}`}>
-          {/* Nudge tooltip — exit intent */}
-          {nudgeClass === "chat-nudge-exit" && (
-            <div className="chat-nudge-tooltip">
-              Want to know if the Pilot is right for your brand?
-            </div>
-          )}
-
-          {/* Icon */}
-          <div className="chat-placeholder-icon">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-            </svg>
-          </div>
-
-          <p className="chat-placeholder-title">F&B Ad Strategist</p>
-          <p className="chat-placeholder-desc">
-            Talk naturally or type your questions.
-          </p>
-
-          {/* Suggested questions */}
-          <div className="chat-placeholder-features">
-            <div className="chat-placeholder-feature">
-              <span className="chat-placeholder-feature-dot" />
-              How is this different from a marketing agency?
-            </div>
-            <div className="chat-placeholder-feature">
-              <span className="chat-placeholder-feature-dot" />
-              What does the AI actually do?
-            </div>
-            <div className="chat-placeholder-feature">
-              <span className="chat-placeholder-feature-dot" />
-              Will my ads look like AI made them?
-            </div>
-          </div>
-
-          {/* Loading indicator or widget */}
-          {isLoading ? (
-            <div className="chat-loading">
-              <div className="chat-loading-dot" />
-              <span className="chat-loading-text">Loading voice assistant...</span>
-            </div>
-          ) : (
-            <div ref={widgetRef} style={{ display: "flex", justifyContent: "center", marginTop: 20 }} />
-          )}
-        </div>
-      )}
+  return (
+    <div className="chat-container">
+      <div ref={widgetRef} className="chat-widget-wrapper" />
     </div>
   );
 }
