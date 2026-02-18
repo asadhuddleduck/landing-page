@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
-const PRICE_ID = process.env.STRIPE_PRICE_ID!;
+const PRICE_ID = process.env.STRIPE_PRICE_ID!.trim();
 
 export async function POST(request: NextRequest) {
   try {
