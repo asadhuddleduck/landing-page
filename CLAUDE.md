@@ -14,6 +14,8 @@ Hosted at `start.huddleduck.co.uk`. Uses an ElevenLabs AI chat agent as the prim
 - Loops.so (email automation via API)
 - Notion API (task creation in Actions DB)
 - Meta Conversions API (server-side purchase events via `facebook-nodejs-business-sdk`)
+- Meta Pixel (client-side pixel events via `fbevents.js`, deduplicated with CAPI)
+- Attribution tracking (visitor cookies + UTMs, POSTs to attribution-tracker API)
 - Hosting: Vercel
 - DNS: Cloudflare (`start.huddleduck.co.uk` CNAME → `cname.vercel-dns.com`)
 
@@ -39,11 +41,15 @@ src/
     Header.tsx             # Sticky header with duck logo + F&B badge (server)
     HeroSection.tsx        # Hero headline with gradient text (server)
     InfoAnimation.tsx      # 3-step process cards (server, placeholder for Framer Motion)
-    ElevenLabsChat.tsx     # ElevenLabs widget (client, useEffect injection)
-    CheckoutSection.tsx    # Pricing card + checkout button (client, calls /api/checkout)
+    ElevenLabsChat.tsx     # ElevenLabs widget (client, loading/error states, 10s timeout)
+    CheckoutSection.tsx    # Pricing card + checkout button (client, visitor_id + pixel events)
     SocialProof.tsx        # 3 testimonial cards (server, placeholder content)
     FAQ.tsx                # 5-item expandable accordion (client, useState)
     Footer.tsx             # Footer with logo + copyright (server)
+    MetaPixel.tsx          # Meta Pixel base code + trackPixelEvent export (client)
+    TrackingScript.tsx     # Attribution tracking POST to /api/track (client)
+    SuccessPixel.tsx       # Purchase pixel event on /success page (client)
+    CookieNotice.tsx       # Soft "We use cookies" dismissible banner (client)
   lib/
     db.ts                  # Turso lazy proxy (from client-dashboards)
     stripe.ts              # Stripe client (fetchHttpClient for Vercel compat)
@@ -51,6 +57,7 @@ src/
     meta-capi.ts           # Meta Conversions API (from attribution-tracker)
     notion.ts              # Notion task creation in Actions DB
     onboarding.ts          # Post-purchase orchestrator (Promise.allSettled)
+    visitor.ts             # Cookie utilities: getVisitorId, getStoredUtms, getFbCookies
 public/
   duck-logo.png            # Huddle Duck logo
   favicon.png              # Favicon (dark background)
@@ -81,6 +88,7 @@ public/
 | `META_PIXEL_ID` | Meta Pixel ID (1780686211962897) |
 | `TURSO_DATABASE_URL` | Turso DB for purchase records |
 | `TURSO_AUTH_TOKEN` | Turso auth |
+| `NEXT_PUBLIC_TRACKING_URL` | Attribution tracker Vercel URL |
 
 ### Key Values
 - `STRIPE_PRICE_ID`: `price_1T25qbEMAaEi0IoguZpHE4GB` (£497 GBP, one-time)
@@ -93,6 +101,7 @@ public/
 - Notion Actions DB data source: `collection://2c384fd7-bc4e-813d-99c4-000b9a6385c8`
 - Cloudflare Zone ID: `253840e28c6c8ec53828f5929bc45732`
 - Turso DB: `landing-page` (URL: `libsql://landing-page-asadhuddleduck.aws-eu-west-1.turso.io`)
+- `NEXT_PUBLIC_TRACKING_URL`: `https://attribution-tracker.vercel.app`
 
 ## DNS
 - Domain: `start.huddleduck.co.uk`
@@ -118,8 +127,23 @@ public/
 ## Session Plan
 - **Session 1** (DONE): Project scaffold, design system, all components, ElevenLabs widget, deploy
 - **Session 2** (DONE): Stripe checkout, post-purchase automation (Loops, Notion task, Meta CAPI, Turso)
-- **Session 3**: Attribution tracking, Meta Pixel, GDPR consent, SEO, polish
+- **Session 3** (DONE): Attribution tracking, Meta Pixel, cookie notice, SEO, production polish
 - **Session 4**: Landing page copy, info animation (Framer Motion), social proof content
+
+## Attribution & Tracking
+- **Visitor ID**: `_vid` cookie (365 days, `crypto.randomUUID()`) — created by `visitor.ts`
+- **UTMs**: First-touch UTMs stored in `_utms` cookie (JSON), never overwritten
+- **TrackingScript**: POSTs page views to `NEXT_PUBLIC_TRACKING_URL/api/track` with visitor_id, UTMs, _fbc/_fbp
+- **Meta Pixel**: `fbevents.js` injected on load. Fires PageView, InitiateCheckout, Purchase
+- **CAPI dedup**: Purchase pixel uses `event_id: stripe_{session_id}` matching server-side CAPI in onboarding.ts
+- **Attribution tracker**: Deployed at `https://attribution-tracker.vercel.app` (separate Turso DB: `attribution-tracker`)
+- **Cookie notice**: Soft banner with "Got it" button, stored in localStorage, no consent gating
+
+## SEO
+- `robots.ts` — allows all crawlers, points to sitemap
+- `sitemap.ts` — lists `/` and `/success`
+- JSON-LD structured data in layout.tsx (Organization + Product schemas)
+- Full OG/Twitter metadata in layout.tsx
 
 ## Build Plan
 Full build plan at `~/.claude/plans/effervescent-tumbling-crystal.md`

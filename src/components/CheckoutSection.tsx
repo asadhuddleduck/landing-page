@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { getVisitorId, getStoredUtms } from "@/lib/visitor";
+import { trackPixelEvent } from "./MetaPixel";
+import { track } from "@vercel/analytics";
 
 const features = [
   "Full AI campaign strategy",
@@ -10,30 +13,33 @@ const features = [
   "Dedicated account manager",
 ];
 
-function getUtmParams() {
-  if (typeof window === "undefined") return {};
-  const params = new URLSearchParams(window.location.search);
-  return {
-    utm_source: params.get("utm_source") || "",
-    utm_medium: params.get("utm_medium") || "",
-    utm_campaign: params.get("utm_campaign") || "",
-  };
-}
-
 export default function CheckoutSection() {
   const [loading, setLoading] = useState(false);
 
   async function handleCheckout() {
     setLoading(true);
     try {
-      const utms = getUtmParams();
+      trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
+      track("checkout_click");
+
+      const vid = getVisitorId();
+      const params = new URLSearchParams(window.location.search);
+      const utms = {
+        utm_source: params.get("utm_source") || "",
+        utm_medium: params.get("utm_medium") || "",
+        utm_campaign: params.get("utm_campaign") || "",
+      };
+      if (!utms.utm_source) {
+        const stored = getStoredUtms();
+        utms.utm_source = stored.utm_source || "";
+        utms.utm_medium = stored.utm_medium || "";
+        utms.utm_campaign = stored.utm_campaign || "";
+      }
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visitor_id: "",
-          ...utms,
-        }),
+        body: JSON.stringify({ visitor_id: vid, ...utms }),
       });
 
       const data = await res.json();
@@ -52,7 +58,7 @@ export default function CheckoutSection() {
 
   return (
     <section id="checkout" className="relative z-10 py-20 px-6">
-      <div className="checkout-card max-w-lg mx-auto p-10 rounded-3xl relative overflow-hidden">
+      <div className="checkout-card max-w-lg mx-auto p-6 sm:p-10 rounded-3xl relative overflow-hidden">
         {/* Top accent bar */}
         <div
           className="absolute top-0 left-0 right-0 h-1"
@@ -74,7 +80,7 @@ export default function CheckoutSection() {
             £
           </span>
           <span
-            className="text-6xl font-black"
+            className="text-5xl sm:text-6xl font-black"
             style={{ color: "var(--text-primary)" }}
           >
             497

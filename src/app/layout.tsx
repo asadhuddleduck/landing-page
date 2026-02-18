@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import TrackingScript from "@/components/TrackingScript";
+import MetaPixel from "@/components/MetaPixel";
+import CookieNotice from "@/components/CookieNotice";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,7 +54,38 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {children}
+        <TrackingScript />
+        <MetaPixel />
+        <CookieNotice />
         <Analytics />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  name: "Huddle Duck",
+                  url: "https://huddleduck.co.uk",
+                  logo: "https://start.huddleduck.co.uk/duck-logo.png",
+                },
+                {
+                  "@type": "Product",
+                  name: "AI Ad Engine Pilot",
+                  description:
+                    "4-week managed Meta ads pilot for F&B brands. AI-powered strategy, creative, and optimisation.",
+                  offers: {
+                    "@type": "Offer",
+                    price: "497",
+                    priceCurrency: "GBP",
+                    availability: "https://schema.org/InStock",
+                  },
+                },
+              ],
+            }),
+          }}
+        />
       </body>
     </html>
   );

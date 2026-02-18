@@ -123,6 +123,13 @@ body {
   box-shadow: 0 4px 20px rgba(30, 186, 143, 0.4);
 }
 
+/* ========== MOBILE ========== */
+@media (max-width: 640px) {
+  .bg-orb-1 { width: 250px; height: 250px; }
+  .bg-orb-2 { width: 200px; height: 200px; }
+  .bg-orb-3 { width: 220px; height: 220px; }
+}
+
 /* ========== ACCESSIBILITY ========== */
 @media (prefers-reduced-motion: reduce) {
   .bg-orb { animation: none !important; }

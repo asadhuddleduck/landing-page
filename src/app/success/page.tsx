@@ -1,5 +1,6 @@
 import { stripe } from "@/lib/stripe";
 import Link from "next/link";
+import SuccessPixel from "@/components/SuccessPixel";
 
 const steps = [
   {
@@ -145,6 +146,8 @@ export default async function SuccessPage({
         >
           Back to home
         </Link>
+
+        <SuccessPixel sessionId={session_id || ""} />
       </div>
     </main>
   );
