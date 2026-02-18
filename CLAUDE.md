@@ -8,7 +8,12 @@ Hosted at `start.huddleduck.co.uk`. Uses an ElevenLabs AI chat agent as the prim
 - Next.js 16 (App Router, TypeScript, React 19)
 - Tailwind CSS v4 (`@tailwindcss/postcss`)
 - `@vercel/analytics`
+- Stripe (checkout + webhooks, `stripe` SDK v20 with `createFetchHttpClient()`)
 - ElevenLabs convai widget (custom element, dynamically injected via `useEffect`)
+- Turso/LibSQL (purchase records, lazy proxy pattern)
+- Loops.so (email automation via API)
+- Notion API (task creation in Actions DB)
+- Meta Conversions API (server-side purchase events via `facebook-nodejs-business-sdk`)
 - Hosting: Vercel
 - DNS: Cloudflare (`start.huddleduck.co.uk` CNAME → `cname.vercel-dns.com`)
 
@@ -26,15 +31,26 @@ src/
     globals.css            # Design system CSS variables + animations
     layout.tsx             # Root layout, Inter font, metadata/OG tags
     page.tsx               # Main page assembling all sections
+    success/page.tsx       # Post-purchase thank you page (server, fetches Stripe session)
+    api/
+      checkout/route.ts    # POST: creates Stripe Checkout Session (£497)
+      webhook/stripe/route.ts  # POST: handles checkout.session.completed webhook
   components/
     Header.tsx             # Sticky header with duck logo + F&B badge (server)
     HeroSection.tsx        # Hero headline with gradient text (server)
     InfoAnimation.tsx      # 3-step process cards (server, placeholder for Framer Motion)
     ElevenLabsChat.tsx     # ElevenLabs widget (client, useEffect injection)
-    CheckoutSection.tsx    # Pricing card + CTA button (server, placeholder for Stripe)
+    CheckoutSection.tsx    # Pricing card + checkout button (client, calls /api/checkout)
     SocialProof.tsx        # 3 testimonial cards (server, placeholder content)
     FAQ.tsx                # 5-item expandable accordion (client, useState)
     Footer.tsx             # Footer with logo + copyright (server)
+  lib/
+    db.ts                  # Turso lazy proxy (from client-dashboards)
+    stripe.ts              # Stripe client (fetchHttpClient for Vercel compat)
+    loops.ts               # Loops.so API wrapper (from attribution-tracker)
+    meta-capi.ts           # Meta Conversions API (from attribution-tracker)
+    notion.ts              # Notion task creation in Actions DB
+    onboarding.ts          # Post-purchase orchestrator (Promise.allSettled)
 public/
   duck-logo.png            # Huddle Duck logo
   favicon.png              # Favicon (dark background)
@@ -49,36 +65,34 @@ public/
 
 ## Environment Variables
 
-### Currently in `.env.local`
+### In `.env.local` and Vercel
 | Variable | Purpose |
 |---|---|
 | `CLOUDFLARE_API_KEY` | Cloudflare Global API Key (for DNS management) |
 | `CLOUDFLARE_EMAIL` | Cloudflare account email |
 | `CLOUDFLARE_ZONE_ID` | Zone ID for huddleduck.co.uk |
+| `STRIPE_SECRET_KEY` | Stripe checkout (sk_live_...) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe.js browser-side (pk_live_...) |
+| `STRIPE_PRICE_ID` | Stripe Price ID for £497 product |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signature verification (whsec_...) |
+| `LOOPS_API_KEY` | Loops.so email automation |
+| `NOTION_TOKEN` | Notion API for task creation |
+| `META_ACCESS_TOKEN` | Meta CAPI for purchase events |
+| `META_PIXEL_ID` | Meta Pixel ID (1780686211962897) |
+| `TURSO_DATABASE_URL` | Turso DB for purchase records |
+| `TURSO_AUTH_TOKEN` | Turso auth |
 
-### Needed in Future Sessions (from build plan)
-| Variable | Purpose | Session |
-|---|---|---|
-| `STRIPE_SECRET_KEY` | Stripe checkout (sk_live_...) | Session 2 |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe.js browser-side (pk_live_...) | Session 2 |
-| `STRIPE_WEBHOOK_SECRET` | Webhook signature verification (whsec_...) | Session 2 |
-| `LOOPS_API_KEY` | Loops.so email automation | Session 2 |
-| `NOTION_TOKEN` | Notion API for task creation | Session 2 |
-| `META_ACCESS_TOKEN` | Meta CAPI for purchase events | Session 2 |
-| `META_PIXEL_ID` | Meta Pixel ID (1780686211962897) | Session 3 |
-| `TURSO_DATABASE_URL` | Turso DB for purchase records | Session 2 |
-| `TURSO_AUTH_TOKEN` | Turso auth | Session 2 |
-
-### Key Values (from build plan)
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: `pk_live_51OMBLhEMAaEi0IogAHJ7Vy2sy82By2Pxg7GXmPwLPYAwoaFBJiLjkjJVbfs2DnshMtUPgIXR27yUN1ewlRiu7Kmg00wmjNr9FG`
-- `LOOPS_API_KEY`: `567fd8f6b85095600f14e9179b8d8dae`
+### Key Values
+- `STRIPE_PRICE_ID`: `price_1T25qbEMAaEi0IoguZpHE4GB` (£497 GBP, one-time)
+- Stripe Product ID: `prod_U062C0TCKDiq7U` ("AI Ad Engine Pilot")
+- Stripe Webhook ID: `we_1T25xGEMAaEi0IogUV98EJTE`
 - `META_PIXEL_ID`: `1780686211962897`
 - ElevenLabs Agent ID: `4f58a5783e990de16e22e8effd8ba103118c603a76f123afbde18a66f4e1466e`
 - Akmal's Notion User ID: `ac601ede-0d62-4107-b59e-21c0530b5348`
+- Notion Actions DB ID: `2c384fd7-bc4e-81a1-b469-e33afbf19157`
 - Notion Actions DB data source: `collection://2c384fd7-bc4e-813d-99c4-000b9a6385c8`
 - Cloudflare Zone ID: `253840e28c6c8ec53828f5929bc45732`
-- `NOTION_TOKEN` and `META_ACCESS_TOKEN`: copy from `client-dashboards/.env.local`
-- `STRIPE_SECRET_KEY`: provided in build plan (sk_live_...)
+- Turso DB: `landing-page` (URL: `libsql://landing-page-asadhuddleduck.aws-eu-west-1.turso.io`)
 
 ## DNS
 - Domain: `start.huddleduck.co.uk`
@@ -86,9 +100,24 @@ public/
 - Cloudflare Zone ID: `253840e28c6c8ec53828f5929bc45732`
 - Nameservers: `adelaide.ns.cloudflare.com`, `phil.ns.cloudflare.com`
 
+## Stripe Integration
+- **Checkout flow**: Button click → POST `/api/checkout` → Stripe Checkout Session → redirect to Stripe → `/success?session_id=...`
+- **Webhook**: `checkout.session.completed` → fires 4 downstream actions via `Promise.allSettled`:
+  1. Turso: `INSERT OR REPLACE` purchase record (idempotent)
+  2. Loops: `addContact` + `triggerEvent("purchase_completed")`
+  3. Notion: create task in Actions DB for Akmal
+  4. Meta CAPI: `Purchase` event with `stripe_{session_id}` for dedup
+- **Stripe SDK**: Must use `Stripe.createFetchHttpClient()` on Vercel (default node:http fails)
+- **Webhook endpoint**: `https://start.huddleduck.co.uk/api/webhook/stripe`
+
+## Turso Database
+- DB name: `landing-page`
+- Table: `purchases` (stripe_session_id UNIQUE, email, name, phone, amount_total, currency, UTMs, visitor_id)
+- Query: `turso db shell landing-page "SELECT * FROM purchases"`
+
 ## Session Plan
 - **Session 1** (DONE): Project scaffold, design system, all components, ElevenLabs widget, deploy
-- **Session 2**: Stripe checkout + post-purchase automation (Loops, Notion task, Meta CAPI, Turso)
+- **Session 2** (DONE): Stripe checkout, post-purchase automation (Loops, Notion task, Meta CAPI, Turso)
 - **Session 3**: Attribution tracking, Meta Pixel, GDPR consent, SEO, polish
 - **Session 4**: Landing page copy, info animation (Framer Motion), social proof content
 
