@@ -44,6 +44,13 @@ function getDynamicVariables(): Record<string, string> {
   };
 }
 
+// Strip ElevenLabs v3 emotion tags that are meant for TTS but visible in text-only mode
+function stripEmotionTags(text: string): string {
+  return text
+    .replace(/\[(calm|casual|excited|empathetic|confident|warm|genuine|understanding)\]\s*/gi, "")
+    .trim();
+}
+
 // Detect which rich card to show for an agent message
 function detectCard(text: string): "pricing" | "testimonial" | "cta" | null {
   const lower = text.toLowerCase();
@@ -78,40 +85,22 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   ]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
-  const [isAgentTyping, setIsAgentTyping] = useState(false);
   const [shownCards, setShownCards] = useState<Set<string>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const conversation = useConversation({
     onMessage: useCallback(
       ({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
-        if (role === "agent") {
-          // Show typing indicator briefly before revealing message
-          setIsAgentTyping(true);
-          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = setTimeout(() => {
-            setIsAgentTyping(false);
-            setMessages((prev) => {
-              // Dedup: if last message has the same role, update it (streaming)
-              const last = prev[prev.length - 1];
-              if (last && last.role === role) {
-                return [...prev.slice(0, -1), { role, text: message }];
-              }
-              return [...prev, { role, text: message }];
-            });
-          }, 400);
-        } else {
-          // User messages appear immediately
-          setMessages((prev) => {
-            const last = prev[prev.length - 1];
-            if (last && last.role === role) {
-              return [...prev.slice(0, -1), { role, text: message }];
-            }
-            return [...prev, { role, text: message }];
-          });
-        }
+        const cleanText = role === "agent" ? stripEmotionTags(message) : message;
+        setMessages((prev) => {
+          // Dedup: if last message has the same role, update it (streaming)
+          const last = prev[prev.length - 1];
+          if (last && last.role === role) {
+            return [...prev.slice(0, -1), { role, text: cleanText }];
+          }
+          return [...prev, { role, text: cleanText }];
+        });
       },
       []
     ),
@@ -145,14 +134,7 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     if (container) {
       container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
     }
-  }, [messages, isAgentTyping]);
-
-  // Cleanup typing timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    };
-  }, []);
+  }, [messages]);
 
   const startConversation = useCallback(
     async (firstMessage?: string) => {
@@ -291,7 +273,7 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
         })}
 
         {/* Typing indicator */}
-        {(isAgentTyping || (isConnected && conversation.isSpeaking)) && (
+        {isConnected && conversation.isSpeaking && (
           <div className="ai-chat-msg ai-chat-msg-agent">
             <div className="ai-chat-msg-avatar">
               <div className="ai-chat-msg-avatar-dot ai-chat-msg-avatar-speaking" />
