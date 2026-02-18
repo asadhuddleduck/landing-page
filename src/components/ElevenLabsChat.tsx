@@ -2,8 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { track } from "@vercel/analytics";
+import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 
 const AGENT_ID = "4f58a5783e990de16e22e8effd8ba103118c603a76f123afbde18a66f4e1466e";
+
+/** Build dynamic variables for the ElevenLabs agent. */
+function buildWidgetVars(): string {
+  const visitorId = getVisitorId();
+  const utms = getStoredUtms();
+  const returningVisitor = localStorage.getItem("hd_has_chatted") === "true";
+
+  const vars = {
+    visitor_id: visitorId,
+    utm_source: utms.utm_source || "",
+    utm_medium: utms.utm_medium || "",
+    utm_campaign: utms.utm_campaign || "",
+    page_url: window.location.href,
+    returning_visitor: returningVisitor ? "true" : "false",
+  };
+
+  return btoa(JSON.stringify(vars));
+}
 
 export default function ElevenLabsChat() {
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -30,7 +49,25 @@ export default function ElevenLabsChat() {
       if (widgetRef.current && !widgetRef.current.querySelector("elevenlabs-convai")) {
         const widget = document.createElement("elevenlabs-convai");
         widget.setAttribute("agent-id", AGENT_ID);
+
+        // Pass dynamic variables (visitor_id, UTMs, returning_visitor)
+        try {
+          widget.setAttribute("dynamic-variables", buildWidgetVars());
+        } catch {
+          // Non-critical — agent works without vars
+        }
+
         widgetRef.current.appendChild(widget);
+
+        // Listen for conversation lifecycle events
+        widget.addEventListener("elevenlabs-convai:conversation-started", () => {
+          track("conversation_started");
+        });
+
+        widget.addEventListener("elevenlabs-convai:conversation-ended", () => {
+          localStorage.setItem("hd_has_chatted", "true");
+          track("conversation_ended");
+        });
       }
       setIsLoading(false);
       track("widget_loaded");
