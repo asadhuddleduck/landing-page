@@ -10,19 +10,20 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      {/* Animated background orbs */}
+      {/* Layered animated background */}
       <div className="bg-effects">
+        <div className="aurora-mesh" />
         <div className="bg-orb bg-orb-1" />
         <div className="bg-orb bg-orb-2" />
-        <div className="bg-orb bg-orb-3" />
+        <div className="dot-grid" />
       </div>
 
       <Header />
 
       <main>
         <HeroSection />
-        <InfoAnimation />
         <ElevenLabsChat />
+        <InfoAnimation />
         <SocialProof />
         <CheckoutSection />
         <FAQ />

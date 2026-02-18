@@ -41,69 +41,93 @@ const steps = [
 ];
 
 const stepVariant = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 },
+  hidden: { opacity: 0, y: 30, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+};
+
+const headingVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 };
 
 export default function InfoAnimation() {
   return (
-    <section className="relative z-10 py-16 px-6 max-w-3xl mx-auto">
-      <h2
-        className="text-3xl md:text-4xl font-black text-center tracking-tight mb-12"
-        style={{ color: "var(--text-primary)" }}
+    <section className="relative z-10 py-12 px-4 md:py-20 md:px-6 max-w-3xl mx-auto">
+      {/* Section heading with gradient accent */}
+      <motion.div
+        className="text-center mb-12 md:mb-16"
+        variants={headingVariant}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        How It Works
-      </h2>
+        <h2
+          className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
+          How It Works
+        </h2>
+        <div
+          className="mt-3 mx-auto h-1 w-16 rounded-full"
+          style={{ background: "var(--gradient-accent)" }}
+        />
+      </motion.div>
 
       <div className="relative">
-        {/* Timeline connector line */}
+        {/* Glowing timeline connector */}
         <div
-          className="absolute left-5 top-5 bottom-5 w-0.5 hidden md:block"
-          style={{ background: "var(--border)" }}
+          className="absolute left-5 top-5 bottom-5 w-px hidden md:block"
+          style={{
+            background: "linear-gradient(to bottom, var(--viridian), rgba(30, 186, 143, 0.05))",
+            boxShadow: "0 0 8px rgba(30, 186, 143, 0.3)",
+          }}
         />
 
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
           {steps.map((step, index) => (
             <motion.div
               key={step.number}
               variants={stepVariant}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{
-                duration: 0.5,
+                duration: 0.55,
                 ease: [0.16, 1, 0.3, 1],
-                delay: index * 0.15,
+                delay: index * 0.12,
               }}
-              className="flex gap-4 md:gap-6 items-start"
+              className="flex flex-col md:flex-row gap-3 md:gap-6 items-center md:items-start"
             >
-              {/* Step number circle */}
-              <div
-                className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold relative z-10"
-                style={{
-                  background: "var(--viridian)",
-                  color: "var(--night-deep)",
-                }}
-              >
-                {step.number}
+              {/* Step number circle with glow */}
+              <div className="flex-shrink-0 relative">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold relative z-10"
+                  style={{
+                    background: "var(--viridian)",
+                    color: "var(--night-deep)",
+                    boxShadow: "0 0 20px rgba(30, 186, 143, 0.4), 0 0 40px rgba(30, 186, 143, 0.15)",
+                  }}
+                >
+                  {step.number}
+                </div>
               </div>
 
-              {/* Step card */}
-              <div
-                className="info-card flex-1 p-6 rounded-2xl transition-all duration-300 hover:-translate-y-0.5"
-              >
-                <div className="flex items-center gap-3 mb-2">
+              {/* Step card — glassmorphic */}
+              <div className="glass-card flex-1 w-full p-5 md:p-6 transition-all duration-300 hover:-translate-y-0.5">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                   <h3
-                    className="text-lg font-bold"
+                    className="text-base md:text-lg font-bold"
                     style={{ color: "var(--text-primary)" }}
                   >
                     {step.title}
                   </h3>
                   <span
-                    className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                    className="self-start text-xs font-semibold px-3 py-1 rounded-full"
                     style={{
                       background: "var(--viridian-glow)",
                       color: "var(--viridian)",
+                      border: "1px solid rgba(30, 186, 143, 0.2)",
                     }}
                   >
                     {step.tag}
