@@ -21,7 +21,7 @@ export default function HeroChatSection() {
 
         <h1 className="hero-headline">Make sure everyone within 3km knows about you</h1>
 
-        {/* Chat widget — the main interaction */}
+        {/* Chat widget: the main interaction */}
         <div className="hero-chat">
           <ElevenLabsChat onConversationEnd={(outcome) => setChatOutcome(outcome)} />
         </div>

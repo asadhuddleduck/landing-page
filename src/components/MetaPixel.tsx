@@ -42,7 +42,7 @@ export default function MetaPixel() {
     if (initialized.current) return;
     initialized.current = true;
 
-    // Meta Pixel base code — skip if already loaded
+    // Meta Pixel base code. Skip if already loaded
     if (window.fbq) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

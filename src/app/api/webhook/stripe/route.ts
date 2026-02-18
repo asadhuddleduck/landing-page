@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       await handlePurchase(session);
     } catch (err) {
       console.error("[webhook] Onboarding error:", err);
-      // Still return 200 — Stripe will retry otherwise
+      // Still return 200. Stripe will retry otherwise
     }
   }
 

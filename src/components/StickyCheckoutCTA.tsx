@@ -32,8 +32,8 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
   // Smart CTA copy based on conversation outcome
   const getCtaText = () => {
     if (loading) return "Processing...";
-    if (chatOutcome?.includes("FRANCHISE")) return "Start Your Franchise Pilot — £497";
-    return "Start Your Pilot — £497";
+    if (chatOutcome?.includes("FRANCHISE")) return "Start Your Franchise Pilot for £497";
+    return "Start Your Pilot for £497";
   };
 
   async function handleCheckout() {

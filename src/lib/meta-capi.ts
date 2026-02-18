@@ -1,14 +1,14 @@
 import crypto from "crypto";
 
 /**
- * Meta Conversions API (CAPI) — sends server-side events to Meta
+ * Meta Conversions API (CAPI): sends server-side events to Meta
  * so your ad campaigns can optimise for real conversions.
  *
  * Uses facebook-nodejs-business-sdk under the hood.
  * Requires: META_ACCESS_TOKEN, META_PIXEL_ID in env vars.
  */
 
-// The SDK doesn't ship proper ESM — use require-style import
+// The SDK doesn't ship proper ESM. Use require-style import
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const bizSdk = require("facebook-nodejs-business-sdk");
 
@@ -72,7 +72,7 @@ export interface CAPIEventInput {
  * Send a conversion event to Meta's Conversions API.
  *
  * Call this from webhook handlers after saving the event to Turso.
- * The event is sent asynchronously — errors are logged, not thrown,
+ * The event is sent asynchronously. Errors are logged, not thrown,
  * so it never blocks the webhook response.
  */
 export async function sendConversionEvent(
@@ -82,7 +82,7 @@ export async function sendConversionEvent(
     const accessToken = getAccessToken();
     const pixelId = getPixelId();
 
-    // Initialise the API (idempotent — safe to call multiple times)
+    // Initialise the API (idempotent. Safe to call multiple times)
     bizSdk.FacebookAdsApi.init(accessToken);
 
     // Build user data with hashed PII
@@ -138,10 +138,10 @@ export async function sendConversionEvent(
 
     const response = await eventRequest.execute();
     console.log(
-      `[meta-capi] ${input.eventName} sent — events_received: ${response?.events_received}`
+      `[meta-capi] ${input.eventName} sent: events_received: ${response?.events_received}`
     );
   } catch (err) {
-    // Log but don't throw — CAPI should never block the main flow
+    // Log but don't throw. CAPI should never block the main flow
     console.error(`[meta-capi] Failed to send ${input.eventName}:`, err);
   }
 }

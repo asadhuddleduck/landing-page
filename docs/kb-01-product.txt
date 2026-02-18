@@ -33,7 +33,7 @@ KEY FACTS
 - Every client gets a live performance dashboard showing exactly what their AI Ad Engine is doing
 - Real campaign data, health scores, cost metrics, and location-level breakdowns
 - We do not hide behind vanity metrics. Full transparency, updated daily.
-- We track enquiries, bookings, walk-ins, applicants, and franchise leads — not likes and followers
+- We track enquiries, bookings, walk-ins, applicants, and franchise leads. Not likes and followers
 - We repurpose existing content, not AI-generated content from scratch. Your food, your brand, your voice.
 - AI handles the research, targeting, and optimisation. Humans handle editing, strategy decisions, and client relationships.
 

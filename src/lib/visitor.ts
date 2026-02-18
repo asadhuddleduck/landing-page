@@ -36,7 +36,7 @@ export function getStoredUtms(): Record<string, string> {
     try {
       return JSON.parse(raw);
     } catch {
-      // Corrupted cookie — ignore
+      // Corrupted cookie. Ignore
     }
   }
   return {};

@@ -12,7 +12,7 @@ export function getDb(): Client {
   return _db;
 }
 
-// Lazy proxy — defers client creation until first method call.
+// Lazy proxy: defers client creation until first method call.
 // Binds methods so private members (like #promiseLimitFunction) work correctly.
 export const db = new Proxy({} as Client, {
   get(_target, prop) {

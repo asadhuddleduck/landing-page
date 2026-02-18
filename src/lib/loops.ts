@@ -1,5 +1,5 @@
 /**
- * Loops.so API wrapper — email marketing automation.
+ * Loops.so API wrapper: email marketing automation.
  *
  * Trigger automation sequences from code by sending events.
  * Build the actual email sequences in the Loops dashboard.

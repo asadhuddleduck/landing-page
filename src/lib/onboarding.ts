@@ -7,7 +7,7 @@ import { sendConversionEvent } from "./meta-capi";
 /**
  * Post-purchase orchestrator.
  * Called by the Stripe webhook after checkout.session.completed.
- * Fans out to all downstream services in parallel — never throws.
+ * Fans out to all downstream services in parallel. Never throws.
  */
 export async function handlePurchase(session: Stripe.Checkout.Session) {
   const email =
@@ -40,7 +40,7 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
       ],
     }),
 
-    // 2. Loops: add contact then trigger event (sequential — contact must exist first)
+    // 2. Loops: add contact then trigger event (sequential: contact must exist first)
     (async () => {
       await addContact({
         email,

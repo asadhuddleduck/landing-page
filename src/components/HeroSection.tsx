@@ -14,11 +14,11 @@ export default function HeroSection() {
 
       <p className="hero-body">
         AI that researches your audience, creates the strategy, and runs your
-        ads — using your real content, not AI slop.
+        ads, using your real content, not AI slop.
       </p>
 
       <a href="#checkout" className="hero-cta">
-        Start Your Pilot — £497
+        Start Your Pilot for £497
       </a>
     </section>
   );

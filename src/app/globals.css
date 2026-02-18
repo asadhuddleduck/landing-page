@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ========== DESIGN SYSTEM — Singularity v3 ========== */
+/* ========== DESIGN SYSTEM: Singularity v3 ========== */
 :root{
   /* Navy depth palette (from client-dashboards) */
   --night-deep:#001E2B;--night:#00334B;--night-card:#002639;--night-card-hover:#003350;
@@ -8,7 +8,7 @@
   --gradient-card:linear-gradient(145deg,#002639 0%,#003350 100%);
   --gradient-accent:linear-gradient(135deg,#1EBA8F 0%,#17A07A 100%);
 
-  /* Brand colours — from Branding Guidelines */
+  /* Brand colours: from Branding Guidelines */
   --viridian:#1EBA8F;--viridian-glow:rgba(30,186,143,0.15);
   --sandstorm:#F7CE46;--sandstorm-glow:rgba(247,206,70,0.15);
   --coffee:#733C3C;--coffee-glow:rgba(115,60,60,0.2);
@@ -16,10 +16,10 @@
   /* Text hierarchy */
   --text-primary:#F0F4F8;--text-secondary:#8BA3B8;--text-muted:#5A7A94;
 
-  /* Borders — viridian-tinted */
+  /* Borders: viridian-tinted */
   --border:rgba(30,186,143,0.12);--border-bright:rgba(30,186,143,0.25);
 
-  /* Brand fonts — SF Pro (primary) + Lato (secondary / Google Fonts fallback) */
+  /* Brand fonts: SF Pro (primary) + Lato (secondary / Google Fonts fallback) */
   --font-primary:-apple-system,'SF Pro Display','SF Pro Text','Lato','Helvetica Neue',Helvetica,Arial,sans-serif;
   --font-heading:-apple-system,'SF Pro Display','Lato','Helvetica Neue',sans-serif;
 
@@ -59,7 +59,7 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 }
 .header-cta:hover{border-color:var(--viridian);background:var(--viridian-glow)}
 
-/* ========== HERO — AI-First (compact orb + headline + chat) ========== */
+/* ========== HERO: AI-First (compact orb + headline + chat) ========== */
 .hero{
   min-height:auto;display:flex;flex-direction:column;align-items:center;
   text-align:center;padding:32px 24px 0;position:relative;z-index:1
@@ -85,7 +85,7 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
   .hero-headline{font-size:44px;max-width:480px}
 }
 
-/* ========== SINGULARITY ORB — Brand Mark (compact) ========== */
+/* ========== SINGULARITY ORB: Brand Mark (compact) ========== */
 .singularity{
   position:relative;width:100px;height:100px;margin:0 auto 20px;
   animation:heroReveal 0.8s var(--ease-premium) 200ms backwards
@@ -123,7 +123,7 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 /* ========== SECTION SPACING ========== */
 .section{position:relative;z-index:1;padding:60px 24px}
 
-/* ========== SOCIAL PROOF — Compact Strip ========== */
+/* ========== SOCIAL PROOF: Compact Strip ========== */
 .social-proof-section{padding:40px 24px}
 .social-proof-strip{
   display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;
@@ -151,7 +151,7 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
   .social-proof-label{font-size:10px}
 }
 
-/* ========== AI CHAT — Custom Chat Interface ========== */
+/* ========== AI CHAT: Custom Chat Interface ========== */
 .ai-chat{
   width:100%;border-radius:20px;overflow:hidden;
   background:var(--gradient-card);border:1px solid var(--border);
@@ -173,27 +173,14 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 .ai-chat-messages::-webkit-scrollbar{width:4px}
 .ai-chat-messages::-webkit-scrollbar-thumb{background:rgba(30,186,143,0.15);border-radius:4px}
 
-/* Welcome state */
-.ai-chat-welcome{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  flex:1;gap:16px;padding:20px 0;opacity:0;animation:fadeSlideUp 0.5s var(--ease-premium) 0.2s forwards
+/* Progress bar */
+.ai-chat-progress{
+  position:absolute;top:2px;left:0;right:0;height:2px;z-index:2;
+  background:rgba(30,186,143,0.08)
 }
-.ai-chat-welcome-orb{
-  position:relative;width:48px;height:48px
-}
-.ai-chat-orb-core{
-  position:absolute;inset:8px;border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,#1EBA8F,#0a4a3a 60%,#001E2B);
-  box-shadow:0 0 16px 4px rgba(30,186,143,0.3),inset 0 0 10px rgba(30,186,143,0.3);
-  animation:orb-breathe-small 4s ease-in-out infinite
-}
-.ai-chat-orb-ring{
-  position:absolute;inset:0;border-radius:50%;
-  border:1px solid rgba(30,186,143,0.15);animation:spin-slow 25s linear infinite
-}
-.ai-chat-welcome-text{
-  font-size:14px;font-weight:400;color:var(--text-muted);text-align:center;
-  letter-spacing:-0.1px;line-height:1.4
+.ai-chat-progress-bar{
+  height:100%;background:var(--gradient-accent);
+  transition:width 0.8s var(--ease-premium);border-radius:0 1px 1px 0
 }
 
 /* Connecting state */
@@ -215,9 +202,9 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 }
 
 /* Messages */
-.ai-chat-msg{display:flex;gap:8px;align-items:flex-start;animation:msgAppear 0.25s var(--ease-premium) backwards}
-.ai-chat-msg-user{justify-content:flex-end}
-.ai-chat-msg-agent{justify-content:flex-start}
+.ai-chat-msg{display:flex;gap:8px;align-items:flex-start}
+.ai-chat-msg-user{justify-content:flex-end;animation:msgAppearUser 0.25s var(--ease-premium) backwards}
+.ai-chat-msg-agent{justify-content:flex-start;animation:msgAppearAgent 0.25s var(--ease-premium) backwards}
 
 .ai-chat-msg-avatar{flex-shrink:0;margin-top:4px}
 .ai-chat-msg-avatar-dot{
@@ -240,21 +227,54 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 }
 .ai-chat-typing-bubble{padding:12px 14px}
 
-/* Suggestion chips */
-.ai-chat-suggestions{
-  display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;
-  animation:fadeSlideUp 0.4s var(--ease-premium) 0.4s backwards
+/* ── Rich inline cards (inside chat) ── */
+.chat-card{
+  margin:4px 32px 8px;border-radius:14px;overflow:hidden;
+  border:1px solid var(--border);background:var(--gradient-card);
+  animation:cardAppear 0.3s var(--ease-premium) 0.05s backwards
 }
-.ai-chat-chip{
-  padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;
-  color:var(--viridian);background:transparent;border:1px solid var(--border);
-  cursor:pointer;transition:all 0.2s;font-family:var(--font-primary);
-  white-space:nowrap
+
+/* Pricing card */
+.chat-card-pricing{padding:18px 16px 14px}
+.chat-card-header{margin-bottom:12px}
+.chat-card-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--viridian)
 }
-.ai-chat-chip:hover{
-  border-color:var(--viridian);background:var(--viridian-glow);
-  transform:translateY(-1px)
+.chat-card-price{display:flex;align-items:baseline;gap:1px;margin-top:4px}
+.chat-card-currency{font-family:var(--font-heading);font-size:20px;font-weight:700;color:var(--viridian)}
+.chat-card-amount{font-family:var(--font-heading);font-size:36px;font-weight:900;color:var(--text-primary);letter-spacing:-1.5px}
+.chat-card-period{font-size:12px;font-weight:400;color:var(--text-muted);margin-left:6px}
+
+.chat-card-features{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.chat-card-feature{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary)}
+.chat-card-check{flex-shrink:0;width:14px;height:14px;color:var(--viridian)}
+
+.chat-card-btn{
+  display:block;width:100%;padding:11px;border-radius:30px;border:none;
+  font-family:var(--font-primary);font-size:13px;font-weight:700;color:white;
+  background:var(--gradient-accent);cursor:pointer;transition:all 0.2s;
+  box-shadow:0 2px 12px rgba(30,186,143,0.25)
 }
+.chat-card-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 18px rgba(30,186,143,0.4)}
+.chat-card-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+.chat-card-fine{font-size:10px;font-weight:400;color:var(--text-muted);text-align:center;margin-top:6px}
+
+/* Testimonial card */
+.chat-card-testimonial{padding:16px;position:relative}
+.chat-card-quote-icon{position:absolute;top:10px;left:12px;width:24px;height:24px}
+.chat-card-quote{
+  font-size:14px;font-weight:500;font-style:italic;color:var(--text-primary);
+  line-height:1.5;margin-bottom:8px;padding-left:4px
+}
+.chat-card-attribution{display:flex;align-items:center;gap:8px}
+.chat-card-brand{font-size:12px;font-weight:700;color:var(--viridian)}
+.chat-card-detail{font-size:11px;font-weight:400;color:var(--text-muted)}
+
+/* CTA card */
+.chat-card-cta{padding:16px;text-align:center}
+.chat-card-cta-text{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:10px}
 
 /* Input bar */
 .ai-chat-input-bar{
@@ -279,21 +299,19 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 .ai-chat-send:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(30,186,143,0.35)}
 .ai-chat-send:disabled{opacity:0.3;cursor:not-allowed;transform:none;box-shadow:none}
 
-@keyframes msgAppear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes msgAppearAgent{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes msgAppearUser{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes cardAppear{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
 @keyframes speakingPulse{
   0%,100%{box-shadow:0 0 8px rgba(30,186,143,0.25)}
   50%{box-shadow:0 0 16px rgba(30,186,143,0.5),0 0 30px rgba(30,186,143,0.15)}
 }
-@keyframes orb-breathe-small{
-  0%,100%{box-shadow:0 0 16px 4px rgba(30,186,143,0.3),inset 0 0 10px rgba(30,186,143,0.3);transform:scale(1)}
-  50%{box-shadow:0 0 20px 6px rgba(30,186,143,0.4),inset 0 0 14px rgba(30,186,143,0.4);transform:scale(1.03)}
-}
-
 @media(min-width:768px){
   .ai-chat-messages{min-height:260px;max-height:400px;padding:28px 20px 16px}
-  .ai-chat-suggestions{padding:0 20px 14px}
   .ai-chat-input-bar{padding:14px 20px}
   .ai-chat-msg-bubble{font-size:14px}
+  .chat-card{margin:4px 36px 8px}
+  .chat-card-amount{font-size:40px}
 }
 
 /* ========== STICKY CHECKOUT CTA ========== */
@@ -414,7 +432,6 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
   .singularity-core,.singularity-glow,.singularity-ring,.singularity-ring-outer,
   .header,.hero-label,.hero-headline,.hero-chat,.singularity,
   .social-proof-strip,.checkout-card,.faq-title,.footer,.sticky-cta,
-  .ai-chat-orb-core,.ai-chat-orb-ring,.ai-chat-welcome,.ai-chat-suggestions,
-  .bg-orb{animation:none!important}
+  .chat-card,.bg-orb{animation:none!important}
   *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
 }

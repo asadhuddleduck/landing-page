@@ -39,7 +39,7 @@ export default async function SuccessPage({
       }
       sessionRef = session.id.slice(-8).toUpperCase();
     } catch {
-      // Invalid session — show generic thank you
+      // Invalid session. Show generic thank you
     }
   }
 

@@ -4,6 +4,7 @@ import { useConversation } from "@elevenlabs/react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { track } from "@vercel/analytics";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
+import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
 
@@ -43,28 +44,77 @@ function getDynamicVariables(): Record<string, string> {
   };
 }
 
+// Detect which rich card to show for an agent message
+function detectCard(text: string): "pricing" | "testimonial" | "cta" | null {
+  const lower = text.toLowerCase();
+  if (lower.includes("checkout") || lower.includes("right below") || lower.includes("go ahead")) {
+    return "cta";
+  }
+  if (lower.includes("497") || (lower.includes("pilot") && lower.includes("£"))) {
+    return "pricing";
+  }
+  if (
+    lower.includes("phat buns") ||
+    lower.includes("burger & sauce") ||
+    lower.includes("burger and sauce") ||
+    lower.includes("676")
+  ) {
+    return "testimonial";
+  }
+  return null;
+}
+
 interface ElevenLabsChatProps {
   onConversationEnd?: (outcome: string) => void;
 }
 
 export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Fake initial message so the AI "speaks first"
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: "agent",
+      text: "Hey! I help F&B brands fill their locations with paid ads. Tell me about your business and I'll show you what we can do.",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isAgentTyping, setIsAgentTyping] = useState(false);
+  const [shownCards, setShownCards] = useState<Set<string>>(new Set());
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const conversation = useConversation({
-    onMessage: useCallback(({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
-      setMessages((prev) => {
-        // Deduplicate — if last message has the same role, update it (streaming)
-        const last = prev[prev.length - 1];
-        if (last && last.role === role) {
-          return [...prev.slice(0, -1), { role, text: message }];
+    onMessage: useCallback(
+      ({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
+        if (role === "agent") {
+          // Show typing indicator briefly before revealing message
+          setIsAgentTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => {
+            setIsAgentTyping(false);
+            setMessages((prev) => {
+              // Dedup: if last message has the same role, update it (streaming)
+              const last = prev[prev.length - 1];
+              if (last && last.role === role) {
+                return [...prev.slice(0, -1), { role, text: message }];
+              }
+              return [...prev, { role, text: message }];
+            });
+          }, 400);
+        } else {
+          // User messages appear immediately
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === role) {
+              return [...prev.slice(0, -1), { role, text: message }];
+            }
+            return [...prev, { role, text: message }];
+          });
         }
-        return [...prev, { role, text: message }];
-      });
-    }, []),
+      },
+      []
+    ),
     onConnect: useCallback(() => {
       track("conversation_started");
     }, []),
@@ -89,10 +139,20 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     }, []),
   });
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll the messages container (not the page)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    }
+  }, [messages, isAgentTyping]);
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, []);
 
   const startConversation = useCallback(
     async (firstMessage?: string) => {
@@ -107,7 +167,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
             conversation: { textOnly: true },
           },
         });
-        // Send the first message if provided
         if (firstMessage) {
           conversation.sendUserMessage(firstMessage);
         }
@@ -151,100 +210,102 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     [conversation]
   );
 
-  const handleSuggestion = useCallback(
-    (text: string) => {
-      if (conversation.status !== "connected") {
-        startConversation(text);
-      } else {
-        conversation.sendUserMessage(text);
-      }
-    },
-    [conversation, startConversation]
-  );
+  // Mark a card as shown so it only appears once
+  const markCardShown = useCallback((cardType: string) => {
+    setShownCards((prev) => new Set(prev).add(cardType));
+  }, []);
 
   const isConnecting = conversation.status === "connecting";
   const isConnected = conversation.status === "connected";
-  const showSuggestions = messages.length === 0 && !isConnecting;
+
+  // Progress bar: fills based on conversation depth
+  const messageCount = messages.length;
+  const progress =
+    messageCount <= 1
+      ? 0
+      : messageCount <= 3
+        ? 15
+        : messageCount <= 5
+          ? 35
+          : messageCount <= 7
+            ? 55
+            : messageCount <= 9
+              ? 75
+              : 90;
 
   return (
     <div className="ai-chat">
-      {/* Messages area */}
-      <div className="ai-chat-messages">
-        {messages.length === 0 && !isConnecting && (
-          <div className="ai-chat-welcome">
-            <div className="ai-chat-welcome-orb">
-              <div className="ai-chat-orb-core" />
-              <div className="ai-chat-orb-ring" />
-            </div>
-            <p className="ai-chat-welcome-text">
-              Ask me anything about growing your F&B brand
-            </p>
-          </div>
-        )}
+      {/* Progress bar */}
+      {progress > 0 && (
+        <div className="ai-chat-progress">
+          <div className="ai-chat-progress-bar" style={{ width: `${progress}%` }} />
+        </div>
+      )}
 
-        {isConnecting && messages.length === 0 && (
+      {/* Messages area */}
+      <div ref={messagesContainerRef} className="ai-chat-messages">
+        {isConnecting && messages.length <= 1 && (
           <div className="ai-chat-connecting">
             <div className="ai-chat-typing">
-              <span /><span /><span />
+              <span />
+              <span />
+              <span />
             </div>
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`ai-chat-msg ai-chat-msg-${msg.role}`}
-          >
-            {msg.role === "agent" && (
-              <div className="ai-chat-msg-avatar">
-                <div className="ai-chat-msg-avatar-dot" />
-              </div>
-            )}
-            <div className="ai-chat-msg-bubble">
-              {msg.text}
-            </div>
-          </div>
-        ))}
+        {messages.map((msg, i) => {
+          // Determine if this agent message should show a rich card
+          const cardType =
+            msg.role === "agent" && i > 0 ? detectCard(msg.text) : null;
+          const shouldShowCard = cardType && !shownCards.has(cardType);
 
-        {isConnected && conversation.isSpeaking && (
+          return (
+            <div key={i}>
+              <div
+                className={`ai-chat-msg ai-chat-msg-${msg.role}`}
+              >
+                {msg.role === "agent" && (
+                  <div className="ai-chat-msg-avatar">
+                    <div className="ai-chat-msg-avatar-dot" />
+                  </div>
+                )}
+                <div className="ai-chat-msg-bubble">{msg.text}</div>
+              </div>
+
+              {/* Rich card below the message */}
+              {shouldShowCard && cardType === "pricing" && (
+                <PricingCard onShow={() => markCardShown("pricing")} />
+              )}
+              {shouldShowCard && cardType === "testimonial" && (
+                <TestimonialCard
+                  text={msg.text}
+                  onShow={() => markCardShown("testimonial")}
+                />
+              )}
+              {shouldShowCard && cardType === "cta" && (
+                <CTACard onShow={() => markCardShown("cta")} />
+              )}
+            </div>
+          );
+        })}
+
+        {/* Typing indicator */}
+        {(isAgentTyping || (isConnected && conversation.isSpeaking)) && (
           <div className="ai-chat-msg ai-chat-msg-agent">
             <div className="ai-chat-msg-avatar">
               <div className="ai-chat-msg-avatar-dot ai-chat-msg-avatar-speaking" />
             </div>
             <div className="ai-chat-msg-bubble ai-chat-typing-bubble">
               <div className="ai-chat-typing">
-                <span /><span /><span />
+                <span />
+                <span />
+                <span />
               </div>
             </div>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
-
-      {/* Suggestion chips */}
-      {showSuggestions && (
-        <div className="ai-chat-suggestions">
-          <button
-            onClick={() => handleSuggestion("I run a multi-location restaurant brand — how can you help?")}
-            className="ai-chat-chip"
-          >
-            How can you help my restaurant?
-          </button>
-          <button
-            onClick={() => handleSuggestion("What kind of results do your clients get?")}
-            className="ai-chat-chip"
-          >
-            What results do clients get?
-          </button>
-          <button
-            onClick={() => handleSuggestion("How does the AI Ad Engine pilot work?")}
-            className="ai-chat-chip"
-          >
-            How does the pilot work?
-          </button>
-        </div>
-      )}
 
       {/* Input bar */}
       <div className="ai-chat-input-bar">
@@ -252,7 +313,11 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           ref={inputRef}
           type="text"
           className="ai-chat-input"
-          placeholder={isConnected ? "Type a message..." : "Ask about growing your F&B brand..."}
+          placeholder={
+            isConnected
+              ? "Type a message..."
+              : "e.g. I run 5 burger restaurants in London..."
+          }
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -264,7 +329,16 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           disabled={!input.trim() || isConnecting}
           aria-label="Send message"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="22" y1="2" x2="11" y2="13" />
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>

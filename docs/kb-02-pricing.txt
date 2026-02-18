@@ -8,7 +8,7 @@ Checkout: Self-serve via Stripe on the landing page. No call required.
 What is included:
 - Customer avatar research (AI-accelerated)
 - Ad copy and voiceover script
-- Video creative (Frankenstein method — repurposing existing content into conversion-focused ad variations)
+- Video creative (Frankenstein method: repurposing existing content into conversion-focused ad variations)
 - Full campaign setup on Meta (Facebook and Instagram)
 - 3-week managed run with weekly optimisation
 - Tracking report
@@ -42,7 +42,7 @@ If asked about the Pilot: "It is £497 one-time for a 3-week managed campaign. T
 
 If asked about ongoing: "After the Pilot, if you want to continue, it is £1,300 per month. Month-to-month, no contracts. And the £497 from the Pilot is fully credited if you upgrade within 30 days."
 
-If asked about ad spend: "The £497 covers our work — strategy, creative, and management. You pay ad spend separately to Meta. Minimum is £10 per location per day."
+If asked about ad spend: "The £497 covers our work: strategy, creative, and management. You pay ad spend separately to Meta. Minimum is £10 per location per day."
 
 COMPARISON CONTEXT
 
