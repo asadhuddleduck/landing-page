@@ -1,33 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import HeroAnimation from "./HeroAnimation";
 import ElevenLabsChat from "./ElevenLabsChat";
-import StickyCheckoutCTA from "./StickyCheckoutCTA";
 
 export default function HeroChatSection() {
-  const [chatOutcome, setChatOutcome] = useState("");
+  const [, setChatOutcome] = useState("");
 
   return (
-    <>
-      <section className="hero">
-        <p className="hero-label">For Multi-Location F&B</p>
+    <section className="hero">
+      <h1 className="hero-headline">What happens when AI runs your ads?</h1>
 
-        <div className="singularity">
-          <div className="singularity-glow" />
-          <div className="singularity-core" />
-          <div className="singularity-ring" />
-          <div className="singularity-ring-outer" />
-        </div>
+      <HeroAnimation />
 
-        <h1 className="hero-headline">Make sure everyone within 3km knows about you</h1>
-
-        {/* Chat widget: the main interaction */}
-        <div className="hero-chat">
-          <ElevenLabsChat onConversationEnd={(outcome) => setChatOutcome(outcome)} />
-        </div>
-      </section>
-
-      <StickyCheckoutCTA chatOutcome={chatOutcome} />
-    </>
+      <div className="hero-chat">
+        <ElevenLabsChat onConversationEnd={(outcome) => setChatOutcome(outcome)} />
+      </div>
+    </section>
   );
 }

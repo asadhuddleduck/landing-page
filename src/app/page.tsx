@@ -1,9 +1,5 @@
-import Header from "@/components/Header";
 import HeroChatSection from "@/components/HeroChatSection";
 import CheckoutSection from "@/components/CheckoutSection";
-import SocialProof from "@/components/SocialProof";
-import FAQ from "@/components/FAQ";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -15,16 +11,10 @@ export default function Home() {
         <div className="bg-orb bg-orb-3" />
       </div>
 
-      <Header />
-
       <main>
         <HeroChatSection />
-        <SocialProof />
         <CheckoutSection />
-        <FAQ />
       </main>
-
-      <Footer />
     </>
   );
 }
