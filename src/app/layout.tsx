@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Lato } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import TrackingScript from "@/components/TrackingScript";
 import MetaPixel from "@/components/MetaPixel";
 import CookieNotice from "@/components/CookieNotice";
 import "./globals.css";
 
-const inter = Inter({
+const lato = Lato({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-sans",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700", "900"],
-  variable: "--font-serif",
+  weight: ["300", "400", "700", "900"],
+  variable: "--font-lato",
 });
 
 export const metadata: Metadata = {
@@ -59,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} ${inter.className}`}>
+      <body className={`${lato.variable} ${lato.className}`}>
         {children}
         <TrackingScript />
         <MetaPixel />

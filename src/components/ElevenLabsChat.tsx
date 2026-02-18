@@ -57,13 +57,6 @@ export default function ElevenLabsChat() {
         <h2 className="chat-heading">Talk to Our AI</h2>
         <p className="chat-subheading">Ask anything about the pilot. Voice or text.</p>
 
-        {isLoading && !hasError && (
-          <div className="chat-loading">
-            <div className="chat-loading-dot" />
-            <span className="chat-loading-text">Connecting...</span>
-          </div>
-        )}
-
         {hasError && (
           <div className="chat-error">
             <p className="chat-error-text">
@@ -76,7 +69,45 @@ export default function ElevenLabsChat() {
         )}
 
         {!hasError && (
-          <div ref={widgetRef} style={{ display: "flex", justifyContent: "center" }} />
+          <div className="chat-placeholder">
+            {/* Icon */}
+            <div className="chat-placeholder-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+            </div>
+
+            <p className="chat-placeholder-title">AI Ad Consultant</p>
+            <p className="chat-placeholder-desc">
+              Powered by ElevenLabs voice AI. Talk naturally or type your questions.
+            </p>
+
+            {/* Feature list */}
+            <div className="chat-placeholder-features">
+              <div className="chat-placeholder-feature">
+                <span className="chat-placeholder-feature-dot" />
+                How does the 3-week pilot work?
+              </div>
+              <div className="chat-placeholder-feature">
+                <span className="chat-placeholder-feature-dot" />
+                What results can I expect?
+              </div>
+              <div className="chat-placeholder-feature">
+                <span className="chat-placeholder-feature-dot" />
+                How much should I budget for ad spend?
+              </div>
+            </div>
+
+            {/* Loading indicator or widget */}
+            {isLoading ? (
+              <div className="chat-loading">
+                <div className="chat-loading-dot" />
+                <span className="chat-loading-text">Loading voice assistant...</span>
+              </div>
+            ) : (
+              <div ref={widgetRef} style={{ display: "flex", justifyContent: "center", marginTop: 20 }} />
+            )}
+          </div>
         )}
       </div>
     </section>
