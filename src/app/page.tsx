@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import InfoAnimation from "@/components/InfoAnimation";
 import ElevenLabsChat from "@/components/ElevenLabsChat";
 import CheckoutSection from "@/components/CheckoutSection";
 import SocialProof from "@/components/SocialProof";
@@ -10,12 +9,9 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      {/* Layered animated background */}
+      {/* Single subtle background glow */}
       <div className="bg-effects">
-        <div className="aurora-mesh" />
-        <div className="bg-orb bg-orb-1" />
-        <div className="bg-orb bg-orb-2" />
-        <div className="dot-grid" />
+        <div className="bg-glow" />
       </div>
 
       <Header />
@@ -23,7 +19,6 @@ export default function Home() {
       <main>
         <HeroSection />
         <ElevenLabsChat />
-        <InfoAnimation />
         <SocialProof />
         <CheckoutSection />
         <FAQ />

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import TrackingScript from "@/components/TrackingScript";
 import MetaPixel from "@/components/MetaPixel";
@@ -9,6 +9,13 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-sans",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700", "900"],
+  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -52,7 +59,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${playfair.variable} ${inter.className}`}>
         {children}
         <TrackingScript />
         <MetaPixel />

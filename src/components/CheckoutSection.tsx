@@ -6,6 +6,12 @@ import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 
+const steps = [
+  "We research your audience",
+  "We build & launch your campaigns",
+  "We optimise weekly & report back",
+];
+
 const features = [
   "Customer avatar research",
   "Ad copy, voiceover script & video creative",
@@ -14,14 +20,9 @@ const features = [
   "Ad spend is separate (min £10/location/day)",
 ];
 
-const cardVariant = {
-  hidden: { opacity: 0, y: 40, scale: 0.96 },
-  visible: { opacity: 1, y: 0, scale: 1 },
-};
-
-const featureVariant = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 },
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 };
 
 export default function CheckoutSection() {
@@ -68,122 +69,129 @@ export default function CheckoutSection() {
   }
 
   return (
-    <section id="checkout" className="relative z-10 py-16 px-4 md:py-20 md:px-6">
+    <section id="checkout" className="relative z-10 section-spacing">
       <motion.div
-        className="max-w-lg mx-auto"
-        variants={cardVariant}
+        className="card max-w-lg mx-auto p-6 sm:p-8 md:p-10"
+        variants={fadeUp}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* Animated gradient border wrapper */}
-        <div className="gradient-border-wrap">
-          <div
-            className="p-5 sm:p-8 md:p-10 relative overflow-hidden"
-            style={{ background: "var(--glass-bg-solid)" }}
+        {/* Label */}
+        <p
+          className="text-xs font-semibold uppercase tracking-wider mb-4"
+          style={{ color: "var(--viridian)" }}
+        >
+          AI Ad Engine Pilot
+        </p>
+
+        {/* Price */}
+        <div className="flex items-baseline gap-1 mb-1">
+          <span
+            className="font-serif text-3xl md:text-4xl font-bold"
+            style={{ color: "var(--viridian)" }}
           >
-            {/* Top accent bar (animated) */}
-            <div
-              className="absolute top-0 left-0 right-0 h-1"
-              style={{
-                background: "linear-gradient(90deg, var(--viridian), var(--sandstorm), var(--viridian))",
-                backgroundSize: "200% 100%",
-                animation: "gradient-shift 4s ease-in-out infinite",
-              }}
-            />
+            £
+          </span>
+          <span
+            className="font-serif text-5xl sm:text-6xl md:text-7xl font-black"
+            style={{ color: "var(--text-primary)" }}
+          >
+            497
+          </span>
+        </div>
+        <p
+          className="text-sm font-medium mb-8"
+          style={{ color: "var(--text-muted)" }}
+        >
+          one-time payment
+        </p>
 
-            <p
-              className="text-sm font-semibold uppercase tracking-wider mb-2"
-              style={{ color: "var(--viridian)" }}
-            >
-              AI Ad Engine Pilot
-            </p>
-
-            <div className="flex items-baseline gap-1 mb-1">
-              <span
-                className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: "linear-gradient(135deg, var(--viridian), var(--sandstorm))",
-                }}
-              >
-                £
-              </span>
-              <span
-                className="text-5xl sm:text-6xl md:text-7xl font-black"
-                style={{ color: "var(--text-primary)" }}
-              >
-                497
-              </span>
-            </div>
-            <p
-              className="text-base font-semibold"
-              style={{ color: "var(--text-muted)" }}
-            >
-              one-time payment
-            </p>
-
-            <ul className="mt-8 space-y-3">
-              {features.map((feature, i) => (
-                <motion.li
-                  key={feature}
-                  className="flex items-center gap-3 text-sm"
-                  style={{ color: "var(--text-secondary)" }}
-                  variants={featureVariant}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: 0.4,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: 0.3 + i * 0.08,
+        {/* How it works — 3 steps */}
+        <div
+          className="mb-8 pb-8"
+          style={{ borderBottom: "1px solid var(--border)" }}
+        >
+          <p
+            className="text-xs uppercase tracking-wider font-medium mb-4"
+            style={{ color: "var(--text-muted)" }}
+          >
+            How it works
+          </p>
+          <div className="space-y-3">
+            {steps.map((step, i) => (
+              <div key={step} className="flex items-center gap-3">
+                <span
+                  className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+                  style={{
+                    background: "var(--viridian-glow)",
+                    color: "var(--viridian)",
+                    border: "1px solid rgba(30, 186, 143, 0.2)",
                   }}
                 >
-                  <svg
-                    className="w-5 h-5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    style={{
-                      color: "var(--viridian)",
-                      filter: "drop-shadow(0 0 4px rgba(30, 186, 143, 0.4))",
-                    }}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  {feature}
-                </motion.li>
-              ))}
-            </ul>
-
-            <button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="checkout-btn mt-10 w-full py-4 rounded-xl text-white font-bold text-lg tracking-tight cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ animation: loading ? "none" : "glow-pulse 3s ease-in-out infinite" }}
-            >
-              {loading ? "Processing..." : "Start Your Pilot"}
-            </button>
-
-            <p
-              className="mt-5 text-center text-xs leading-relaxed"
-              style={{ color: "var(--text-muted)" }}
-            >
-              A mutual trial. You see what we can do. We see if you&apos;re a fit.
-            </p>
-            <p
-              className="mt-1 text-center text-xs"
-              style={{ color: "var(--sandstorm)" }}
-            >
-              £497 credited toward your first month if you upgrade within 30 days.
-            </p>
+                  {i + 1}
+                </span>
+                <span
+                  className="text-sm"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {step}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* Features */}
+        <ul className="space-y-3 mb-10">
+          {features.map((feature) => (
+            <li
+              key={feature}
+              className="flex items-center gap-3 text-sm"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <svg
+                className="w-4 h-4 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                style={{ color: "var(--viridian)" }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              {feature}
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA */}
+        <button
+          onClick={handleCheckout}
+          disabled={loading}
+          className="checkout-btn w-full py-4 rounded-full text-white font-bold text-base tracking-tight cursor-pointer transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Processing..." : "Start Your Pilot"}
+        </button>
+
+        {/* Fine print */}
+        <p
+          className="mt-5 text-center text-xs leading-relaxed"
+          style={{ color: "var(--text-muted)" }}
+        >
+          A mutual trial. You see what we can do. We see if you&apos;re a fit.
+        </p>
+        <p
+          className="mt-1 text-center text-xs"
+          style={{ color: "var(--sandstorm)" }}
+        >
+          £497 credited toward your first month if you upgrade within 30 days.
+        </p>
       </motion.div>
     </section>
   );
