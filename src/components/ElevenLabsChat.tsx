@@ -7,6 +7,8 @@ import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
+const INITIAL_MESSAGE =
+  "Hey! I'm Huddle Duck's AI. We build something for F&B brands that most agencies can't. Tell me about your business and I'll show you if it's a fit.";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -44,10 +46,12 @@ function getDynamicVariables(): Record<string, string> {
   };
 }
 
-// Strip ElevenLabs v3 emotion tags that are meant for TTS but visible in text-only mode
-function stripEmotionTags(text: string): string {
+// Clean agent text: strip emotion tags (TTS-only) and em/en dashes (brand rule)
+function cleanAgentText(text: string): string {
   return text
     .replace(/\[(calm|casual|excited|empathetic|confident|warm|genuine|understanding)\]\s*/gi, "")
+    .replace(/\u2014/g, " - ")
+    .replace(/\u2013/g, "-")
     .trim();
 }
 
@@ -76,12 +80,9 @@ interface ElevenLabsChatProps {
 }
 
 export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProps) {
-  // Fake initial message so the AI "speaks first"
+  // Fake initial message so the AI "speaks first" (replaced when real session connects)
   const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "agent",
-      text: "Hey! I help F&B brands fill their locations with paid ads. Tell me about your business and I'll show you what we can do.",
-    },
+    { role: "agent", text: INITIAL_MESSAGE },
   ]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
@@ -92,9 +93,25 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const conversation = useConversation({
     onMessage: useCallback(
       ({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
-        const cleanText = role === "agent" ? stripEmotionTags(message) : message;
+        const cleanText = role === "agent" ? cleanAgentText(message) : message;
         setMessages((prev) => {
-          // Dedup: if last message has the same role, update it (streaming)
+          // Skip SDK echo of user messages we already added locally
+          if (role === "user") {
+            const last = prev[prev.length - 1];
+            if (last && last.role === "user" && last.text === cleanText) {
+              return prev;
+            }
+          }
+          // First real agent message: replace the fake initial message
+          if (role === "agent" && prev.length >= 1 && prev[0].text === INITIAL_MESSAGE) {
+            const withoutFake = prev.slice(1);
+            const last = withoutFake[withoutFake.length - 1];
+            if (last && last.role === role) {
+              return [...withoutFake.slice(0, -1), { role, text: cleanText }];
+            }
+            return [...withoutFake, { role, text: cleanText }];
+          }
+          // Normal dedup: if last message has same role, update it (streaming)
           const last = prev[prev.length - 1];
           if (last && last.role === role) {
             return [...prev.slice(0, -1), { role, text: cleanText }];
@@ -164,6 +181,9 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     const text = input.trim();
     if (!text) return;
     setInput("");
+
+    // Add user message to UI immediately
+    setMessages((prev) => [...prev, { role: "user", text }]);
 
     if (conversation.status !== "connected") {
       startConversation(text);
