@@ -1,7 +1,7 @@
 export default function HeroSection() {
   return (
     <section className="hero">
-      <p className="hero-label">AI-Powered Advertising</p>
+      <p className="hero-label">AI-Accelerated Advertising</p>
 
       <div className="singularity" style={{ marginBottom: 48 }}>
         <div className="singularity-glow" />
