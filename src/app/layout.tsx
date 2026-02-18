@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "AI Ad Engine for F&B Brands | Huddle Duck",
   description:
-    "The AI-powered advertising engine built for restaurants, cafes, and food brands. Get a 4-week managed Meta ads pilot for just £497.",
+    "The AI-powered advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
   metadataBase: new URL("https://start.huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AI Ad Engine for F&B Brands | Huddle Duck",
     description:
-      "The AI-powered advertising engine built for restaurants, cafes, and food brands. Get a 4-week managed Meta ads pilot for just £497.",
+      "The AI-powered advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
     url: "https://start.huddleduck.co.uk",
     images: [
       {
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AI Ad Engine for F&B Brands | Huddle Duck",
     description:
-      "The AI-powered advertising engine built for restaurants, cafes, and food brands. Get a 4-week managed Meta ads pilot for just £497.",
+      "The AI-powered advertising engine built for restaurants, cafes, and food brands. 3-week managed Meta ads pilot for just £497.",
     images: ["/og-image.jpg"],
   },
 };
@@ -74,7 +74,7 @@ export default function RootLayout({
                   "@type": "Product",
                   name: "AI Ad Engine Pilot",
                   description:
-                    "4-week managed Meta ads pilot for F&B brands. AI-powered strategy, creative, and optimisation.",
+                    "3-week managed Meta ads pilot for multi-location F&B brands. AI-accelerated strategy, creative production, and campaign management.",
                   offers: {
                     "@type": "Offer",
                     price: "497",

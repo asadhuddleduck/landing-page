@@ -6,27 +6,27 @@ const faqs = [
   {
     question: "What is the AI Ad Engine Pilot?",
     answer:
-      "The Pilot is a 4-week managed advertising programme where our AI builds, launches, and optimises Meta ad campaigns for your F&B business. You get a dedicated account manager and real-time dashboard to track results.",
+      "A 3-week managed advertising engagement where we research your customer avatar, produce ad creative (copy, voiceover, video), build and launch Meta campaigns, optimise weekly, and deliver a tracking report with a strategy review. Think of it as a mutual trial — you see what we can do, and we see if your business is a fit for ongoing management.",
   },
   {
     question: "How long does the pilot run?",
     answer:
-      "The pilot runs for 4 weeks from the day your first campaign goes live. This gives us enough data to demonstrate real results and optimise your campaigns.",
+      "The managed campaign runs for 3 weeks from launch day. Before that, there is a research and creative production phase where we build your avatar and assets. After the 3-week run, you receive a full tracking report and strategy review call.",
   },
   {
     question: "What platforms do you advertise on?",
     answer:
-      "We run campaigns on Meta platforms — Facebook and Instagram. These are the most effective channels for F&B businesses to reach local customers.",
+      "We run campaigns on Meta — Facebook and Instagram. These are the most effective paid channels for F&B businesses targeting local customers. We handle all targeting, creative, and budget allocation.",
   },
   {
-    question: "Do I need to provide my own ad creative?",
+    question: "Do I need to provide ad creative or a budget?",
     answer:
-      "No. Our AI generates ad creative tailored to your brand and audience. We handle everything from copy to visuals. You just approve and we launch.",
+      "We produce all creative — ad copy, voiceover scripts, and video assets — as part of the Pilot. We repurpose your existing content into conversion-focused ad variations. You do need to cover your own ad spend separately, with a minimum of £10 per location per day to Meta. The £497 Pilot fee covers our strategy, production, and management work.",
   },
   {
     question: "What happens after the pilot ends?",
     answer:
-      "After the pilot, you can continue with a monthly management plan or take the insights and run campaigns yourself. There are no contracts or lock-ins.",
+      "You can upgrade to ongoing management at £1,200 per month — month-to-month, no long-term contracts. Your £497 Pilot fee is credited toward the first month if you upgrade within 30 days. Or you can take the insights from your tracking report and run campaigns yourself.",
   },
 ];
 
@@ -82,7 +82,7 @@ export default function FAQ() {
               <div
                 className="overflow-hidden transition-all duration-300"
                 style={{
-                  maxHeight: isOpen ? "200px" : "0px",
+                  maxHeight: isOpen ? "500px" : "0px",
                   opacity: isOpen ? 1 : 0,
                 }}
               >

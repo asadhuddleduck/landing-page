@@ -6,11 +6,11 @@ import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 
 const features = [
-  "Full AI campaign strategy",
-  "4 weeks of managed Meta ads",
-  "Real-time results dashboard",
-  "Weekly AI optimisation reports",
-  "Dedicated account manager",
+  "Customer avatar research",
+  "Ad copy, voiceover script & video creative",
+  "Full campaign setup & 3-week managed run",
+  "Tracking report & strategy review",
+  "Ad spend is separate (min £10/location/day)",
 ];
 
 export default function CheckoutSection() {
@@ -128,10 +128,16 @@ export default function CheckoutSection() {
         </button>
 
         <p
-          className="mt-4 text-center text-xs"
+          className="mt-4 text-center text-xs leading-relaxed"
           style={{ color: "var(--text-muted)" }}
         >
-          30-day money-back guarantee. No contracts.
+          A mutual trial. You see what we can do. We see if you&apos;re a fit.
+        </p>
+        <p
+          className="mt-1 text-center text-xs"
+          style={{ color: "var(--text-muted)" }}
+        >
+          £497 credited toward your first month if you upgrade within 30 days.
         </p>
       </div>
     </section>
