@@ -118,7 +118,7 @@ export default function CheckoutSection() {
           A mutual trial. You see what we can do. We see if you&apos;re a fit.
         </p>
         <p className="checkout-credit">
-          £497 credited toward your first month if you upgrade within 30 days.
+          £497 fully credited if you upgrade within 30 days.
         </p>
       </div>
     </section>

@@ -27,7 +27,7 @@ const faqs = [
   {
     question: "What happens after the pilot ends?",
     answer:
-      "You can upgrade to ongoing management at £1,200 per month — month-to-month, no long-term contracts. Your £497 Pilot fee is credited toward the first month if you upgrade within 30 days. Or you can take the insights from your tracking report and run campaigns yourself.",
+      "You can upgrade to ongoing management — month-to-month, no long-term contracts. Your £497 Pilot fee is fully credited when you upgrade within 30 days. Or you can take the insights from your tracking report and run campaigns yourself.",
   },
 ];
 
