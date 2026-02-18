@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://start.huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
-    apple: "/favicon.png",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: "AI Ad Engine for F&B Brands | Huddle Duck",
