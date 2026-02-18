@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
@@ -19,11 +18,6 @@ const features = [
   "Tracking report & strategy review",
   "Ad spend is separate (min £10/location/day)",
 ];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
 
 export default function CheckoutSection() {
   const [loading, setLoading] = useState(false);
@@ -69,95 +63,37 @@ export default function CheckoutSection() {
   }
 
   return (
-    <section id="checkout" className="relative z-10 section-spacing">
-      <motion.div
-        className="card max-w-lg mx-auto p-6 sm:p-8 md:p-10"
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {/* Label */}
-        <p
-          className="text-xs font-semibold uppercase tracking-wider mb-4"
-          style={{ color: "var(--viridian)" }}
-        >
-          AI Ad Engine Pilot
-        </p>
+    <section id="checkout" className="section">
+      <div className="checkout-card">
+        <p className="checkout-label">AI Ad Engine Pilot</p>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-1 mb-1">
-          <span
-            className="font-serif text-3xl md:text-4xl font-bold"
-            style={{ color: "var(--viridian)" }}
-          >
-            £
-          </span>
-          <span
-            className="font-serif text-5xl sm:text-6xl md:text-7xl font-black"
-            style={{ color: "var(--text-primary)" }}
-          >
-            497
-          </span>
+        <div className="checkout-price">
+          <span className="checkout-currency">£</span>
+          <span className="checkout-amount">497</span>
         </div>
-        <p
-          className="text-sm font-medium mb-8"
-          style={{ color: "var(--text-muted)" }}
-        >
-          one-time payment
-        </p>
+        <p className="checkout-payment-type">one-time payment</p>
 
-        {/* How it works — 3 steps */}
-        <div
-          className="mb-8 pb-8"
-          style={{ borderBottom: "1px solid var(--border)" }}
-        >
-          <p
-            className="text-xs uppercase tracking-wider font-medium mb-4"
-            style={{ color: "var(--text-muted)" }}
-          >
-            How it works
-          </p>
-          <div className="space-y-3">
-            {steps.map((step, i) => (
-              <div key={step} className="flex items-center gap-3">
-                <span
-                  className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-                  style={{
-                    background: "var(--viridian-glow)",
-                    color: "var(--viridian)",
-                    border: "1px solid rgba(30, 186, 143, 0.2)",
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <span
-                  className="text-sm"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  {step}
-                </span>
-              </div>
-            ))}
-          </div>
+        <hr className="checkout-divider" />
+
+        <p className="checkout-steps-label">How it works</p>
+        <div className="checkout-steps">
+          {steps.map((step, i) => (
+            <div key={step} className="checkout-step">
+              <span className="checkout-step-num">{i + 1}</span>
+              <span className="checkout-step-text">{step}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Features */}
-        <ul className="space-y-3 mb-10">
+        <div className="checkout-features">
           {features.map((feature) => (
-            <li
-              key={feature}
-              className="flex items-center gap-3 text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
+            <div key={feature} className="checkout-feature">
               <svg
-                className="w-4 h-4 flex-shrink-0"
+                className="checkout-check"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2.5}
-                style={{ color: "var(--viridian)" }}
               >
                 <path
                   strokeLinecap="round"
@@ -166,33 +102,25 @@ export default function CheckoutSection() {
                 />
               </svg>
               {feature}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
 
-        {/* CTA */}
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="checkout-btn w-full py-4 rounded-full text-white font-bold text-base tracking-tight cursor-pointer transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="checkout-btn"
         >
           {loading ? "Processing..." : "Start Your Pilot"}
         </button>
 
-        {/* Fine print */}
-        <p
-          className="mt-5 text-center text-xs leading-relaxed"
-          style={{ color: "var(--text-muted)" }}
-        >
+        <p className="checkout-fine-print">
           A mutual trial. You see what we can do. We see if you&apos;re a fit.
         </p>
-        <p
-          className="mt-1 text-center text-xs"
-          style={{ color: "var(--sandstorm)" }}
-        >
+        <p className="checkout-credit">
           £497 credited toward your first month if you upgrade within 30 days.
         </p>
-      </motion.div>
+      </div>
     </section>
   );
 }

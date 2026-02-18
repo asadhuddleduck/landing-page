@@ -9,9 +9,11 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      {/* Single subtle background glow */}
+      {/* Animated background orbs */}
       <div className="bg-effects">
-        <div className="bg-glow" />
+        <div className="bg-orb bg-orb-1" />
+        <div className="bg-orb bg-orb-2" />
+        <div className="bg-orb bg-orb-3" />
       </div>
 
       <Header />

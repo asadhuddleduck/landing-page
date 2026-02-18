@@ -1,15 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { track } from "@vercel/analytics";
 
 const AGENT_ID = "4f58a5783e990de16e22e8effd8ba103118c603a76f123afbde18a66f4e1466e";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
 
 export default function ElevenLabsChat() {
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -58,69 +52,32 @@ export default function ElevenLabsChat() {
   }, []);
 
   return (
-    <section id="ai-chat" className="relative z-10 section-spacing">
-      <div className="max-w-3xl mx-auto text-center">
-        {/* Heading */}
-        <motion.h2
-          className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4"
-          style={{ color: "var(--text-primary)" }}
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        >
-          Talk to Our AI
-        </motion.h2>
+    <section className="section">
+      <div className="chat-section">
+        <h2 className="chat-heading">Talk to Our AI</h2>
+        <p className="chat-subheading">Ask anything about the pilot. Voice or text.</p>
 
-        <motion.p
-          className="mb-12 md:mb-16 text-sm md:text-base"
-          style={{ color: "var(--text-secondary)" }}
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-        >
-          Ask anything about the pilot. Voice or text.
-        </motion.p>
+        {isLoading && !hasError && (
+          <div className="chat-loading">
+            <div className="chat-loading-dot" />
+            <span className="chat-loading-text">Connecting...</span>
+          </div>
+        )}
 
-        {/* Widget area */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-        >
-          {isLoading && !hasError && (
-            <div className="flex items-center justify-center gap-3">
-              <div
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ background: "var(--viridian)" }}
-              />
-              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Connecting...
-              </span>
-            </div>
-          )}
+        {hasError && (
+          <div className="chat-error">
+            <p className="chat-error-text">
+              Our AI assistant is temporarily unavailable.
+            </p>
+            <a href="mailto:hello@huddleduck.co.uk" className="chat-error-cta">
+              Email us
+            </a>
+          </div>
+        )}
 
-          {hasError && (
-            <div className="card p-6 max-w-sm mx-auto">
-              <p className="text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
-                Our AI assistant is temporarily unavailable.
-              </p>
-              <a
-                href="mailto:hello@huddleduck.co.uk"
-                className="checkout-btn inline-block px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-105"
-              >
-                Email us
-              </a>
-            </div>
-          )}
-
-          {!hasError && <div ref={widgetRef} className="flex justify-center" />}
-        </motion.div>
+        {!hasError && (
+          <div ref={widgetRef} style={{ display: "flex", justifyContent: "center" }} />
+        )}
       </div>
     </section>
   );

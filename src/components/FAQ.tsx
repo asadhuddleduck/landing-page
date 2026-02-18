@@ -31,90 +31,56 @@ const faqs = [
   },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="relative z-10 section-spacing max-w-3xl mx-auto">
-      <motion.h2
-        className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center mb-12 md:mb-16"
-        style={{ color: "var(--text-primary)" }}
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      >
-        Questions
-      </motion.h2>
+    <section className="section">
+      <div className="faq-section">
+        <h2 className="faq-title">Questions</h2>
 
-      <div className="space-y-2">
-        {faqs.map((faq, i) => {
-          const isOpen = openIndex === i;
-          return (
-            <div
-              key={i}
-              className="overflow-hidden rounded-2xl transition-colors duration-300"
-              style={{
-                background: "var(--bg-surface)",
-                border: `1px solid ${isOpen ? "var(--border-bright)" : "var(--border)"}`,
-              }}
-            >
-              <button
-                className="w-full px-5 py-5 md:px-6 md:py-6 flex items-center justify-between text-left cursor-pointer min-h-[48px]"
-                onClick={() => setOpenIndex(isOpen ? null : i)}
-              >
-                <span
-                  className="font-medium text-sm md:text-base pr-4"
-                  style={{ color: "var(--text-primary)" }}
+        <div className="faq-list">
+          {faqs.map((faq, i) => {
+            const isOpen = openIndex === i;
+            return (
+              <div key={i} className={`faq-item${isOpen ? " open" : ""}`}>
+                <button
+                  className="faq-question"
+                  onClick={() => setOpenIndex(isOpen ? null : i)}
                 >
-                  {faq.question}
-                </span>
-                <span
-                  className="flex-shrink-0 text-sm transition-transform duration-300"
-                  style={{
-                    color: isOpen ? "var(--viridian)" : "var(--text-muted)",
-                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                >
+                  <span>{faq.question}</span>
                   <svg
-                    className="w-4 h-4"
+                    className="faq-chevron"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={2}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
-                </span>
-              </button>
+                </button>
 
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <p
-                      className="px-5 pb-5 md:px-6 md:pb-6 text-sm leading-relaxed"
-                      style={{ color: "var(--text-secondary)" }}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ overflow: "hidden" }}
                     >
-                      {faq.answer}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
+                      <p className="faq-answer">{faq.answer}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
