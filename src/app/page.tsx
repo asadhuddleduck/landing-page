@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
-import ElevenLabsChat from "@/components/ElevenLabsChat";
+import HeroChatSection from "@/components/HeroChatSection";
 import CheckoutSection from "@/components/CheckoutSection";
 import SocialProof from "@/components/SocialProof";
 import FAQ from "@/components/FAQ";
@@ -19,8 +18,7 @@ export default function Home() {
       <Header />
 
       <main>
-        <HeroSection />
-        <ElevenLabsChat />
+        <HeroChatSection />
         <SocialProof />
         <CheckoutSection />
         <FAQ />
