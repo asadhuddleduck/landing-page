@@ -54,8 +54,8 @@ export default function ElevenLabsChat() {
   return (
     <section className="section">
       <div className="chat-section">
-        <h2 className="chat-heading">Talk to Our AI</h2>
-        <p className="chat-subheading">Ask anything about the pilot. Voice or text.</p>
+        <h2 className="chat-heading">Ask the AI that runs F&B campaigns</h2>
+        <p className="chat-subheading">It&apos;s analysed thousands of food &amp; drink campaigns. Ask it anything.</p>
 
         {hasError && (
           <div className="chat-error">
@@ -77,24 +77,24 @@ export default function ElevenLabsChat() {
               </svg>
             </div>
 
-            <p className="chat-placeholder-title">AI Ad Consultant</p>
+            <p className="chat-placeholder-title">F&B Ad Strategist</p>
             <p className="chat-placeholder-desc">
-              Powered by ElevenLabs voice AI. Talk naturally or type your questions.
+              Talk naturally or type your questions.
             </p>
 
             {/* Feature list */}
             <div className="chat-placeholder-features">
               <div className="chat-placeholder-feature">
                 <span className="chat-placeholder-feature-dot" />
-                How does the 3-week pilot work?
+                How is this different from a marketing agency?
               </div>
               <div className="chat-placeholder-feature">
                 <span className="chat-placeholder-feature-dot" />
-                What results can I expect?
+                What does the AI actually do?
               </div>
               <div className="chat-placeholder-feature">
                 <span className="chat-placeholder-feature-dot" />
-                How much should I budget for ad spend?
+                Will my ads look like AI made them?
               </div>
             </div>
 

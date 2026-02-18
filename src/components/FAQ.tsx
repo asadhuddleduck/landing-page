@@ -17,12 +17,22 @@ const faqs = [
   {
     question: "What platforms do you advertise on?",
     answer:
-      "We run campaigns on Meta — Facebook and Instagram. These are the most effective paid channels for F&B businesses targeting local customers. We handle all targeting, creative, and budget allocation.",
+      "We use Meta — Facebook and Instagram — but not the way most agencies do. Most agencies run standard Meta ads, which rarely work for food businesses. Our AI uses Meta\u2019s API as a delivery vehicle to reach a specific customer avatar at scale. The strategy is the avatar research and targeting. Meta is just how we deliver it.",
   },
   {
     question: "Do I need to provide ad creative or a budget?",
     answer:
       "We produce all creative — ad copy, voiceover scripts, and video assets — as part of the Pilot. We repurpose your existing content into conversion-focused ad variations. You do need to cover your own ad spend separately, with a minimum of £10 per location per day to Meta. The £497 Pilot fee covers our strategy, production, and management work.",
+  },
+  {
+    question: "Will my ads look like they were made by AI?",
+    answer:
+      "No. We never generate AI content from scratch — your customers can spot that instantly and it erodes trust. Instead, we take your existing social media content and remake it into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.",
+  },
+  {
+    question: "How is this different from hiring a marketing agency?",
+    answer:
+      "A traditional agency charges \u00a32,000\u20135,000 per month, takes weeks to onboard, and runs generic playbooks. Our AI deep-researches your specific audience, competitors, and market before a single ad goes live. You get a strategy built on data, not guesswork \u2014 at a fraction of the cost. The Pilot is \u00a3497 for 3 weeks of fully managed campaigns. Compare that to a single billboard, a TV commercial, or a month with a traditional agency.",
   },
   {
     question: "What happens after the pilot ends?",

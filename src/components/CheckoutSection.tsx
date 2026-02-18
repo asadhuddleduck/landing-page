@@ -6,16 +6,16 @@ import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 
 const steps = [
-  "We research your audience",
-  "We build & launch your campaigns",
-  "We optimise weekly & report back",
+  "AI deep-researches your audience",
+  "We remake your real content into ads",
+  "3 weeks managed, then you decide",
 ];
 
 const features = [
-  "Customer avatar research",
-  "Ad copy, voiceover script & video creative",
-  "Full campaign setup & 3-week managed run",
-  "Tracking report & strategy review",
+  "Deep audience research from social data & competitor analysis",
+  "Ad creative remade from your existing content",
+  "Full Meta campaign setup & 3-week managed run",
+  "Tracking report & strategy review call",
   "Ad spend is separate (min £10/location/day)",
 ];
 
