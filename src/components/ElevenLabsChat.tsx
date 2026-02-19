@@ -346,9 +346,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           onKeyDown={handleKeyDown}
           disabled={isConnecting}
           autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
           data-form-type="other"
           onContextMenu={(e) => e.preventDefault()}
           onFocus={handleFocus}
