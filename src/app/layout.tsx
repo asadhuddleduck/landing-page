@@ -8,8 +8,9 @@ import "./globals.css";
 
 const lato = Lato({
   subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
+  weight: ["400", "700", "900"],
   variable: "--font-lato",
+  display: "swap",
 });
 
 export const viewport: Viewport = {

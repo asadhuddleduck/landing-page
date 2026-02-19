@@ -10,6 +10,29 @@ const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
 
 const GREETING_MESSAGE = "Your competitors haven't found this yet. Tell me what you sell and I'll show you what's possible.";
 
+// Animated placeholder phrases — randomly assembled from parts
+const PLACEHOLDER_CUISINES = [
+  "burger restaurants", "sushi restaurants", "pizza places", "cafes",
+  "fine dining restaurants", "bakeries", "steakhouses", "noodle bars",
+  "taco shops", "shawarma spots", "Thai restaurants", "Indian restaurants",
+  "brunch spots", "dessert parlours", "chicken shops", "seafood restaurants",
+  "kebab restaurants", "patisseries", "coffee shops", "ice cream shops",
+  "ramen shops", "Greek restaurants", "Mediterranean grills", "BBQ joints",
+];
+const PLACEHOLDER_COUNTRIES = [
+  "the UK", "England", "Scotland", "Ireland", "Wales", "the UAE",
+  "the US", "Canada", "Australia", "Singapore", "Saudi Arabia",
+  "Qatar", "Kuwait", "Malaysia", "France", "Germany", "Spain",
+  "Italy", "the Netherlands", "Sweden", "Japan", "South Korea",
+];
+
+function buildPlaceholder(): string {
+  const count = Math.floor(Math.random() * 19) + 2;
+  const cuisine = PLACEHOLDER_CUISINES[Math.floor(Math.random() * PLACEHOLDER_CUISINES.length)];
+  const country = PLACEHOLDER_COUNTRIES[Math.floor(Math.random() * PLACEHOLDER_COUNTRIES.length)];
+  return `I run ${count} ${cuisine} in ${country}...`;
+}
+
 interface ChatMessage {
   role: "user" | "agent";
   text: string;
@@ -93,58 +116,123 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const [showGreeting, setShowGreeting] = useState(true);
   const [greetingExiting, setGreetingExiting] = useState(false);
 
-  // Keyboard scroll fix: after browser scrolls on focus, fine-tune position
-  // TUNING: adjust IDEAL_GAP to control spacing between input and keyboard top
-  // Higher = more space above keyboard, lower = input closer to keyboard
+  // Animated typing placeholder
+  const [placeholderText, setPlaceholderText] = useState("");
+  const placeholderRef = useRef({ phrase: "", charIdx: 0, phase: "typing" as "typing" | "hold" | "erasing" });
+
   useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
+    // Don't animate once connected
+    if (hasStarted) return;
 
-    const heroEl = document.querySelector(".hero") as HTMLElement | null;
-    if (!heroEl) return;
+    // Pick first phrase
+    placeholderRef.current.phrase = buildPlaceholder();
+    placeholderRef.current.charIdx = 0;
+    placeholderRef.current.phase = "typing";
 
-    let initialHeight = vv.height;
+    const interval = setInterval(() => {
+      const p = placeholderRef.current;
 
-    function handleResize() {
-      if (!vv || !heroEl) return;
-      const keyboardHeight = initialHeight - vv.height;
-
-      if (keyboardHeight > 100) {
-        // Keyboard is open
-        const inputEl = inputRef.current;
-        if (!inputEl) return;
-        const inputRect = inputEl.getBoundingClientRect();
-        const visibleBottom = vv.offsetTop + vv.height;
-        const currentGap = visibleBottom - inputRect.bottom;
-        const IDEAL_GAP = 30; // px between input bottom and keyboard top
-
-        if (currentGap > IDEAL_GAP + 20) {
-          // Too much gap - shift hero DOWN to bring input closer to keyboard
-          const shift = currentGap - IDEAL_GAP;
-          heroEl.style.transform = `translateY(${shift}px)`;
-          heroEl.style.transition = "transform 0.25s ease-out";
-        } else if (currentGap < 10) {
-          // Input too close to or behind keyboard - shift hero UP
-          const shift = IDEAL_GAP - currentGap;
-          heroEl.style.transform = `translateY(-${shift}px)`;
-          heroEl.style.transition = "transform 0.25s ease-out";
+      if (p.phase === "typing") {
+        p.charIdx++;
+        setPlaceholderText(p.phrase.slice(0, p.charIdx));
+        if (p.charIdx >= p.phrase.length) {
+          p.phase = "hold";
+          // Hold for 2s before erasing
+          setTimeout(() => { p.phase = "erasing"; }, 2000);
         }
-      } else {
-        // Keyboard closed - reset
-        heroEl.style.transform = "";
-        heroEl.style.transition = "transform 0.25s ease-out";
+      } else if (p.phase === "erasing") {
+        p.charIdx--;
+        setPlaceholderText(p.phrase.slice(0, p.charIdx));
+        if (p.charIdx <= 0) {
+          // Pick a new phrase
+          p.phrase = buildPlaceholder();
+          p.charIdx = 0;
+          p.phase = "typing";
+        }
       }
+      // "hold" phase: do nothing, timer above will switch to erasing
+    }, 80);
+
+    return () => clearInterval(interval);
+  }, [hasStarted]);
+
+  // Headline visibility: scroll-aware, bi-directional.
+  // - Scroll down past threshold OR focus input (mobile) → fade out slowly
+  // - Scroll back near top → snap back in
+  // - Re-triggerable in both directions
+  const headlineVisibleRef = useRef(true);
+
+  const hideHeadline = useCallback((fast: boolean) => {
+    if (!headlineVisibleRef.current) return;
+    headlineVisibleRef.current = false;
+    const headline = document.querySelector(".hero-headline") as HTMLElement;
+    const directive = document.querySelector(".hero-directive") as HTMLElement;
+    const dur = fast ? "0.3s" : "0.6s";
+    if (headline) {
+      headline.style.transition = `opacity ${dur} ease, transform ${dur} ease`;
+      headline.style.opacity = "0";
+      headline.style.transform = "translateY(-10px)";
+    }
+    if (directive) {
+      directive.style.transition = `opacity ${dur} ease 0.05s, transform ${dur} ease 0.05s`;
+      directive.style.opacity = "0";
+      directive.style.transform = "translateY(-10px)";
+    }
+  }, []);
+
+  const showHeadline = useCallback(() => {
+    if (headlineVisibleRef.current) return;
+    headlineVisibleRef.current = true;
+    const headline = document.querySelector(".hero-headline") as HTMLElement;
+    const directive = document.querySelector(".hero-directive") as HTMLElement;
+    // Snap back in quickly
+    if (headline) {
+      headline.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+      headline.style.opacity = "1";
+      headline.style.transform = "translateY(0)";
+    }
+    if (directive) {
+      directive.style.transition = "opacity 0.2s ease 0.03s, transform 0.2s ease 0.03s";
+      directive.style.opacity = "1";
+      directive.style.transform = "translateY(0)";
+    }
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    // Skip on desktop (no virtual keyboard)
+    if (window.innerWidth >= 768) return;
+    hideHeadline(true);
+  }, [hideHeadline]);
+
+  const handleBlur = useCallback(() => {
+    // Don't restore on blur - scroll position controls visibility
+  }, []);
+
+  // Scroll-driven headline: hide when scrolled down, show when near top
+  // Throttled via requestAnimationFrame to avoid jank on mobile
+  useEffect(() => {
+    const HIDE_THRESHOLD = 80;  // px scrolled before headline fades
+    const SHOW_THRESHOLD = 40;  // px from top to snap headline back
+    let scrollTicking = false;
+
+    function onScroll() {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        if (window.innerWidth >= 768) { scrollTicking = false; return; } // desktop: always visible
+        const y = window.scrollY;
+        if (y > HIDE_THRESHOLD && headlineVisibleRef.current) {
+          hideHeadline(false); // slow fade on scroll down
+        } else if (y < SHOW_THRESHOLD && !headlineVisibleRef.current) {
+          showHeadline(); // snap back when near top
+        }
+        scrollTicking = false;
+      });
     }
 
-    vv.addEventListener("resize", handleResize);
-    return () => {
-      vv.removeEventListener("resize", handleResize);
-      if (heroEl) {
-        heroEl.style.transform = "";
-        heroEl.style.transition = "";
-      }
-    };
-  }, []);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [hideHeadline, showHeadline]);
 
   const conversation = useConversation({
     onMessage: useCallback(
@@ -158,17 +246,9 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
               return prev;
             }
           }
-          // For agent messages: if the last message is also agent, check if it's
-          // a streaming update (same message growing) or a new separate message
-          const last = prev[prev.length - 1];
-          if (last && last.role === "agent" && role === "agent") {
-            // If the new text starts with the old text, it's streaming - update in place
-            if (cleanText.startsWith(last.text.substring(0, Math.min(last.text.length, 20)))) {
-              return [...prev.slice(0, -1), { role, text: cleanText, id: last.id }];
-            }
-            // Otherwise it's a genuinely new agent message - append it
-            return [...prev, { role, text: cleanText, id: msgIdCounter++ }];
-          }
+          // Agent messages always get their own bubble.
+          // No streaming merge — each onMessage callback with new text = new entry.
+          // The SDK delivers each complete agent turn as a single callback.
           return [...prev, { role, text: cleanText, id: msgIdCounter++ }];
         });
       },
@@ -235,6 +315,8 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
         setShowGreeting(false);
         setGreetingExiting(false);
         setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
+        // Re-focus after greeting exit re-render to keep mobile keyboard open
+        requestAnimationFrame(() => inputRef.current?.focus());
       }, 300);
     } else {
       // Already in conversation - just add user message (it enters with animation)
@@ -242,10 +324,20 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     }
 
     if (conversation.status !== "connected") {
-      startConversation(text);
+      startConversation(text).then(() => {
+        // Re-focus input after first message — the hasStarted transition
+        // can cause mobile keyboards to dismiss during re-render
+        requestAnimationFrame(() => inputRef.current?.focus());
+      });
     } else {
       conversation.sendUserMessage(text);
     }
+
+    // Keep keyboard open on iOS: refocus immediately + after React re-render
+    inputRef.current?.focus();
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
   }, [input, conversation, startConversation, showGreeting]);
 
   const handleKeyDown = useCallback(
@@ -380,40 +472,28 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
         <input
           ref={inputRef}
           type="text"
-          className="two-msg-input"
+          className={`two-msg-input${hasStarted ? " two-msg-input--active" : ""}`}
           placeholder={
             isConnected
               ? "Type a message..."
-              : "e.g. I run 5 burger restaurants in London..."
+              : placeholderText || "\u200B"
           }
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          disabled={isConnecting}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          readOnly={isConnecting}
           autoComplete="off"
+          enterKeyHint="send"
           data-form-type="other"
           onContextMenu={(e) => e.preventDefault()}
         />
-        <button
-          className="two-msg-send"
-          onClick={handleSend}
-          disabled={!input.trim() || isConnecting}
-          aria-label="Send message"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-        </button>
+      </div>
+
+      {/* Powered by Huddle Duck */}
+      <div className="powered-by">
+        powered by <img src="/duck-logo.png" alt="" className="powered-by-logo" /> <strong>Huddle Duck</strong>
       </div>
     </div>
   );

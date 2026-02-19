@@ -21,28 +21,12 @@ export default function CookieNotice() {
   if (!visible) return null;
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 z-[9999] px-4 py-3 sm:px-6"
-      style={{
-        background: "rgba(0, 30, 43, 0.97)",
-        borderTop: "1px solid var(--border)",
-      }}
-    >
-      <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-        <p
-          className="text-xs sm:text-sm flex-1 text-center sm:text-left"
-          style={{ color: "var(--text-secondary)" }}
-        >
+    <div className="cookie-notice">
+      <div className="cookie-notice-inner">
+        <p className="cookie-notice-text">
           We use cookies to measure ad performance and improve your experience.
         </p>
-        <button
-          onClick={dismiss}
-          className="px-4 py-1.5 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 flex-shrink-0"
-          style={{
-            background: "var(--viridian)",
-            color: "white",
-          }}
-        >
+        <button onClick={dismiss} className="cookie-notice-btn">
           Got it
         </button>
       </div>

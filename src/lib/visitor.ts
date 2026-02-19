@@ -23,7 +23,9 @@ function getCookie(name: string): string | null {
 export function getVisitorId(): string {
   let vid = getCookie(VID_COOKIE);
   if (!vid) {
-    vid = crypto.randomUUID();
+    vid = typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     setCookie(VID_COOKIE, vid, COOKIE_DAYS);
   }
   return vid;

@@ -14,9 +14,9 @@ const steps = [
 const features = [
   "Deep audience research from social data & competitor analysis",
   "Ad creative remade from your existing content",
-  "Full Meta campaign setup & 3-week managed run",
+  "Full AI campaign setup & 3-week managed run",
   "Tracking report & strategy review call",
-  "Ad spend is separate (min £10/location/day)",
+  "Ad spend not included - we recommend 1x your AOV per day per location",
 ];
 
 export default function CheckoutSection() {

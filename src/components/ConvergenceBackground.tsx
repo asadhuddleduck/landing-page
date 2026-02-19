@@ -49,6 +49,10 @@ export default function ConvergenceBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Skip animation entirely if user prefers reduced motion
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
     const dpr = window.devicePixelRatio || 1;
     let w = window.innerWidth;
     let h = window.innerHeight;
@@ -68,16 +72,18 @@ export default function ConvergenceBackground() {
       }
     }
 
-    // Poll for the input bar position (it may not be rendered yet on first frame)
+    // Poll for the input bar position — fast enough to catch keyboard open/close
     updateInputRect();
-    const rectInterval = setInterval(updateInputRect, 1000);
+    const rectInterval = setInterval(updateInputRect, 150);
 
     function getFocalPoint(): { x: number; y: number } {
       return { x: inputRect.x, y: inputRect.y };
     }
 
-    // Create streaks
-    const STREAK_COUNT = 40;
+    // Create streaks — fewer on mobile so they feel sparse and purposeful
+    const isMobile = w < 768;
+    const isLowEnd = isMobile && (navigator.hardwareConcurrency ?? 4) <= 4;
+    const STREAK_COUNT = isLowEnd ? 14 : (isMobile ? 22 : 40);
     const streaks: Streak[] = [];
 
     function spawnStreak(): Streak {
@@ -110,16 +116,19 @@ export default function ConvergenceBackground() {
       };
     }
 
+    // On mobile, keep most streaks near edges (less advance) so they visibly arrive
+    // On desktop, spread them out more for an ambient feel
+    const maxAdvance = isMobile ? 200 : 600;
     for (let i = 0; i < STREAK_COUNT; i++) {
       const s = spawnStreak();
-      const advance = Math.random() * 600;
+      const advance = Math.random() * maxAdvance;
       s.x += Math.cos(s.angle) * advance;
       s.y += Math.sin(s.angle) * advance;
       streaks.push(s);
     }
 
-    // Create motes
-    const MOTE_COUNT = 60;
+    // Create motes — fewer on mobile, even fewer on low-end devices
+    const MOTE_COUNT = isLowEnd ? 8 : (isMobile ? 12 : 60);
     const motes: Mote[] = [];
 
     function spawnMote(): Mote {
@@ -146,10 +155,10 @@ export default function ConvergenceBackground() {
       return {
         x: mx,
         y: my,
-        vx: dist > 0 ? (dx / dist) * (0.3 + Math.random() * 0.5) : 0,
-        vy: dist > 0 ? (dy / dist) * (0.3 + Math.random() * 0.5) : 0,
-        radius: 0.5 + Math.random() * 1.5,
-        opacity: 0.08 + Math.random() * 0.15,
+        vx: dist > 0 ? (dx / dist) * (isMobile ? (3 + Math.random() * 4) : (0.3 + Math.random() * 0.5)) : 0,
+        vy: dist > 0 ? (dy / dist) * (isMobile ? (3 + Math.random() * 4) : (0.3 + Math.random() * 0.5)) : 0,
+        radius: isMobile ? (0.3 + Math.random() * 0.8) : (0.5 + Math.random() * 1.5),
+        opacity: isMobile ? (0.15 + Math.random() * 0.2) : (0.08 + Math.random() * 0.15),
         life: Math.random() * maxLife,
         maxLife,
       };
@@ -158,6 +167,20 @@ export default function ConvergenceBackground() {
     for (let i = 0; i < MOTE_COUNT; i++) {
       motes.push(spawnMote());
     }
+
+    // Scale acceleration radii to screen size so mobile feels dramatic.
+    // On desktop (1440px) these stay close to original values.
+    // On mobile (~390px) they scale up relative to viewport.
+    let screenDiag = Math.sqrt(w * w + h * h);
+    let streakSpeedRadius = Math.max(300, screenDiag * 0.6);
+    let streakFadeRadius = w < 768 ? Math.max(120, screenDiag * 0.18) : Math.max(80, screenDiag * 0.12);  // event horizon: bigger on mobile
+    let streakTargetSpeed = 3.5;
+    let streakAccelRate = 0.02;
+    let streakHomingBase = 0.008;
+    let streakGravityRadius = 0;  // streaks use flat homing now (gravity well is for motes)
+
+    // Mote pull radius — much bigger on mobile so they accelerate from far away
+    let motePullRadius = w < 768 ? screenDiag * 1.2 : Math.max(400, screenDiag * 0.55);
 
     let animFrame: number;
 
@@ -177,16 +200,28 @@ export default function ConvergenceBackground() {
         const dx = focal.x - s.x;
         const dy = focal.y - s.y;
         const targetAngle = Math.atan2(dy, dx);
-        s.angle = lerp(s.angle, targetAngle, 0.008);
-
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        let streakOpacity = s.opacity;
-        if (dist < 80) {
-          streakOpacity *= dist / 80;
+        // Distance-dependent homing: on mobile, homing strength increases
+        // dramatically as streaks approach the focal point (gravity well effect).
+        // Desktop uses a flat gentle rate.
+        let homingRate = streakHomingBase;
+        if (streakGravityRadius > 0 && dist < streakGravityRadius) {
+          // t goes from 0 (at edge of gravity radius) to 1 (at focal point)
+          const t = 1 - dist / streakGravityRadius;
+          // Cubic ramp: gentle far away, aggressive close in
+          homingRate = 0.01 + 0.25 * t * t * t;
         }
-        if (dist < 200) {
-          s.speed = lerp(s.speed, 3.5, 0.02);
+        s.angle = lerp(s.angle, targetAngle, homingRate);
+
+        // Fade to transparent in a small zone right before the input bar
+        let streakOpacity = s.opacity;
+        if (dist < streakFadeRadius) {
+          streakOpacity *= dist / streakFadeRadius;
+        }
+        // Accelerate — much more aggressive on mobile (no slow-feeling particles)
+        if (dist < streakSpeedRadius) {
+          s.speed = lerp(s.speed, streakTargetSpeed, streakAccelRate);
         }
 
         const tailX = s.x - Math.cos(s.angle) * s.length;
@@ -204,7 +239,7 @@ export default function ConvergenceBackground() {
         ctx!.lineWidth = s.width;
         ctx!.stroke();
 
-        if (dist < 30 || s.x < -100 || s.x > w + 100 || s.y < -100 || s.y > h + 100) {
+        if (dist < streakFadeRadius * 0.3 || s.x < -100 || s.x > w + 100 || s.y < -100 || s.y > h + 100) {
           streaks[i] = spawnStreak();
         }
       }
@@ -217,26 +252,32 @@ export default function ConvergenceBackground() {
         const dy = focal.y - m.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Slow-then-fast: cubic ramp
-        const t = Math.max(0, 1 - dist / 400);
-        const pull = 0.003 + 0.04 * t * t * t;
+        // Pull toward focal — on mobile, strong pull from very far away
+        const t = Math.max(0, 1 - dist / motePullRadius);
+        const basePull = isMobile
+          ? 0.04 + 0.35 * t * t   // quadratic ramp: strong even at edges, fierce close in
+          : 0.003 + 0.04 * t * t * t;
         if (dist > 0) {
-          m.vx += (dx / dist) * pull;
-          m.vy += (dy / dist) * pull;
+          m.vx += (dx / dist) * basePull;
+          m.vy += (dy / dist) * basePull;
         }
 
-        m.vx *= 0.995;
-        m.vy *= 0.995;
+        // Less damping on mobile so they maintain speed
+        const damping = isMobile ? 0.97 : 0.995;
+        m.vx *= damping;
+        m.vy *= damping;
 
         m.x += m.vx;
         m.y += m.vy;
         m.life++;
 
+        // Event horizon fade: motes ramp opacity to zero as they approach the center
+        // Uses the same fade radius as streaks so the "event horizon" is consistent
         let moteOpacity = m.opacity;
         const lifeProg = m.life / m.maxLife;
         if (lifeProg < 0.1) moteOpacity *= lifeProg / 0.1;
         if (lifeProg > 0.8) moteOpacity *= (1 - lifeProg) / 0.2;
-        if (dist < 50) moteOpacity *= dist / 50;
+        if (dist < streakFadeRadius) moteOpacity *= dist / streakFadeRadius;
 
         const color = i % 7 === 0 ? SANDSTORM : VIRIDIAN;
 
@@ -256,7 +297,8 @@ export default function ConvergenceBackground() {
         ctx!.fillStyle = rgba(color, moteOpacity);
         ctx!.fill();
 
-        if (m.life > m.maxLife || dist < 20) {
+        // Respawn once consumed by the event horizon (or expired)
+        if (m.life > m.maxLife || dist < streakFadeRadius * 0.3) {
           motes[i] = spawnMote();
         }
       }
@@ -274,22 +316,44 @@ export default function ConvergenceBackground() {
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
       ctx!.scale(dpr, dpr);
       updateInputRect();
+      // Recalculate acceleration radii for new screen size
+      screenDiag = Math.sqrt(w * w + h * h);
+      streakSpeedRadius = Math.max(300, screenDiag * 0.6);
+      streakFadeRadius = w < 768 ? Math.max(120, screenDiag * 0.18) : Math.max(80, screenDiag * 0.12);
+      streakTargetSpeed = 3.5;
+      streakAccelRate = 0.02;
+      streakHomingBase = 0.008;
+      streakGravityRadius = 0;
+      motePullRadius = w < 768 ? screenDiag * 1.2 : Math.max(400, screenDiag * 0.55);
     }
 
     window.addEventListener("resize", handleResize);
+
+    // Pause animation when tab is not visible (saves CPU/battery)
+    function handleVisibility() {
+      if (document.hidden) {
+        cancelAnimationFrame(animFrame);
+      } else {
+        animFrame = requestAnimationFrame(draw);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       cancelAnimationFrame(animFrame);
       clearInterval(rectInterval);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="convergence-bg"
-      aria-hidden="true"
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="convergence-bg"
+        aria-hidden="true"
+      />
+    </>
   );
 }
