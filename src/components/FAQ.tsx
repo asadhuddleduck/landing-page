@@ -7,32 +7,32 @@ const faqs = [
   {
     question: "What is the AI Ad Engine Pilot?",
     answer:
-      "A 3-week managed advertising engagement where we research your customer avatar, produce ad creative (copy, voiceover, video), build and launch Meta campaigns, optimise weekly, and deliver a tracking report with a strategy review. Think of it as a mutual trial. You see what we can do, and we see if your business is a fit for ongoing management.",
+      "A 3-week managed advertising engagement. The AI researches your customer avatar, produces ad creative (copy, voiceover, video), builds and launches campaigns, optimises weekly, and delivers a tracking report with a strategy review. Think of it as a mutual trial. You see what it can do, and it identifies whether your business is a fit for ongoing management.",
   },
   {
     question: "How long does the pilot run?",
     answer:
-      "The managed campaign runs for 3 weeks from launch day. Before that, there is a research and creative production phase where we build your avatar and assets. After the 3-week run, you receive a full tracking report and strategy review call.",
+      "The managed campaign runs for 3 weeks from launch day. Before that, there is a research and creative production phase where the AI builds your avatar and assets. After the 3-week run, you receive a full tracking report and strategy review call.",
   },
   {
     question: "What platforms do you advertise on?",
     answer:
-      "We use Meta (Facebook and Instagram) but not the way most agencies do. Most agencies run standard Meta ads, which rarely work for food businesses. Our AI uses Meta\u2019s API as a delivery vehicle to reach a specific customer avatar at scale. The strategy is the avatar research and targeting. Meta is just how we deliver it.",
+      "Meta (Facebook and Instagram), but not the way most agencies use it. Most agencies run standard Meta ads, which rarely work for food businesses. The AI uses Meta\u2019s API as a delivery vehicle to reach a specific customer avatar at scale. The strategy is the avatar research and targeting. Meta is just how it gets delivered.",
   },
   {
     question: "Do I need to provide ad creative or a budget?",
     answer:
-      "We produce all creative (ad copy, voiceover scripts, and video assets) as part of the Pilot. We repurpose your existing content into conversion-focused ad variations. You do need to cover your own ad spend separately, with a minimum of £10 per location per day to Meta. The £497 Pilot fee covers our strategy, production, and management work.",
+      "All creative (ad copy, voiceover scripts, and video assets) is produced as part of the Pilot. The AI repurposes your existing content into conversion-focused ad variations. You do need to cover your own ad spend separately, with a minimum of £10 per location per day to Meta. The £497 Pilot fee covers strategy, production, and management.",
   },
   {
     question: "Will my ads look like they were made by AI?",
     answer:
-      "No. We never generate AI content from scratch. Your customers can spot that instantly and it erodes trust. Instead, we take your existing social media content and remake it into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.",
+      "No. The AI never generates content from scratch. Your customers can spot that instantly and it erodes trust. Instead, it takes your existing social media content and remakes it into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.",
   },
   {
     question: "How is this different from hiring a marketing agency?",
     answer:
-      "A traditional agency charges £2,000 to 5,000 per month, takes weeks to onboard, and runs generic playbooks. Our AI deep-researches your specific audience, competitors, and market before a single ad goes live. You get a strategy built on data, not guesswork at a fraction of the cost. The Pilot is \u00a3497 for 3 weeks of fully managed campaigns. Compare that to a single billboard, a TV commercial, or a month with a traditional agency.",
+      "A traditional agency charges £2,000 to 5,000 per month, takes weeks to onboard, and runs generic playbooks. The AI deep-researches your specific audience, competitors, and market before a single ad goes live. You get a strategy built on data, not guesswork, at a fraction of the cost. The Pilot is £497 for 3 weeks of fully managed campaigns. Compare that to a single billboard, a TV commercial, or a month with a traditional agency.",
   },
   {
     question: "What happens after the pilot ends?",

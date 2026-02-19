@@ -24,7 +24,7 @@ export default function CookieNotice() {
     <div className="cookie-notice">
       <div className="cookie-notice-inner">
         <p className="cookie-notice-text">
-          We use cookies to measure ad performance and improve your experience.
+          This site uses cookies to measure ad performance and improve your experience.
         </p>
         <button onClick={dismiss} className="cookie-notice-btn">
           Got it

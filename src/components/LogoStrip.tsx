@@ -13,7 +13,7 @@ const logos = [
   { src: "/logos/burgshake.png", alt: "Burgshake", h: 27 },
   { src: "/logos/zezu.png", alt: "Zezu", h: 30 },
   { src: "/logos/halal-editions.png", alt: "Halal Editions", h: 32 },
-  { src: "/logos/fusion-treats.png", alt: "Fusion Treats", h: 36 },
+  { src: "/logos/fusion-treats.svg", alt: "Fusion Treats", h: 36 },
   { src: "/logos/tasty-plaice.png", alt: "Tasty Plaice", h: 22 },
 ];
 

@@ -101,6 +101,38 @@ function detectCard(text: string): "pricing" | "testimonial" | "cta" | null {
   return null;
 }
 
+/* ── Power-bar colour helpers ── */
+function lerpColor(a: string, b: string, t: number): string {
+  const parse = (hex: string) => [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
+  const [r1, g1, b1] = parse(a);
+  const [r2, g2, b2] = parse(b);
+  return `rgb(${Math.round(r1 + (r2 - r1) * t)},${Math.round(g1 + (g2 - g1) * t)},${Math.round(b1 + (b2 - b1) * t)})`;
+}
+
+function getPowerBarColor(chars: number): string {
+  if (chars <= 12) return "#E53935";
+  if (chars <= 30) return lerpColor("#E53935", "#FB8C00", (chars - 12) / 18);
+  if (chars <= 50) return lerpColor("#FB8C00", "#1EBA8F", (chars - 30) / 20);
+  if (chars <= 80) return "#1EBA8F";
+  if (chars <= 120) return "#F7CE46";
+  return "#0A6E9E"; // Night Forest blue for supernova
+}
+
+function getPowerBarLabel(zone: string): string {
+  switch (zone) {
+    case "red": return "keep going...";
+    case "mid": return "nice, tell me more";
+    case "green": return "great detail!";
+    case "gold": return "amazing brief ✦";
+    case "supernova": return "perfect brief ✦✦";
+    default: return "";
+  }
+}
+
 interface ElevenLabsChatProps {
   onConversationEnd?: (outcome: string) => void;
 }
@@ -397,6 +429,17 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   // Are we waiting for the first agent response after user sent?
   const waitingForResponse = lastUserMsg && agentMessages.length === 0 && !showGreeting;
 
+  // Power-bar derived state (3-stage dopamine ladder)
+  // Stage 1: red→green (0-80) easy ramp
+  // Stage 2: gold shimmer (80-120) reward
+  // Stage 3: Night Forest blue supernova (120+) ultimate hidden final form
+  const charCount = input.length;
+  const showPowerBar = charCount > 0;
+  const fillPercent = Math.min(charCount / 120, 1);
+  const powerZone: "red" | "mid" | "green" | "gold" | "supernova" =
+    charCount <= 12 ? "red" : charCount <= 50 ? "mid" : charCount <= 80 ? "green" : charCount <= 120 ? "gold" : "supernova";
+  const charDisplay = String(charCount).padStart(2, "0");
+
   return (
     <div className="two-msg" ref={containerRef}>
       {/* Rotating greeting (before conversation starts) */}
@@ -491,9 +534,32 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
         />
       </div>
 
-      {/* Powered by Huddle Duck */}
-      <div className="powered-by">
-        powered by <img src="/duck-logo.png" alt="" className="powered-by-logo" /> <strong>Huddle Duck</strong>
+      {/* Power bar / Powered-by footer */}
+      <div className="power-bar-container">
+        <div className={`powered-by${showPowerBar ? " powered-by--hidden" : ""}`}>
+          powered by <img src="/duck-logo.png" alt="" className="powered-by-logo" /> <strong>Huddle Duck</strong>
+        </div>
+        <div className={`power-bar${showPowerBar ? " power-bar--visible" : ""}${powerZone === "gold" ? " power-bar--gold" : ""}${powerZone === "supernova" ? " power-bar--supernova" : ""}`}>
+          <span className="power-bar-count" style={{ color: getPowerBarColor(charCount) }}>{charDisplay}</span>
+          <div className="power-bar-track">
+            <div
+              className="power-bar-fill"
+              style={{
+                width: `${fillPercent * 100}%`,
+                background: powerZone === "supernova"
+                  ? "linear-gradient(90deg, #00334B 0%, #0A6E9E 30%, #2AA3D4 60%, #0A6E9E 100%)"
+                  : powerZone === "gold"
+                    ? "linear-gradient(90deg, #1EBA8F 0%, #F7CE46 60%, #FFE082 100%)"
+                    : getPowerBarColor(charCount),
+                boxShadow: powerZone === "supernova"
+                  ? "0 0 14px rgba(10,110,158,0.7),0 0 30px rgba(10,110,158,0.3)"
+                  : `0 0 8px ${getPowerBarColor(charCount)}`,
+              }}
+            />
+            <div className={`power-bar-shimmer${powerZone === "gold" || powerZone === "supernova" ? " power-bar-shimmer--active" : ""}${powerZone === "supernova" ? " power-bar-shimmer--supernova" : ""}`} />
+          </div>
+          <span className="power-bar-label" style={{ color: getPowerBarColor(charCount) }}>{getPowerBarLabel(powerZone)}</span>
+        </div>
       </div>
     </div>
   );
