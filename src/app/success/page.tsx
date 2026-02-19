@@ -15,29 +15,49 @@ const steps = [
   },
   {
     number: "3",
-    title: "We start building",
+    title: "The AI starts building",
     description:
-      "Our AI begins researching your market and crafting your campaign strategy.",
+      "It begins researching your market and crafting your campaign strategy.",
   },
 ];
 
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>;
+  searchParams: Promise<{ session_id?: string; payment_intent?: string }>;
 }) {
-  const { session_id } = await searchParams;
+  const { session_id, payment_intent } = await searchParams;
 
   let customerName = "there";
   let sessionRef = "";
+  let eventId = "";
 
-  if (session_id) {
+  if (payment_intent) {
+    // New flow: inline Payment Element
+    try {
+      const pi = await stripe.paymentIntents.retrieve(payment_intent, {
+        expand: ["customer"],
+      });
+      const customer = pi.customer;
+      if (customer && typeof customer !== "string" && !customer.deleted) {
+        if (customer.name) {
+          customerName = customer.name.split(" ")[0];
+        }
+      }
+      sessionRef = pi.id.slice(-8).toUpperCase();
+      eventId = pi.id;
+    } catch {
+      // Invalid PI. Show generic thank you
+    }
+  } else if (session_id) {
+    // Legacy flow: Checkout Session redirect
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id);
       if (session.customer_details?.name) {
         customerName = session.customer_details.name.split(" ")[0];
       }
       sessionRef = session.id.slice(-8).toUpperCase();
+      eventId = session.id;
     } catch {
       // Invalid session. Show generic thank you
     }
@@ -147,7 +167,7 @@ export default async function SuccessPage({
           Back to home
         </Link>
 
-        <SuccessPixel sessionId={session_id || ""} />
+        <SuccessPixel eventId={eventId} />
       </div>
     </main>
   );

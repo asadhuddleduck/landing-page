@@ -6,23 +6,24 @@ import { track } from "@vercel/analytics";
 
 /**
  * Fires Meta Pixel Purchase event on the /success page.
- * Uses stripe_{sessionId} as event_id to deduplicate with server-side CAPI.
+ * Uses stripe_{eventId} as event_id to deduplicate with server-side CAPI.
+ * eventId can be a checkout session ID or a payment intent ID.
  */
-export default function SuccessPixel({ sessionId }: { sessionId: string }) {
+export default function SuccessPixel({ eventId }: { eventId: string }) {
   const hasFired = useRef(false);
 
   useEffect(() => {
-    if (hasFired.current || !sessionId) return;
+    if (hasFired.current || !eventId) return;
     hasFired.current = true;
 
     trackPixelEvent(
       "Purchase",
       { value: 497, currency: "GBP" },
-      `stripe_${sessionId}`
+      `stripe_${eventId}`
     );
 
-    track("purchase_completed", { session_id: sessionId });
-  }, [sessionId]);
+    track("purchase_completed", { event_id: eventId });
+  }, [eventId]);
 
   return null;
 }

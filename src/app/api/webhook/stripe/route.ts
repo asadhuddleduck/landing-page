@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { handlePurchase } from "@/lib/onboarding";
+import { handlePurchase, handlePaymentIntentPurchase } from "@/lib/onboarding";
 
 export const runtime = "nodejs";
 
@@ -25,12 +25,20 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
+    // Legacy flow (Checkout Session redirect)
     const session = event.data.object;
     try {
       await handlePurchase(session);
     } catch (err) {
-      console.error("[webhook] Onboarding error:", err);
-      // Still return 200. Stripe will retry otherwise
+      console.error("[webhook] Onboarding error (session):", err);
+    }
+  } else if (event.type === "payment_intent.succeeded") {
+    // New flow (inline Payment Element)
+    const paymentIntent = event.data.object;
+    try {
+      await handlePaymentIntentPurchase(paymentIntent);
+    } catch (err) {
+      console.error("[webhook] Onboarding error (payment_intent):", err);
     }
   }
 

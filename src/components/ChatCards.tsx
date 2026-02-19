@@ -1,48 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 
-// Shared checkout handler used by PricingCard and CTACard
-async function handleCheckout(setLoading: (v: boolean) => void) {
+// Scroll to #checkout section instead of redirecting to Stripe
+function scrollToCheckout(setLoading: (v: boolean) => void) {
   setLoading(true);
-  try {
-    trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
-    track("card_cta_click");
+  trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
+  track("card_cta_click");
 
-    const vid = getVisitorId();
-    const params = new URLSearchParams(window.location.search);
-    const utms = {
-      utm_source: params.get("utm_source") || "",
-      utm_medium: params.get("utm_medium") || "",
-      utm_campaign: params.get("utm_campaign") || "",
-    };
-    if (!utms.utm_source) {
-      const stored = getStoredUtms();
-      utms.utm_source = stored.utm_source || "";
-      utms.utm_medium = stored.utm_medium || "";
-      utms.utm_campaign = stored.utm_campaign || "";
-    }
-
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ visitor_id: vid, ...utms }),
-    });
-    const data = await res.json();
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      console.error("[chat-card] No URL returned:", data);
-      setLoading(false);
-    }
-  } catch (err) {
-    console.error("[chat-card] Error:", err);
-    setLoading(false);
+  const el = document.getElementById("checkout");
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
   }
+
+  // Reset loading after scroll
+  setTimeout(() => setLoading(false), 500);
 }
 
 /* ────────── Pricing Card ────────── */
@@ -96,10 +70,10 @@ export function PricingCard({ onShow }: PricingCardProps) {
       </div>
       <button
         className="chat-card-btn"
-        onClick={() => handleCheckout(setLoading)}
+        onClick={() => scrollToCheckout(setLoading)}
         disabled={loading}
       >
-        {loading ? "Processing..." : "Start Your Pilot"}
+        Start Your Pilot
       </button>
       <p className="chat-card-fine">Credited if you upgrade within 30 days</p>
     </div>
@@ -186,10 +160,10 @@ export function CTACard({ onShow }: CTACardProps) {
       <p className="chat-card-cta-text">Ready to start?</p>
       <button
         className="chat-card-btn"
-        onClick={() => handleCheckout(setLoading)}
+        onClick={() => scrollToCheckout(setLoading)}
         disabled={loading}
       >
-        {loading ? "Processing..." : "Start Your Pilot"}
+        Start Your Pilot
       </button>
       <p className="chat-card-fine">Takes about 2 minutes</p>
     </div>
