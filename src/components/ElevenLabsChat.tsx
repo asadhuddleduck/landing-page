@@ -278,9 +278,14 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
               return prev;
             }
           }
-          // Agent messages always get their own bubble.
-          // No streaming merge — each onMessage callback with new text = new entry.
-          // The SDK delivers each complete agent turn as a single callback.
+          // Agent messages: the SDK fires onMessage twice for the same turn
+          // (exact duplicate). Skip if identical to the last agent message.
+          if (role === "agent" && prev.length > 0) {
+            const last = prev[prev.length - 1];
+            if (last.role === "agent" && last.text === cleanText) {
+              return prev; // exact duplicate, skip
+            }
+          }
           return [...prev, { role, text: cleanText, id: msgIdCounter++ }];
         });
       },
@@ -442,9 +447,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
 
   return (
     <div className="two-msg" ref={containerRef}>
-      {/* Subtle branding logo top-left */}
-      <img src="/duck-logo.png" alt="Huddle Duck" className="two-msg-brand" />
-
       {/* Rotating greeting (before conversation starts) */}
       {showGreeting && (
         <div
