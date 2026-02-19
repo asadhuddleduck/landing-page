@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Lato } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import TrackingScript from "@/components/TrackingScript";
@@ -11,6 +11,12 @@ const lato = Lato({
   weight: ["300", "400", "700", "900"],
   variable: "--font-lato",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  interactiveWidget: "resizes-content",
+};
 
 export const metadata: Metadata = {
   title: "AI Ad Engine for F&B Brands | Huddle Duck",

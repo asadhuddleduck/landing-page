@@ -8,7 +8,7 @@ import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
 const INITIAL_MESSAGE =
-  "Hey! I'm Huddle Duck's AI. We build something for F&B brands that most agencies can't. Tell me about your business and I'll show you if it's a fit.";
+  "We built something that changes how F&B brands advertise. Most don't know it exists yet. Tell me about your business.";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -144,9 +144,11 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     }, []),
   });
 
-  // Auto-focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
+  // On mobile, scroll input into view when keyboard opens
+  const handleFocus = useCallback(() => {
+    setTimeout(() => {
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
   }, []);
 
   const startConversation = useCallback(
@@ -343,6 +345,13 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={isConnecting}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-form-type="other"
+          onContextMenu={(e) => e.preventDefault()}
+          onFocus={handleFocus}
         />
         <button
           className="two-msg-send"
