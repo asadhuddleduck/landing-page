@@ -93,6 +93,59 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const [showGreeting, setShowGreeting] = useState(true);
   const [greetingExiting, setGreetingExiting] = useState(false);
 
+  // Keyboard scroll fix: after browser scrolls on focus, fine-tune position
+  // TUNING: adjust IDEAL_GAP to control spacing between input and keyboard top
+  // Higher = more space above keyboard, lower = input closer to keyboard
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const heroEl = document.querySelector(".hero") as HTMLElement | null;
+    if (!heroEl) return;
+
+    let initialHeight = vv.height;
+
+    function handleResize() {
+      if (!vv || !heroEl) return;
+      const keyboardHeight = initialHeight - vv.height;
+
+      if (keyboardHeight > 100) {
+        // Keyboard is open
+        const inputEl = inputRef.current;
+        if (!inputEl) return;
+        const inputRect = inputEl.getBoundingClientRect();
+        const visibleBottom = vv.offsetTop + vv.height;
+        const currentGap = visibleBottom - inputRect.bottom;
+        const IDEAL_GAP = 30; // px between input bottom and keyboard top
+
+        if (currentGap > IDEAL_GAP + 20) {
+          // Too much gap - shift hero DOWN to bring input closer to keyboard
+          const shift = currentGap - IDEAL_GAP;
+          heroEl.style.transform = `translateY(${shift}px)`;
+          heroEl.style.transition = "transform 0.25s ease-out";
+        } else if (currentGap < 10) {
+          // Input too close to or behind keyboard - shift hero UP
+          const shift = IDEAL_GAP - currentGap;
+          heroEl.style.transform = `translateY(-${shift}px)`;
+          heroEl.style.transition = "transform 0.25s ease-out";
+        }
+      } else {
+        // Keyboard closed - reset
+        heroEl.style.transform = "";
+        heroEl.style.transition = "transform 0.25s ease-out";
+      }
+    }
+
+    vv.addEventListener("resize", handleResize);
+    return () => {
+      vv.removeEventListener("resize", handleResize);
+      if (heroEl) {
+        heroEl.style.transform = "";
+        heroEl.style.transition = "";
+      }
+    };
+  }, []);
+
   const conversation = useConversation({
     onMessage: useCallback(
       ({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
