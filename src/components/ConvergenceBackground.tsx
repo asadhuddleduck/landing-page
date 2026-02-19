@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 
 // Full-viewport convergence animation
-// Particles and streaks flow from edges toward the input bar rectangle
-// Creates an event-horizon effect - everything on screen is pulled toward the chat input
+// Particles and streaks flow circularly toward the input bar center
+// Event horizon glow around the input bar
 
 interface Streak {
   x: number;
@@ -27,15 +27,6 @@ interface Mote {
   maxLife: number;
 }
 
-interface Rect {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-  centerX: number;
-  centerY: number;
-}
-
 const VIRIDIAN = { r: 30, g: 186, b: 143 };
 const SANDSTORM = { r: 247, g: 206, b: 70 };
 
@@ -45,29 +36,6 @@ function rgba(c: { r: number; g: number; b: number }, a: number): string {
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
-}
-
-function clamp(v: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, v));
-}
-
-// Find the nearest point on a rectangle's perimeter to a given point
-function nearestPointOnRect(px: number, py: number, rect: Rect): { x: number; y: number } {
-  const cx = clamp(px, rect.left, rect.right);
-  const cy = clamp(py, rect.top, rect.bottom);
-  // If the point is inside the rect, push to nearest edge
-  if (cx === px && cy === py) {
-    const dLeft = px - rect.left;
-    const dRight = rect.right - px;
-    const dTop = py - rect.top;
-    const dBottom = rect.bottom - py;
-    const minD = Math.min(dLeft, dRight, dTop, dBottom);
-    if (minD === dLeft) return { x: rect.left, y: py };
-    if (minD === dRight) return { x: rect.right, y: py };
-    if (minD === dTop) return { x: px, y: rect.top };
-    return { x: px, y: rect.bottom };
-  }
-  return { x: cx, y: cy };
 }
 
 export default function ConvergenceBackground() {
@@ -87,18 +55,24 @@ export default function ConvergenceBackground() {
     canvas.height = h * dpr;
     ctx.scale(dpr, dpr);
 
-    // Input bar rectangle: horizontally centered, max-width 540px, ~62% down the viewport
-    function getInputRect(): Rect {
-      const maxW = 540;
-      const pad = 24;
-      const barW = Math.min(maxW, w - pad * 2);
-      const left = (w - barW) / 2;
-      const right = left + barW;
-      const centerY = h * 0.62;
-      const barH = 48;
-      const top = centerY - barH / 2;
-      const bottom = centerY + barH / 2;
-      return { left, right, top, bottom, centerX: w / 2, centerY };
+    // Read the actual input bar position from the DOM
+    // Falls back to an estimate if not found yet
+    let inputRect = { x: w / 2, y: h * 0.65, w: Math.min(540, w - 48), h: 48 };
+
+    function updateInputRect() {
+      const el = document.querySelector(".two-msg-input-bar");
+      if (el) {
+        const r = el.getBoundingClientRect();
+        inputRect = { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height };
+      }
+    }
+
+    // Poll for the input bar position (it may not be rendered yet on first frame)
+    updateInputRect();
+    const rectInterval = setInterval(updateInputRect, 1000);
+
+    function getFocalPoint(): { x: number; y: number } {
+      return { x: inputRect.x, y: inputRect.y };
     }
 
     // Create streaks
@@ -106,7 +80,7 @@ export default function ConvergenceBackground() {
     const streaks: Streak[] = [];
 
     function spawnStreak(): Streak {
-      const rect = getInputRect();
+      const focal = getFocalPoint();
       const edge = Math.random();
       let sx: number, sy: number;
 
@@ -120,9 +94,8 @@ export default function ConvergenceBackground() {
         sx = w + 20; sy = Math.random() * h;
       }
 
-      const target = nearestPointOnRect(sx, sy, rect);
-      const dx = target.x - sx;
-      const dy = target.y - sy;
+      const dx = focal.x - sx;
+      const dy = focal.y - sy;
       const angle = Math.atan2(dy, dx);
 
       return {
@@ -149,7 +122,7 @@ export default function ConvergenceBackground() {
     const motes: Mote[] = [];
 
     function spawnMote(): Mote {
-      const rect = getInputRect();
+      const focal = getFocalPoint();
       const edgeBias = Math.random() < 0.7;
       let mx: number, my: number;
 
@@ -164,9 +137,8 @@ export default function ConvergenceBackground() {
         my = Math.random() * h;
       }
 
-      const target = nearestPointOnRect(mx, my, rect);
-      const dx = target.x - mx;
-      const dy = target.y - my;
+      const dx = focal.x - mx;
+      const dy = focal.y - my;
       const dist = Math.sqrt(dx * dx + dy * dy);
       const maxLife = 300 + Math.random() * 400;
 
@@ -191,31 +163,29 @@ export default function ConvergenceBackground() {
     function draw() {
       ctx!.clearRect(0, 0, w, h);
 
-      const rect = getInputRect();
+      const focal = getFocalPoint();
 
-      // ---- Draw streaks ----
+      // ---- Draw streaks (converge to center point) ----
       for (let i = 0; i < streaks.length; i++) {
         const s = streaks[i];
 
         s.x += Math.cos(s.angle) * s.speed;
         s.y += Math.sin(s.angle) * s.speed;
 
-        // Home toward nearest point on input bar rect
-        const target = nearestPointOnRect(s.x, s.y, rect);
-        const dx = target.x - s.x;
-        const dy = target.y - s.y;
+        // Home toward focal center
+        const dx = focal.x - s.x;
+        const dy = focal.y - s.y;
         const targetAngle = Math.atan2(dy, dx);
-        s.angle = lerp(s.angle, targetAngle, 0.01);
+        s.angle = lerp(s.angle, targetAngle, 0.008);
 
-        const distToRect = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
 
         let streakOpacity = s.opacity;
-        if (distToRect < 60) {
-          streakOpacity *= distToRect / 60;
+        if (dist < 80) {
+          streakOpacity *= dist / 80;
         }
-        // Accelerate as approaching (event horizon pull)
-        if (distToRect < 200) {
-          s.speed = lerp(s.speed, 3, 0.03);
+        if (dist < 200) {
+          s.speed = lerp(s.speed, 2.5, 0.02);
         }
 
         const tailX = s.x - Math.cos(s.angle) * s.length;
@@ -233,21 +203,20 @@ export default function ConvergenceBackground() {
         ctx!.lineWidth = s.width;
         ctx!.stroke();
 
-        if (distToRect < 15 || s.x < -100 || s.x > w + 100 || s.y < -100 || s.y > h + 100) {
+        if (dist < 30 || s.x < -100 || s.x > w + 100 || s.y < -100 || s.y > h + 100) {
           streaks[i] = spawnStreak();
         }
       }
 
-      // ---- Draw motes ----
+      // ---- Draw motes (converge to center point) ----
       for (let i = 0; i < motes.length; i++) {
         const m = motes[i];
 
-        const target = nearestPointOnRect(m.x, m.y, rect);
-        const dx = target.x - m.x;
-        const dy = target.y - m.y;
+        const dx = focal.x - m.x;
+        const dy = focal.y - m.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Slow-then-fast pull: cubic ramp toward the rect
+        // Slow-then-fast: cubic ramp
         const t = Math.max(0, 1 - dist / 400);
         const pull = 0.003 + 0.04 * t * t * t;
         if (dist > 0) {
@@ -266,7 +235,7 @@ export default function ConvergenceBackground() {
         const lifeProg = m.life / m.maxLife;
         if (lifeProg < 0.1) moteOpacity *= lifeProg / 0.1;
         if (lifeProg > 0.8) moteOpacity *= (1 - lifeProg) / 0.2;
-        if (dist < 40) moteOpacity *= dist / 40;
+        if (dist < 50) moteOpacity *= dist / 50;
 
         const color = i % 7 === 0 ? SANDSTORM : VIRIDIAN;
 
@@ -286,51 +255,48 @@ export default function ConvergenceBackground() {
         ctx!.fillStyle = rgba(color, moteOpacity);
         ctx!.fill();
 
-        if (m.life > m.maxLife || dist < 10) {
+        if (m.life > m.maxLife || dist < 20) {
           motes[i] = spawnMote();
         }
       }
 
       // ---- Event horizon glow around the input bar ----
+      // This is a soft, blurred rectangular glow - like a black hole outline
       const pulse = 0.7 + Math.sin(Date.now() * 0.0015) * 0.3;
+      const rLeft = inputRect.x - inputRect.w / 2;
+      const rTop = inputRect.y - inputRect.h / 2;
+      const rW = inputRect.w;
+      const rH = inputRect.h;
       const borderRadius = 16;
-      const glowLayers = [
-        { expand: 20, alpha: 0.025 * pulse },
-        { expand: 12, alpha: 0.04 * pulse },
-        { expand: 6, alpha: 0.06 * pulse },
-        { expand: 2, alpha: 0.08 * pulse },
-      ];
 
-      for (const layer of glowLayers) {
-        const e = layer.expand;
-        ctx!.beginPath();
-        ctx!.roundRect(
-          rect.left - e,
-          rect.top - e,
-          (rect.right - rect.left) + e * 2,
-          (rect.bottom - rect.top) + e * 2,
-          borderRadius + e * 0.5
-        );
-        ctx!.strokeStyle = rgba(VIRIDIAN, layer.alpha);
-        ctx!.lineWidth = 2;
-        ctx!.stroke();
-      }
-
-      // Inner glow fill
-      const innerGlow = ctx!.createLinearGradient(rect.left, rect.top, rect.right, rect.bottom);
-      innerGlow.addColorStop(0, rgba(VIRIDIAN, 0.015 * pulse));
-      innerGlow.addColorStop(0.5, rgba(VIRIDIAN, 0.008 * pulse));
-      innerGlow.addColorStop(1, rgba(VIRIDIAN, 0.015 * pulse));
+      // Outer soft glow (large blur)
+      ctx!.save();
+      ctx!.shadowColor = rgba(VIRIDIAN, 0.4 * pulse);
+      ctx!.shadowBlur = 40;
       ctx!.beginPath();
-      ctx!.roundRect(
-        rect.left,
-        rect.top,
-        rect.right - rect.left,
-        rect.bottom - rect.top,
-        borderRadius
-      );
-      ctx!.fillStyle = innerGlow;
-      ctx!.fill();
+      ctx!.roundRect(rLeft - 4, rTop - 4, rW + 8, rH + 8, borderRadius + 2);
+      ctx!.strokeStyle = rgba(VIRIDIAN, 0.12 * pulse);
+      ctx!.lineWidth = 3;
+      ctx!.stroke();
+      ctx!.restore();
+
+      // Middle glow
+      ctx!.save();
+      ctx!.shadowColor = rgba(VIRIDIAN, 0.5 * pulse);
+      ctx!.shadowBlur = 20;
+      ctx!.beginPath();
+      ctx!.roundRect(rLeft - 1, rTop - 1, rW + 2, rH + 2, borderRadius);
+      ctx!.strokeStyle = rgba(VIRIDIAN, 0.15 * pulse);
+      ctx!.lineWidth = 2;
+      ctx!.stroke();
+      ctx!.restore();
+
+      // Inner bright edge
+      ctx!.beginPath();
+      ctx!.roundRect(rLeft, rTop, rW, rH, borderRadius);
+      ctx!.strokeStyle = rgba(VIRIDIAN, 0.08 * pulse);
+      ctx!.lineWidth = 1;
+      ctx!.stroke();
 
       animFrame = requestAnimationFrame(draw);
     }
@@ -344,12 +310,14 @@ export default function ConvergenceBackground() {
       canvas!.height = h * dpr;
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
       ctx!.scale(dpr, dpr);
+      updateInputRect();
     }
 
     window.addEventListener("resize", handleResize);
 
     return () => {
       cancelAnimationFrame(animFrame);
+      clearInterval(rectInterval);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
