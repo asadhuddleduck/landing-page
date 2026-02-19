@@ -442,6 +442,9 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
 
   return (
     <div className="two-msg" ref={containerRef}>
+      {/* Subtle branding logo top-left */}
+      <img src="/duck-logo.png" alt="Huddle Duck" className="two-msg-brand" />
+
       {/* Rotating greeting (before conversation starts) */}
       {showGreeting && (
         <div
@@ -534,11 +537,8 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
         />
       </div>
 
-      {/* Power bar / Powered-by footer */}
+      {/* Power bar */}
       <div className="power-bar-container">
-        <div className={`powered-by${showPowerBar ? " powered-by--hidden" : ""}`}>
-          powered by <img src="/duck-logo.png" alt="" className="powered-by-logo" /> <strong>Huddle Duck</strong>
-        </div>
         <div className={`power-bar${showPowerBar ? " power-bar--visible" : ""}${powerZone === "gold" ? " power-bar--gold" : ""}${powerZone === "supernova" ? " power-bar--supernova" : ""}`}>
           <span className="power-bar-count" style={{ color: getPowerBarColor(charCount) }}>{charDisplay}</span>
           <div className="power-bar-track">
