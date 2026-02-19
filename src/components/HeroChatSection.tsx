@@ -9,7 +9,7 @@ export default function HeroChatSection() {
   return (
     <section className="hero">
       <h1 className="hero-headline">What happens when AI runs your ads?</h1>
-      <p className="hero-directive">Tell it about your business. Watch what happens.</p>
+      <p className="hero-directive">Tell it about your food business. Watch what happens.</p>
 
       <div className="hero-chat">
         <ElevenLabsChat onConversationEnd={(outcome) => setChatOutcome(outcome)} />
