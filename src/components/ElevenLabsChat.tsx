@@ -171,13 +171,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     }, []),
   });
 
-  // Scroll input bar just above keyboard
-  const handleFocus = useCallback(() => {
-    setTimeout(() => {
-      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 300);
-  }, []);
-
   const startConversation = useCallback(
     async (firstMessage?: string) => {
       if (hasStarted) return;
@@ -373,7 +366,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           autoComplete="off"
           data-form-type="other"
           onContextMenu={(e) => e.preventDefault()}
-          onFocus={handleFocus}
         />
         <button
           className="two-msg-send"
