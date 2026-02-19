@@ -1,14 +1,23 @@
 "use client";
 
 import { useConversation } from "@elevenlabs/react";
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { track } from "@vercel/analytics";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
-const INITIAL_MESSAGE =
-  "We built something that changes how F&B brands advertise. Most don't know it exists yet. Tell me about your business.";
+
+const GREETING_MESSAGES = [
+  "Most restaurant brands waste 80% of their marketing budget. We fixed that. Tell me about yours.",
+  "Your competitors haven't found this yet. Tell me what you sell and I'll show you what's possible.",
+  "I've studied every ad pattern that works for food and beverage brands. Describe your business. I'll tell you exactly what I'd do.",
+  "This isn't a chatbot. I run real ad campaigns for food and beverage businesses. Tell me about yours and I'll show you the difference.",
+  "I already know what's wrong with your ads. Tell me about your business and I'll prove it.",
+  "The brands scaling fastest right now aren't doing it the way you think. Tell me what you run and I'll show you.",
+  "I've run millions in ad spend for restaurant brands. Tell me about your business - I'll show you what I see.",
+  "Food brands that find this don't go back to doing ads the old way. Tell me about your business.",
+];
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -83,18 +92,32 @@ interface ElevenLabsChatProps {
 }
 
 export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "agent", text: INITIAL_MESSAGE, id: msgIdCounter++ },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const [shownCards, setShownCards] = useState<Set<string>>(new Set());
-  // Track which message IDs are "exiting" (fading out)
-  const [exitingIds, setExitingIds] = useState<Set<number>>(new Set());
-  // Track which message IDs have just entered (for enter animation)
-  const [enteringIds, setEnteringIds] = useState<Set<number>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Rotating greeting state
+  const [greetingIndex, setGreetingIndex] = useState(0);
+  const [greetingFading, setGreetingFading] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(true);
+  // Track whether the greeting exit animation is playing
+  const [greetingExiting, setGreetingExiting] = useState(false);
+
+  // Rotate greeting every 5 seconds with crossfade
+  useEffect(() => {
+    if (!showGreeting) return;
+    const interval = setInterval(() => {
+      setGreetingFading(true);
+      setTimeout(() => {
+        setGreetingIndex((prev) => (prev + 1) % GREETING_MESSAGES.length);
+        setGreetingFading(false);
+      }, 400); // fade out duration
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [showGreeting]);
 
   const conversation = useConversation({
     onMessage: useCallback(
@@ -184,29 +207,26 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     if (!text) return;
     setInput("");
 
-    // Mark current visible messages as exiting
-    const currentVisibleIds = new Set<number>();
-    for (const msg of messages) {
-      currentVisibleIds.add(msg.id);
+    // Dismiss the greeting with exit animation
+    if (showGreeting) {
+      setGreetingExiting(true);
+      // After exit animation, hide greeting and add user message
+      setTimeout(() => {
+        setShowGreeting(false);
+        setGreetingExiting(false);
+        setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
+      }, 300);
+    } else {
+      // Already in conversation - just add user message (it enters with animation)
+      setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
     }
-    setExitingIds(currentVisibleIds);
-
-    // After exit animation completes, add user message and remove exiting state
-    const newId = msgIdCounter++;
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "user", text, id: newId }]);
-      setEnteringIds(new Set([newId]));
-      setExitingIds(new Set());
-      // Clear entering state after animation
-      setTimeout(() => setEnteringIds(new Set()), 400);
-    }, 300);
 
     if (conversation.status !== "connected") {
       startConversation(text);
     } else {
       conversation.sendUserMessage(text);
     }
-  }, [input, conversation, startConversation, messages]);
+  }, [input, conversation, startConversation, showGreeting]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -235,69 +255,83 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const isConnecting = conversation.status === "connecting";
   const isConnected = conversation.status === "connected";
 
-  // Derive visible messages: latest user message + all agent messages since that user message
-  const { lastUserMsg, agentMessages } = useMemo(() => {
-    let lastUser: ChatMessage | null = null;
-    let lastUserIdx = -1;
-
+  // Derive what to show:
+  // - Find the last user message (always visible at top once it exists)
+  // - All agent messages after the last user message (stack below)
+  const lastUserIdx = (() => {
     for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === "user") {
-        lastUser = messages[i];
-        lastUserIdx = i;
-        break;
-      }
+      if (messages[i].role === "user") return i;
     }
+    return -1;
+  })();
 
-    const agents: ChatMessage[] = [];
-    const startIdx = lastUserIdx >= 0 ? lastUserIdx + 1 : 0;
-    for (let i = startIdx; i < messages.length; i++) {
+  const lastUserMsg = lastUserIdx >= 0 ? messages[lastUserIdx] : null;
+
+  // Agent messages: everything after the last user message
+  const agentMessages: ChatMessage[] = [];
+  if (lastUserIdx >= 0) {
+    for (let i = lastUserIdx + 1; i < messages.length; i++) {
       if (messages[i].role === "agent") {
-        agents.push(messages[i]);
+        agentMessages.push(messages[i]);
       }
     }
-
-    // Initial state: show the greeting
-    if (agents.length === 0 && lastUserIdx < 0) {
-      for (let i = messages.length - 1; i >= 0; i--) {
-        if (messages[i].role === "agent") {
-          agents.push(messages[i]);
-          break;
-        }
-      }
-    }
-
-    return { lastUserMsg: lastUser, agentMessages: agents };
-  }, [messages]);
+  }
 
   // Detect card for the last agent message
   const lastAgentMsg = agentMessages.length > 0 ? agentMessages[agentMessages.length - 1] : null;
-  const cardType = lastAgentMsg && messages.length > 1 ? detectCard(lastAgentMsg.text) : null;
+  const cardType = lastAgentMsg ? detectCard(lastAgentMsg.text) : null;
   const shouldShowCard = cardType && !shownCards.has(cardType);
 
-  // Determine animation class for a message
-  function getMsgClass(id: number, baseClass: string): string {
-    if (exitingIds.has(id)) return `${baseClass} two-msg-exit`;
-    if (enteringIds.has(id)) return `${baseClass} two-msg-enter`;
-    return baseClass;
-  }
+  // Are we waiting for the first agent response after user sent?
+  const waitingForResponse = lastUserMsg && agentMessages.length === 0 && !showGreeting;
 
   return (
     <div className="two-msg" ref={containerRef}>
-      {/* User's latest message (top) */}
-      {lastUserMsg && (
+      {/* Rotating greeting (before conversation starts) */}
+      {showGreeting && (
+        <div
+          className={`two-msg-card two-msg-agent${greetingExiting ? " two-msg-push-up" : ""}`}
+        >
+          <div className="two-msg-agent-indicator">
+            <div className="two-msg-agent-dot" />
+            <span className="two-msg-agent-label">Ads AI</span>
+          </div>
+          <div className={`two-msg-text two-msg-greeting${greetingFading ? " two-msg-greeting-fade" : ""}`}>
+            {GREETING_MESSAGES[greetingIndex]}
+          </div>
+        </div>
+      )}
+
+      {/* User's latest message (always visible once sent) */}
+      {!showGreeting && lastUserMsg && (
         <div
           key={`u-${lastUserMsg.id}`}
-          className={getMsgClass(lastUserMsg.id, "two-msg-card two-msg-user")}
+          className="two-msg-card two-msg-user two-msg-enter"
         >
           <div className="two-msg-text">{lastUserMsg.text}</div>
         </div>
       )}
 
-      {/* AI messages (all since last user message) */}
-      {agentMessages.map((msg) => (
+      {/* Typing indicator - waiting for first agent response */}
+      {(isConnecting || (isConnected && waitingForResponse)) && (
+        <div className="two-msg-card two-msg-agent two-msg-typing two-msg-enter">
+          <div className="two-msg-agent-indicator">
+            <div className="two-msg-agent-dot two-msg-agent-dot-speaking" />
+            <span className="two-msg-agent-label">Ads AI</span>
+          </div>
+          <div className="ai-chat-typing">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      )}
+
+      {/* AI messages (all since last user message - they stack, never disappear each other) */}
+      {!showGreeting && agentMessages.map((msg) => (
         <div
           key={`a-${msg.id}`}
-          className={getMsgClass(msg.id, "two-msg-card two-msg-agent")}
+          className="two-msg-card two-msg-agent two-msg-enter"
         >
           <div className="two-msg-agent-indicator">
             <div className="two-msg-agent-dot" />
@@ -306,36 +340,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           <div className="two-msg-text">{msg.text}</div>
         </div>
       ))}
-
-      {/* Typing indicator - only when waiting for a response (no agent messages yet after user sent) */}
-      {isConnected && agentMessages.length === 0 && lastUserMsg && (
-        <div className="two-msg-card two-msg-agent two-msg-typing two-msg-enter">
-          <div className="two-msg-agent-indicator">
-            <div className="two-msg-agent-dot two-msg-agent-dot-speaking" />
-            <span className="two-msg-agent-label">Ads AI</span>
-          </div>
-          <div className="ai-chat-typing">
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
-      )}
-
-      {/* Connecting state */}
-      {isConnecting && (
-        <div className="two-msg-card two-msg-agent two-msg-typing two-msg-enter">
-          <div className="two-msg-agent-indicator">
-            <div className="two-msg-agent-dot two-msg-agent-dot-speaking" />
-            <span className="two-msg-agent-label">Ads AI</span>
-          </div>
-          <div className="ai-chat-typing">
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
-      )}
 
       {/* Rich card below the AI message */}
       {shouldShowCard && cardType === "pricing" && (

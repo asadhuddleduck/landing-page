@@ -144,17 +144,18 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 @keyframes twoMsgAppear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* Message transition states */
-.two-msg-exit{
-  animation:twoMsgExit 0.25s var(--ease-premium) forwards
-}
 .two-msg-enter{
-  animation:twoMsgEnter 0.3s var(--ease-premium) backwards
+  animation:twoMsgEnter 0.4s var(--ease-premium) backwards
 }
-.two-msg-enter-delayed{
-  animation:twoMsgEnter 0.3s var(--ease-premium) 0.15s backwards
+.two-msg-push-up{
+  animation:twoMsgPushUp 0.3s var(--ease-premium) forwards
 }
-@keyframes twoMsgExit{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
-@keyframes twoMsgEnter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes twoMsgEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes twoMsgPushUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-16px)}}
+
+/* Greeting text crossfade */
+.two-msg-greeting{transition:opacity 0.4s ease}
+.two-msg-greeting-fade{opacity:0}
 
 @media(min-width:768px){
   .two-msg-text{font-size:15px}
