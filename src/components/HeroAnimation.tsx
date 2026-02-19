@@ -2,36 +2,305 @@
 
 import { useEffect, useRef } from "react";
 
-// 3-5 second one-time neural network animation using Canvas
-// Nodes connect with glowing viridian lines, particles flow, then settles to ambient
+// Cycling hero animation: 3 visual modes with smooth crossfades
+// Mode 1: Particle constellation (drifting connected particles)
+// Mode 2: Signal wave (horizontal energy pulses)
+// Mode 3: Morphing mesh (warping grid with flowing energy)
 
-interface Node {
-  x: number;
-  y: number;
-  targetX: number;
-  targetY: number;
-  radius: number;
-  opacity: number;
-  activateAt: number; // ms into animation when this node lights up
-  connections: number[]; // indices of connected nodes
+const VIRIDIAN = { r: 30, g: 186, b: 143 };
+const VIRIDIAN_DIM = { r: 20, g: 120, b: 95 };
+const CYCLE_DURATION = 8000; // ms per mode
+const CROSSFADE_DURATION = 1500; // ms for fade between modes
+const MODE_COUNT = 3;
+
+function rgba(c: { r: number; g: number; b: number }, a: number): string {
+  return `rgba(${c.r},${c.g},${c.b},${a})`;
 }
 
+// ===== MODE 1: Particle Constellation =====
 interface Particle {
-  fromNode: number;
-  toNode: number;
-  progress: number;
-  speed: number;
-  startAt: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  baseOpacity: number;
+}
+
+function createParticles(w: number, h: number, count: number): Particle[] {
+  const particles: Particle[] = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.3,
+      radius: 1 + Math.random() * 1.5,
+      baseOpacity: 0.3 + Math.random() * 0.5,
+    });
+  }
+  return particles;
+}
+
+function drawConstellation(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  particles: Particle[],
+  time: number,
+  opacity: number
+) {
+  const breathe = 0.85 + Math.sin(time * 0.001) * 0.15;
+  const connectionDist = 80;
+
+  // Update positions
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0) p.x = w;
+    if (p.x > w) p.x = 0;
+    if (p.y < 0) p.y = h;
+    if (p.y > h) p.y = 0;
+  }
+
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < connectionDist) {
+        const lineAlpha = (1 - dist / connectionDist) * 0.15 * opacity * breathe;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = rgba(VIRIDIAN, lineAlpha);
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw particles with glow
+  for (const p of particles) {
+    const pAlpha = p.baseOpacity * opacity * breathe;
+
+    // Glow
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 6);
+    grad.addColorStop(0, rgba(VIRIDIAN, pAlpha * 0.4));
+    grad.addColorStop(1, rgba(VIRIDIAN, 0));
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius * 6, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Core
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(VIRIDIAN, pAlpha);
+    ctx.fill();
+  }
+}
+
+// ===== MODE 2: Signal Wave =====
+function drawSignalWave(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  time: number,
+  opacity: number
+) {
+  const waveCount = 5;
+  const t = time * 0.001;
+
+  for (let wave = 0; wave < waveCount; wave++) {
+    const waveY = h * (0.15 + (wave / (waveCount - 1)) * 0.7);
+    const waveAlpha = (0.2 + (wave % 2 === 0 ? 0.15 : 0)) * opacity;
+    const speed = 1 + wave * 0.3;
+    const amplitude = 8 + wave * 3;
+    const frequency = 0.008 + wave * 0.002;
+
+    // Draw the wave line
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const y =
+        waveY +
+        Math.sin(x * frequency + t * speed) * amplitude +
+        Math.sin(x * frequency * 2.3 + t * speed * 1.7) * amplitude * 0.3;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = rgba(VIRIDIAN, waveAlpha * 0.6);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Draw glow beneath the wave
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const y =
+        waveY +
+        Math.sin(x * frequency + t * speed) * amplitude +
+        Math.sin(x * frequency * 2.3 + t * speed * 1.7) * amplitude * 0.3;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, waveY, 0, waveY + 40);
+    grad.addColorStop(0, rgba(VIRIDIAN, waveAlpha * 0.08));
+    grad.addColorStop(1, rgba(VIRIDIAN, 0));
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Pulse particles along the wave
+    const pulseCount = 3 + wave;
+    for (let p = 0; p < pulseCount; p++) {
+      const px = ((t * speed * 50 + p * (w / pulseCount)) % w);
+      const py =
+        waveY +
+        Math.sin(px * frequency + t * speed) * amplitude +
+        Math.sin(px * frequency * 2.3 + t * speed * 1.7) * amplitude * 0.3;
+
+      const pulseGrad = ctx.createRadialGradient(px, py, 0, px, py, 8);
+      pulseGrad.addColorStop(0, rgba(VIRIDIAN, waveAlpha * 0.8));
+      pulseGrad.addColorStop(1, rgba(VIRIDIAN, 0));
+      ctx.beginPath();
+      ctx.arc(px, py, 8, 0, Math.PI * 2);
+      ctx.fillStyle = pulseGrad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(px, py, 2, 0, Math.PI * 2);
+      ctx.fillStyle = rgba(VIRIDIAN, waveAlpha);
+      ctx.fill();
+    }
+  }
+}
+
+// ===== MODE 3: Morphing Mesh =====
+interface MeshPoint {
+  baseX: number;
+  baseY: number;
+  phase: number;
+  ampX: number;
+  ampY: number;
+  freq: number;
+}
+
+function createMeshPoints(w: number, h: number, cols: number, rows: number): MeshPoint[] {
+  const points: MeshPoint[] = [];
+  const cellW = w / (cols - 1);
+  const cellH = h / (rows - 1);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      points.push({
+        baseX: c * cellW,
+        baseY: r * cellH,
+        phase: Math.random() * Math.PI * 2,
+        ampX: 10 + Math.random() * 15,
+        ampY: 8 + Math.random() * 12,
+        freq: 0.5 + Math.random() * 0.5,
+      });
+    }
+  }
+  return points;
+}
+
+function drawMorphMesh(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  mesh: MeshPoint[],
+  cols: number,
+  time: number,
+  opacity: number
+) {
+  const t = time * 0.001;
+  const positions: { x: number; y: number }[] = [];
+
+  // Calculate current positions
+  for (const p of mesh) {
+    positions.push({
+      x: p.baseX + Math.sin(t * p.freq + p.phase) * p.ampX,
+      y: p.baseY + Math.cos(t * p.freq * 0.8 + p.phase) * p.ampY,
+    });
+  }
+
+  // Draw connections (grid lines)
+  for (let i = 0; i < positions.length; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+
+    // Right neighbor
+    if (col < cols - 1) {
+      const j = i + 1;
+      const midX = (positions[i].x + positions[j].x) / 2;
+      const energy = Math.sin(t * 2 + midX * 0.01) * 0.5 + 0.5;
+      const lineAlpha = (0.08 + energy * 0.12) * opacity;
+
+      ctx.beginPath();
+      ctx.moveTo(positions[i].x, positions[i].y);
+      ctx.lineTo(positions[j].x, positions[j].y);
+      ctx.strokeStyle = rgba(
+        energy > 0.6 ? VIRIDIAN : VIRIDIAN_DIM,
+        lineAlpha
+      );
+      ctx.lineWidth = energy > 0.7 ? 1.5 : 0.8;
+      ctx.stroke();
+    }
+
+    // Bottom neighbor
+    if (row < Math.floor((mesh.length - 1) / cols)) {
+      const j = i + cols;
+      if (j < positions.length) {
+        const midY = (positions[i].y + positions[j].y) / 2;
+        const energy = Math.sin(t * 1.5 + midY * 0.015) * 0.5 + 0.5;
+        const lineAlpha = (0.06 + energy * 0.1) * opacity;
+
+        ctx.beginPath();
+        ctx.moveTo(positions[i].x, positions[i].y);
+        ctx.lineTo(positions[j].x, positions[j].y);
+        ctx.strokeStyle = rgba(
+          energy > 0.6 ? VIRIDIAN : VIRIDIAN_DIM,
+          lineAlpha
+        );
+        ctx.lineWidth = energy > 0.7 ? 1.5 : 0.8;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw nodes with energy pulses
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    const energy = (Math.sin(t * 1.8 + i * 0.3) * 0.5 + 0.5);
+    const nodeAlpha = (0.2 + energy * 0.6) * opacity;
+    const nodeRadius = 1.5 + energy * 1.5;
+
+    // Glow for high-energy nodes
+    if (energy > 0.5) {
+      const glowGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, nodeRadius * 8);
+      glowGrad.addColorStop(0, rgba(VIRIDIAN, nodeAlpha * 0.3));
+      glowGrad.addColorStop(1, rgba(VIRIDIAN, 0));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, nodeRadius * 8, 0, Math.PI * 2);
+      ctx.fillStyle = glowGrad;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, nodeRadius, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(VIRIDIAN, nodeAlpha);
+    ctx.fill();
+  }
 }
 
 export default function HeroAnimation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const hasPlayed = useRef(false);
 
   useEffect(() => {
-    if (hasPlayed.current) return;
-    hasPlayed.current = true;
-
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -39,261 +308,103 @@ export default function HeroAnimation() {
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const width = canvas.offsetWidth;
-    const height = canvas.offsetHeight;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+    let w = canvas.offsetWidth;
+    let h = canvas.offsetHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
     ctx.scale(dpr, dpr);
 
-    const VIRIDIAN = { r: 30, g: 186, b: 143 };
-    const ANIMATION_DURATION = 4000; // 4 seconds
-    const AMBIENT_FADE_START = 3500;
+    // Initialize all 3 mode datasets
+    const particleCount = Math.min(Math.floor(w * h / 2000), 120);
+    const particles = createParticles(w, h, particleCount);
+    const meshCols = 10;
+    const meshRows = 6;
+    const meshPoints = createMeshPoints(w, h, meshCols, meshRows);
 
-    // Generate nodes in a rough grid with jitter
-    const nodes: Node[] = [];
-    const cols = 7;
-    const rows = 4;
-    const padX = width * 0.1;
-    const padY = height * 0.15;
-    const cellW = (width - padX * 2) / (cols - 1);
-    const cellH = (height - padY * 2) / (rows - 1);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const jitterX = (Math.random() - 0.5) * cellW * 0.4;
-        const jitterY = (Math.random() - 0.5) * cellH * 0.4;
-        const x = padX + c * cellW + jitterX;
-        const y = padY + r * cellH + jitterY;
-        // Activate from center outward
-        const cx = width / 2;
-        const cy = height / 2;
-        const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-        const maxDist = Math.sqrt(cx ** 2 + cy ** 2);
-        const activateAt = (dist / maxDist) * 2000 + Math.random() * 400;
-
-        nodes.push({
-          x: cx, // Start at center (burst outward)
-          y: cy,
-          targetX: x,
-          targetY: y,
-          radius: 2 + Math.random() * 2,
-          opacity: 0,
-          activateAt,
-          connections: [],
-        });
-      }
-    }
-
-    // Connect each node to 2-3 nearest neighbors
-    for (let i = 0; i < nodes.length; i++) {
-      const distances = nodes
-        .map((n, j) => ({
-          idx: j,
-          dist: Math.sqrt(
-            (nodes[i].targetX - n.targetX) ** 2 +
-            (nodes[i].targetY - n.targetY) ** 2
-          ),
-        }))
-        .filter((d) => d.idx !== i)
-        .sort((a, b) => a.dist - b.dist);
-
-      const connectCount = 2 + Math.floor(Math.random() * 2);
-      for (let k = 0; k < connectCount && k < distances.length; k++) {
-        const j = distances[k].idx;
-        if (!nodes[i].connections.includes(j)) {
-          nodes[i].connections.push(j);
-        }
-        if (!nodes[j].connections.includes(i)) {
-          nodes[j].connections.push(i);
-        }
-      }
-    }
-
-    // Create particles that flow along connections
-    const particles: Particle[] = [];
-    for (let i = 0; i < nodes.length; i++) {
-      for (const j of nodes[i].connections) {
-        if (j > i && Math.random() > 0.4) {
-          particles.push({
-            fromNode: i,
-            toNode: j,
-            progress: 0,
-            speed: 0.3 + Math.random() * 0.4,
-            startAt: Math.max(nodes[i].activateAt, nodes[j].activateAt) + 200,
-          });
-        }
-      }
-    }
-
-    const startTime = performance.now();
     let animFrame: number;
-
-    function ease(t: number): number {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
+    const startTime = performance.now();
 
     function draw(now: number) {
       const elapsed = now - startTime;
-      ctx!.clearRect(0, 0, width, height);
+      ctx!.clearRect(0, 0, w, h);
 
-      // Global ambient fade after animation completes
-      let globalOpacity = 1;
-      if (elapsed > AMBIENT_FADE_START) {
-        const fadeProg = Math.min(
-          (elapsed - AMBIENT_FADE_START) / (ANIMATION_DURATION - AMBIENT_FADE_START + 1000),
-          1
-        );
-        globalOpacity = 1 - fadeProg * 0.65; // Fade to 35% opacity
+      // Determine which mode is active and crossfade progress
+      const totalCycle = CYCLE_DURATION * MODE_COUNT;
+      const cyclePos = elapsed % totalCycle;
+      const currentMode = Math.floor(cyclePos / CYCLE_DURATION);
+      const modeProgress = (cyclePos % CYCLE_DURATION) / CYCLE_DURATION;
+
+      // Calculate opacity for current and next mode
+      let currentOpacity = 1;
+      let nextOpacity = 0;
+      const fadeStart = 1 - CROSSFADE_DURATION / CYCLE_DURATION;
+
+      if (modeProgress > fadeStart) {
+        const fadeProgress = (modeProgress - fadeStart) / (1 - fadeStart);
+        currentOpacity = 1 - fadeProgress;
+        nextOpacity = fadeProgress;
       }
 
-      // Update and draw nodes
-      for (const node of nodes) {
-        if (elapsed < node.activateAt) continue;
+      const nextMode = (currentMode + 1) % MODE_COUNT;
 
-        const nodeElapsed = elapsed - node.activateAt;
-        const moveProgress = Math.min(nodeElapsed / 800, 1);
-        const eased = ease(moveProgress);
+      // Draw current mode
+      drawMode(ctx!, w, h, currentMode, elapsed, currentOpacity, particles, meshPoints, meshCols);
 
-        node.x = node.x + (node.targetX - node.x) * 0.1;
-        node.y = node.y + (node.targetY - node.y) * 0.1;
-
-        // Snap close to target
-        if (moveProgress > 0.9) {
-          node.x = node.targetX;
-          node.y = node.targetY;
-        }
-
-        node.opacity = Math.min(eased * 1.5, 1) * globalOpacity;
+      // Draw next mode (during crossfade)
+      if (nextOpacity > 0) {
+        drawMode(ctx!, w, h, nextMode, elapsed, nextOpacity, particles, meshPoints, meshCols);
       }
 
-      // Draw connections
-      for (let i = 0; i < nodes.length; i++) {
-        for (const j of nodes[i].connections) {
-          if (j <= i) continue;
-          const a = nodes[i];
-          const b = nodes[j];
-          if (a.opacity === 0 || b.opacity === 0) continue;
-
-          const lineOpacity = Math.min(a.opacity, b.opacity) * 0.3;
-          ctx!.beginPath();
-          ctx!.moveTo(a.x, a.y);
-          ctx!.lineTo(b.x, b.y);
-          ctx!.strokeStyle = `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${lineOpacity})`;
-          ctx!.lineWidth = 1;
-          ctx!.stroke();
-        }
-      }
-
-      // Draw particles
-      for (const p of particles) {
-        if (elapsed < p.startAt) continue;
-
-        const pElapsed = elapsed - p.startAt;
-        p.progress = (pElapsed * p.speed) / 1000;
-
-        if (p.progress > 1) {
-          // Loop particle
-          p.progress = p.progress % 1;
-        }
-
-        const a = nodes[p.fromNode];
-        const b = nodes[p.toNode];
-        if (a.opacity === 0 || b.opacity === 0) continue;
-
-        const px = a.x + (b.x - a.x) * p.progress;
-        const py = a.y + (b.y - a.y) * p.progress;
-        const pOpacity = Math.min(a.opacity, b.opacity) * 0.8 * globalOpacity;
-
-        ctx!.beginPath();
-        ctx!.arc(px, py, 1.5, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${pOpacity})`;
-        ctx!.fill();
-      }
-
-      // Draw nodes (on top)
-      for (const node of nodes) {
-        if (node.opacity === 0) continue;
-
-        // Glow
-        const gradient = ctx!.createRadialGradient(
-          node.x, node.y, 0,
-          node.x, node.y, node.radius * 4
-        );
-        gradient.addColorStop(0, `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${node.opacity * 0.3})`);
-        gradient.addColorStop(1, `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},0)`);
-        ctx!.beginPath();
-        ctx!.arc(node.x, node.y, node.radius * 4, 0, Math.PI * 2);
-        ctx!.fillStyle = gradient;
-        ctx!.fill();
-
-        // Core
-        ctx!.beginPath();
-        ctx!.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${node.opacity})`;
-        ctx!.fill();
-      }
-
-      // Keep running for ambient state (particles loop)
-      if (elapsed < ANIMATION_DURATION + 2000) {
-        animFrame = requestAnimationFrame(draw);
-      } else {
-        // Final ambient frame
-        drawAmbient();
-      }
+      animFrame = requestAnimationFrame(draw);
     }
 
-    function drawAmbient() {
-      ctx!.clearRect(0, 0, width, height);
-      const ambientOpacity = 0.35;
-
-      // Draw connections at low opacity
-      for (let i = 0; i < nodes.length; i++) {
-        for (const j of nodes[i].connections) {
-          if (j <= i) continue;
-          const a = nodes[i];
-          const b = nodes[j];
-          ctx!.beginPath();
-          ctx!.moveTo(a.targetX, a.targetY);
-          ctx!.lineTo(b.targetX, b.targetY);
-          ctx!.strokeStyle = `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${0.1 * ambientOpacity})`;
-          ctx!.lineWidth = 1;
-          ctx!.stroke();
-        }
-      }
-
-      // Draw nodes at low opacity
-      for (const node of nodes) {
-        const gradient = ctx!.createRadialGradient(
-          node.targetX, node.targetY, 0,
-          node.targetX, node.targetY, node.radius * 3
-        );
-        gradient.addColorStop(0, `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${0.15 * ambientOpacity})`);
-        gradient.addColorStop(1, `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},0)`);
-        ctx!.beginPath();
-        ctx!.arc(node.targetX, node.targetY, node.radius * 3, 0, Math.PI * 2);
-        ctx!.fillStyle = gradient;
-        ctx!.fill();
-
-        ctx!.beginPath();
-        ctx!.arc(node.targetX, node.targetY, node.radius, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${VIRIDIAN.r},${VIRIDIAN.g},${VIRIDIAN.b},${ambientOpacity})`;
-        ctx!.fill();
+    function drawMode(
+      ctx: CanvasRenderingContext2D,
+      w: number,
+      h: number,
+      mode: number,
+      time: number,
+      opacity: number,
+      particles: Particle[],
+      mesh: MeshPoint[],
+      meshCols: number
+    ) {
+      switch (mode) {
+        case 0:
+          drawConstellation(ctx, w, h, particles, time, opacity);
+          break;
+        case 1:
+          drawSignalWave(ctx, w, h, time, opacity);
+          break;
+        case 2:
+          drawMorphMesh(ctx, w, h, mesh, meshCols, time, opacity);
+          break;
       }
     }
 
     animFrame = requestAnimationFrame(draw);
 
+    // Handle resize
+    function handleResize() {
+      w = canvas!.offsetWidth;
+      h = canvas!.offsetHeight;
+      canvas!.width = w * dpr;
+      canvas!.height = h * dpr;
+      ctx!.setTransform(1, 0, 0, 1, 0, 0);
+      ctx!.scale(dpr, dpr);
+    }
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
       cancelAnimationFrame(animFrame);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return (
     <div className="hero-animation">
-      <canvas
-        ref={canvasRef}
-        className="hero-animation-canvas"
-      />
+      <canvas ref={canvasRef} className="hero-animation-canvas" />
     </div>
   );
 }

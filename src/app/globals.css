@@ -62,16 +62,16 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
   .hero-headline{font-size:48px;max-width:520px}
 }
 
-/* ========== HERO ANIMATION: Neural Network ========== */
+/* ========== HERO ANIMATION: Cycling Visuals ========== */
 .hero-animation{
-  width:100%;max-width:540px;height:120px;margin:24px auto 0;
+  width:100%;max-width:540px;height:180px;margin:24px auto 0;
   animation:fadeSlideUp 0.5s var(--ease-premium) 400ms backwards
 }
 .hero-animation-canvas{
   width:100%;height:100%;display:block
 }
 @media(min-width:768px){
-  .hero-animation{height:160px;margin:32px auto 0}
+  .hero-animation{height:260px;margin:32px auto 0}
 }
 
 /* ========== SECTION SPACING ========== */
@@ -129,10 +129,10 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 .two-msg-input{
   flex:1;padding:12px 16px;border-radius:14px;
   border:1px solid var(--border);
-  background:rgba(0,30,43,0.6);color:var(--text-primary);font-size:14px;
+  background:rgba(0,30,43,0.6);color:var(--text-primary);font-size:16px;
   font-family:var(--font-primary);outline:none;transition:border-color 0.2s
 }
-.two-msg-input::placeholder{color:var(--text-muted);font-size:13px}
+.two-msg-input::placeholder{color:var(--text-muted);font-size:16px}
 .two-msg-input:focus{border-color:var(--border-bright);box-shadow:0 0 20px rgba(30,186,143,0.06)}
 .two-msg-input:disabled{opacity:0.5}
 
@@ -146,6 +146,19 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 .two-msg-send:disabled{opacity:0.3;cursor:not-allowed;transform:none;box-shadow:none}
 
 @keyframes twoMsgAppear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Message transition states */
+.two-msg-exit{
+  animation:twoMsgExit 0.25s var(--ease-premium) forwards
+}
+.two-msg-enter{
+  animation:twoMsgEnter 0.3s var(--ease-premium) backwards
+}
+.two-msg-enter-delayed{
+  animation:twoMsgEnter 0.3s var(--ease-premium) 0.15s backwards
+}
+@keyframes twoMsgExit{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
+@keyframes twoMsgEnter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 @media(min-width:768px){
   .two-msg-text{font-size:15px}
@@ -265,6 +278,26 @@ body{font-family:var(--font-primary);background:var(--night-deep);color:var(--te
 @keyframes speakingPulse{
   0%,100%{box-shadow:0 0 6px rgba(30,186,143,0.4)}
   50%{box-shadow:0 0 14px rgba(30,186,143,0.6),0 0 24px rgba(30,186,143,0.15)}
+}
+
+/* ========== MOBILE: Small screens ========== */
+@media(max-width:374px){
+  .hero{padding:36px 16px 0}
+  .hero-headline{font-size:28px;max-width:320px}
+  .two-msg-card{padding:12px 14px}
+  .two-msg-input{padding:10px 14px}
+  .section{padding:48px 16px}
+  .checkout-card{padding:24px 18px}
+}
+
+/* ========== MOBILE: Safe area for notched phones ========== */
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  .section:last-child{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+}
+
+/* ========== MOBILE: Minimum touch targets (44px) ========== */
+.two-msg-send{
+  min-width:44px;min-height:44px
 }
 
 /* ========== ACCESSIBILITY ========== */

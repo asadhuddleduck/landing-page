@@ -13,7 +13,10 @@ const INITIAL_MESSAGE =
 interface ChatMessage {
   role: "user" | "agent";
   text: string;
+  id: number;
 }
+
+let msgIdCounter = 0;
 
 function getDynamicVariables(): Record<string, string> {
   const visitorId = getVisitorId();
@@ -81,11 +84,12 @@ interface ElevenLabsChatProps {
 
 export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "agent", text: INITIAL_MESSAGE },
+    { role: "agent", text: INITIAL_MESSAGE, id: msgIdCounter++ },
   ]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const [shownCards, setShownCards] = useState<Set<string>>(new Set());
+  const [transitioning, setTransitioning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const conversation = useConversation({
@@ -100,12 +104,18 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
               return prev;
             }
           }
-          // Normal dedup: if last message has same role, update it (streaming)
+          // For agent messages: if the last message is also agent, check if it's
+          // a streaming update (same message growing) or a new separate message
           const last = prev[prev.length - 1];
-          if (last && last.role === role) {
-            return [...prev.slice(0, -1), { role, text: cleanText }];
+          if (last && last.role === "agent" && role === "agent") {
+            // If the new text starts with the old text, it's streaming - update in place
+            if (cleanText.startsWith(last.text.substring(0, Math.min(last.text.length, 20)))) {
+              return [...prev.slice(0, -1), { role, text: cleanText, id: last.id }];
+            }
+            // Otherwise it's a genuinely new agent message - append it
+            return [...prev, { role, text: cleanText, id: msgIdCounter++ }];
           }
-          return [...prev, { role, text: cleanText }];
+          return [...prev, { role, text: cleanText, id: msgIdCounter++ }];
         });
       },
       []
@@ -168,8 +178,14 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     if (!text) return;
     setInput("");
 
-    // Add user message to UI immediately
-    setMessages((prev) => [...prev, { role: "user", text }]);
+    // Trigger exit animation on current messages
+    setTransitioning(true);
+
+    // After exit animation, add user message and clear transition
+    setTimeout(() => {
+      setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
+      setTransitioning(false);
+    }, 250);
 
     if (conversation.status !== "connected") {
       startConversation(text);
@@ -205,46 +221,73 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const isConnecting = conversation.status === "connecting";
   const isConnected = conversation.status === "connected";
 
-  // Derive the 2 visible messages: latest user message + latest agent message
-  const { lastUserMsg, lastAgentMsg } = useMemo(() => {
+  // Derive visible messages: latest user message + all agent messages since that user message
+  const { lastUserMsg, agentMessages } = useMemo(() => {
     let lastUser: ChatMessage | null = null;
-    let lastAgent: ChatMessage | null = null;
+    let lastUserIdx = -1;
 
+    // Find the last user message
     for (let i = messages.length - 1; i >= 0; i--) {
-      if (!lastUser && messages[i].role === "user") lastUser = messages[i];
-      if (!lastAgent && messages[i].role === "agent") lastAgent = messages[i];
-      if (lastUser && lastAgent) break;
+      if (messages[i].role === "user") {
+        lastUser = messages[i];
+        lastUserIdx = i;
+        break;
+      }
     }
 
-    return { lastUserMsg: lastUser, lastAgentMsg: lastAgent };
+    // Collect all agent messages after the last user message
+    // (or all agent messages if no user message yet)
+    const agents: ChatMessage[] = [];
+    const startIdx = lastUserIdx >= 0 ? lastUserIdx + 1 : 0;
+    for (let i = startIdx; i < messages.length; i++) {
+      if (messages[i].role === "agent") {
+        agents.push(messages[i]);
+      }
+    }
+
+    // If no agent messages after user, include the initial/last agent before user
+    if (agents.length === 0 && lastUserIdx < 0) {
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === "agent") {
+          agents.push(messages[i]);
+          break;
+        }
+      }
+    }
+
+    return { lastUserMsg: lastUser, agentMessages: agents };
   }, [messages]);
 
-  // Detect card for the current agent message
+  // Detect card for the last agent message
+  const lastAgentMsg = agentMessages.length > 0 ? agentMessages[agentMessages.length - 1] : null;
   const cardType = lastAgentMsg && messages.length > 1 ? detectCard(lastAgentMsg.text) : null;
   const shouldShowCard = cardType && !shownCards.has(cardType);
-
-  // Message key for triggering transitions
-  const msgKey = `${lastUserMsg?.text || ""}_${lastAgentMsg?.text || ""}`;
 
   return (
     <div className="two-msg">
       {/* User's latest message (top) */}
       {lastUserMsg && (
-        <div key={`u-${msgKey}`} className="two-msg-card two-msg-user">
+        <div
+          key={`u-${lastUserMsg.id}`}
+          className={`two-msg-card two-msg-user ${transitioning ? "two-msg-exit" : "two-msg-enter"}`}
+        >
           <div className="two-msg-text">{lastUserMsg.text}</div>
         </div>
       )}
 
-      {/* AI's latest reply (below) */}
-      {lastAgentMsg && (
-        <div key={`a-${msgKey}`} className="two-msg-card two-msg-agent">
+      {/* AI messages (all since last user message) */}
+      {!transitioning && agentMessages.map((msg, idx) => (
+        <div
+          key={`a-${msg.id}`}
+          className={`two-msg-card two-msg-agent two-msg-enter${idx === 0 ? "-delayed" : ""}`}
+        >
           <div className="two-msg-agent-indicator">
             <div className="two-msg-agent-dot" />
             <span className="two-msg-agent-label">Huddle Duck AI</span>
           </div>
-          <div className="two-msg-text">{lastAgentMsg.text}</div>
+          <div className="two-msg-text">{msg.text}</div>
         </div>
-      )}
+      ))}
 
       {/* Typing indicator */}
       {isConnected && conversation.isSpeaking && (
