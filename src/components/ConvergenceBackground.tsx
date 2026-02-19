@@ -102,10 +102,10 @@ export default function ConvergenceBackground() {
         x: sx,
         y: sy,
         angle: angle + (Math.random() - 0.5) * 0.15,
-        speed: 0.8 + Math.random() * 1.2,
+        speed: 1.5 + Math.random() * 2,
         length: 30 + Math.random() * 80,
-        opacity: 0.04 + Math.random() * 0.08,
-        width: 0.5 + Math.random() * 1,
+        opacity: 0.06 + Math.random() * 0.12,
+        width: 0.8 + Math.random() * 1.5,
       };
     }
 
@@ -145,10 +145,10 @@ export default function ConvergenceBackground() {
       return {
         x: mx,
         y: my,
-        vx: dist > 0 ? (dx / dist) * (0.15 + Math.random() * 0.3) : 0,
-        vy: dist > 0 ? (dy / dist) * (0.15 + Math.random() * 0.3) : 0,
-        radius: 0.5 + Math.random() * 1.5,
-        opacity: 0.08 + Math.random() * 0.15,
+        vx: dist > 0 ? (dx / dist) * (0.3 + Math.random() * 0.5) : 0,
+        vy: dist > 0 ? (dy / dist) * (0.3 + Math.random() * 0.5) : 0,
+        radius: 0.8 + Math.random() * 2,
+        opacity: 0.12 + Math.random() * 0.2,
         life: Math.random() * maxLife,
         maxLife,
       };
@@ -185,7 +185,7 @@ export default function ConvergenceBackground() {
           streakOpacity *= dist / 80;
         }
         if (dist < 200) {
-          s.speed = lerp(s.speed, 2.5, 0.02);
+          s.speed = lerp(s.speed, 3.5, 0.02);
         }
 
         const tailX = s.x - Math.cos(s.angle) * s.length;
@@ -218,7 +218,7 @@ export default function ConvergenceBackground() {
 
         // Slow-then-fast: cubic ramp
         const t = Math.max(0, 1 - dist / 400);
-        const pull = 0.003 + 0.04 * t * t * t;
+        const pull = 0.006 + 0.05 * t * t * t;
         if (dist > 0) {
           m.vx += (dx / dist) * pull;
           m.vy += (dy / dist) * pull;
@@ -240,7 +240,7 @@ export default function ConvergenceBackground() {
         const color = i % 7 === 0 ? SANDSTORM : VIRIDIAN;
 
         // Glow
-        const gRad = m.radius * 5;
+        const gRad = m.radius * 6;
         const grad = ctx!.createRadialGradient(m.x, m.y, 0, m.x, m.y, gRad);
         grad.addColorStop(0, rgba(color, moteOpacity * 0.5));
         grad.addColorStop(1, rgba(color, 0));
@@ -259,44 +259,6 @@ export default function ConvergenceBackground() {
           motes[i] = spawnMote();
         }
       }
-
-      // ---- Event horizon glow around the input bar ----
-      // This is a soft, blurred rectangular glow - like a black hole outline
-      const pulse = 0.7 + Math.sin(Date.now() * 0.0015) * 0.3;
-      const rLeft = inputRect.x - inputRect.w / 2;
-      const rTop = inputRect.y - inputRect.h / 2;
-      const rW = inputRect.w;
-      const rH = inputRect.h;
-      const borderRadius = 16;
-
-      // Outer soft glow (large blur)
-      ctx!.save();
-      ctx!.shadowColor = rgba(VIRIDIAN, 0.4 * pulse);
-      ctx!.shadowBlur = 40;
-      ctx!.beginPath();
-      ctx!.roundRect(rLeft - 4, rTop - 4, rW + 8, rH + 8, borderRadius + 2);
-      ctx!.strokeStyle = rgba(VIRIDIAN, 0.12 * pulse);
-      ctx!.lineWidth = 3;
-      ctx!.stroke();
-      ctx!.restore();
-
-      // Middle glow
-      ctx!.save();
-      ctx!.shadowColor = rgba(VIRIDIAN, 0.5 * pulse);
-      ctx!.shadowBlur = 20;
-      ctx!.beginPath();
-      ctx!.roundRect(rLeft - 1, rTop - 1, rW + 2, rH + 2, borderRadius);
-      ctx!.strokeStyle = rgba(VIRIDIAN, 0.15 * pulse);
-      ctx!.lineWidth = 2;
-      ctx!.stroke();
-      ctx!.restore();
-
-      // Inner bright edge
-      ctx!.beginPath();
-      ctx!.roundRect(rLeft, rTop, rW, rH, borderRadius);
-      ctx!.strokeStyle = rgba(VIRIDIAN, 0.08 * pulse);
-      ctx!.lineWidth = 1;
-      ctx!.stroke();
 
       animFrame = requestAnimationFrame(draw);
     }

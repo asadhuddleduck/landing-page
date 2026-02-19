@@ -8,16 +8,7 @@ import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
 
-const GREETING_MESSAGES = [
-  "Most restaurant brands waste 80% of their marketing budget. We fixed that. Tell me about yours.",
-  "Your competitors haven't found this yet. Tell me what you sell and I'll show you what's possible.",
-  "I've studied every ad pattern that works for food and beverage brands. Describe your business. I'll tell you exactly what I'd do.",
-  "This isn't a chatbot. I run real ad campaigns for food and beverage businesses. Tell me about yours and I'll show you the difference.",
-  "I already know what's wrong with your ads. Tell me about your business and I'll prove it.",
-  "The brands scaling fastest right now aren't doing it the way you think. Tell me what you run and I'll show you.",
-  "I've run millions in ad spend for restaurant brands. Tell me about your business - I'll show you what I see.",
-  "Food brands that find this don't go back to doing ads the old way. Tell me about your business.",
-];
+const GREETING_MESSAGE = "Your competitors haven't found this yet. Tell me what you sell and I'll show you what's possible.";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -99,25 +90,52 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Rotating greeting state
-  const [greetingIndex, setGreetingIndex] = useState(0);
-  const [greetingFading, setGreetingFading] = useState(false);
   const [showGreeting, setShowGreeting] = useState(true);
-  // Track whether the greeting exit animation is playing
   const [greetingExiting, setGreetingExiting] = useState(false);
 
-  // Rotate greeting every 18 seconds: fade out -> swap -> fade in (no overlap)
+  // Keyboard scroll fix: after the browser scrolls on focus, fine-tune position
+  // so the input sits ~24px above the keyboard (no bounce, no overshoot)
   useEffect(() => {
-    if (!showGreeting) return;
-    const interval = setInterval(() => {
-      setGreetingFading(true); // fade out
-      setTimeout(() => {
-        setGreetingIndex((prev) => (prev + 1) % GREETING_MESSAGES.length);
-        setGreetingFading(false); // fade in new text
-      }, 500); // wait for full fade-out before swapping
-    }, 18000);
-    return () => clearInterval(interval);
-  }, [showGreeting]);
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const heroEl = document.querySelector(".hero") as HTMLElement | null;
+    if (!heroEl) return;
+
+    let initialHeight = vv.height;
+
+    function handleResize() {
+      if (!vv || !heroEl) return;
+      const keyboardHeight = initialHeight - vv.height;
+
+      if (keyboardHeight > 100) {
+        const inputEl = inputRef.current;
+        if (!inputEl) return;
+        const inputBottom = inputEl.getBoundingClientRect().bottom;
+        const visibleBottom = vv.offsetTop + vv.height;
+        const currentGap = visibleBottom - inputBottom;
+        const idealGap = 24;
+        const adjustment = currentGap - idealGap;
+
+        if (Math.abs(adjustment) > 10) {
+          heroEl.style.transform = `translateY(${adjustment}px)`;
+          heroEl.style.transition = "transform 0.2s ease-out";
+        }
+      } else {
+        heroEl.style.transform = "";
+        heroEl.style.transition = "transform 0.2s ease-out";
+      }
+    }
+
+    vv.addEventListener("resize", handleResize);
+    return () => {
+      vv.removeEventListener("resize", handleResize);
+      if (heroEl) {
+        heroEl.style.transform = "";
+        heroEl.style.transition = "";
+      }
+    };
+  }, []);
 
   const conversation = useConversation({
     onMessage: useCallback(
@@ -289,8 +307,8 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
             <div className="two-msg-agent-dot" />
             <span className="two-msg-agent-label">Ads AI</span>
           </div>
-          <div className={`two-msg-text two-msg-greeting${greetingFading ? " two-msg-greeting-fade" : ""}`}>
-            {GREETING_MESSAGES[greetingIndex]}
+          <div className="two-msg-text">
+            {GREETING_MESSAGE}
           </div>
         </div>
       )}

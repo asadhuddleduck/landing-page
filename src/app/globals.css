@@ -24,9 +24,9 @@
   --ease-premium:cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html{-webkit-overflow-scrolling:touch}
+html{overflow-x:hidden}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font-primary);background:var(--black);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+body{font-family:var(--font-primary);background:var(--black);color:var(--text-primary);min-height:100vh}
 
 /* ========== LAYOUT ========== */
 .lp-container{position:relative;z-index:1;max-width:540px;margin:0 auto;padding:0 24px}
@@ -119,16 +119,16 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 }
 .two-msg-input{
   flex:1;padding:14px 18px;border-radius:16px;
-  border:1px solid rgba(30,186,143,0.2);
+  border:1px solid rgba(255,255,255,0.3);
   background:rgba(10,10,10,0.8);color:var(--text-primary);font-size:16px;
   font-family:var(--font-primary);outline:none;
   transition:all 0.3s;
-  box-shadow:0 0 30px rgba(30,186,143,0.06)
+  box-shadow:0 0 15px rgba(255,255,255,0.08),0 0 40px rgba(255,255,255,0.04)
 }
 .two-msg-input::placeholder{color:var(--text-muted);font-size:16px}
 .two-msg-input:focus{
-  border-color:rgba(30,186,143,0.4);
-  box-shadow:0 0 40px rgba(30,186,143,0.1),0 0 80px rgba(30,186,143,0.04)
+  border-color:rgba(255,255,255,0.5);
+  box-shadow:0 0 20px rgba(255,255,255,0.12),0 0 50px rgba(255,255,255,0.06),0 0 100px rgba(255,255,255,0.03)
 }
 .two-msg-input:disabled{opacity:0.5}
 
@@ -152,10 +152,6 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 }
 @keyframes twoMsgEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes twoMsgPushUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-16px)}}
-
-/* Greeting text crossfade - fixed height for 3 lines (14px * 1.6 line-height * 3 = ~67px) */
-.two-msg-greeting{transition:opacity 0.5s ease;height:68px;overflow:hidden;display:flex;align-items:center}
-.two-msg-greeting-fade{opacity:0}
 
 @media(min-width:768px){
   .two-msg-text{font-size:15px}
