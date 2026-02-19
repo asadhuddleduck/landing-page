@@ -37,6 +37,18 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
   pointer-events:none;z-index:0
 }
 
+/* ========== SITE BRAND (fixed top-left) ========== */
+.site-brand{
+  position:absolute;top:20px;left:20px;
+  width:32px;height:auto;z-index:10;
+  opacity:0.8;pointer-events:none;user-select:none;
+  animation:brandSlideIn 0.8s var(--ease-premium) backwards
+}
+@keyframes brandSlideIn{
+  from{opacity:0;transform:translateX(-20px)}
+  to{opacity:0.8;transform:translateX(0)}
+}
+
 /* ========== HERO: Headline + Directive + Chat ========== */
 .hero{
   min-height:100vh;display:flex;flex-direction:column;align-items:center;
@@ -70,13 +82,7 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 
 /* ========== 2-MESSAGE UI ========== */
 .two-msg{
-  display:flex;flex-direction:column;gap:12px;width:100%;position:relative
-}
-.two-msg-brand{
-  position:absolute;top:-28px;left:0;
-  width:20px;height:auto;opacity:0.35;
-  pointer-events:none;user-select:none;
-  transition:opacity 0.3s ease
+  display:flex;flex-direction:column;gap:12px;width:100%
 }
 
 .two-msg-card{
@@ -386,7 +392,30 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .checkout-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 
 .checkout-fine-print{font-size:11px;font-weight:400;color:var(--text-muted);text-align:center;margin-top:16px;line-height:1.5}
-.checkout-credit{font-size:11px;font-weight:700;color:var(--sandstorm);text-align:center;margin-top:4px}
+
+/* Credit guarantee badge (below card) */
+.guarantee-badge{
+  display:flex;align-items:center;gap:14px;
+  max-width:380px;margin:20px auto 0;
+  padding:16px 20px;
+  border:1px solid rgba(247,206,70,0.15);border-radius:12px;
+  background:rgba(247,206,70,0.03)
+}
+.guarantee-badge-shield{
+  flex-shrink:0;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center
+}
+.guarantee-badge-shield svg{
+  width:28px;height:28px;color:var(--sandstorm);opacity:0.6
+}
+.guarantee-badge-label{
+  font-size:9px;font-weight:700;letter-spacing:1.2px;
+  color:var(--sandstorm);opacity:0.8;margin-bottom:3px
+}
+.guarantee-badge-text{
+  font-size:11px;font-weight:400;color:var(--text-secondary);
+  line-height:1.45
+}
 
 /* ========== CHECKOUT INLINE FORM ========== */
 .checkout-form{
@@ -461,6 +490,24 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 }
 .checkout-success-text{
   font-size:14px;color:var(--text-secondary);line-height:1.6
+}
+
+/* Trust badge — "Powered by [Stripe logo]" */
+.checkout-trust{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  margin:12px auto 0;
+  width:100%;
+  line-height:1
+}
+.checkout-trust span{
+  font-size:11px;font-weight:400;letter-spacing:0.2px;
+  color:rgba(255,255,255,0.3);white-space:nowrap
+}
+.checkout-trust-stripe{
+  flex-shrink:0;
+  width:38px;height:14px;
+  color:rgba(255,255,255,0.45);
+  display:block
 }
 
 /* ========== LOGO STRIP ========== */
