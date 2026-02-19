@@ -1,7 +1,7 @@
 "use client";
 
 import { useConversation } from "@elevenlabs/react";
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 import { track } from "@vercel/analytics";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
@@ -89,8 +89,12 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const [shownCards, setShownCards] = useState<Set<string>>(new Set());
-  const [transitioning, setTransitioning] = useState(false);
+  // Track which message IDs are "exiting" (fading out)
+  const [exitingIds, setExitingIds] = useState<Set<number>>(new Set());
+  // Track which message IDs have just entered (for enter animation)
+  const [enteringIds, setEnteringIds] = useState<Set<number>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const conversation = useConversation({
     onMessage: useCallback(
@@ -144,10 +148,10 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     }, []),
   });
 
-  // On mobile, scroll input into view when keyboard opens
+  // Scroll input bar just above keyboard
   const handleFocus = useCallback(() => {
     setTimeout(() => {
-      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }, 300);
   }, []);
 
@@ -180,21 +184,29 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     if (!text) return;
     setInput("");
 
-    // Trigger exit animation on current messages
-    setTransitioning(true);
+    // Mark current visible messages as exiting
+    const currentVisibleIds = new Set<number>();
+    for (const msg of messages) {
+      currentVisibleIds.add(msg.id);
+    }
+    setExitingIds(currentVisibleIds);
 
-    // After exit animation, add user message and clear transition
+    // After exit animation completes, add user message and remove exiting state
+    const newId = msgIdCounter++;
     setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
-      setTransitioning(false);
-    }, 250);
+      setMessages((prev) => [...prev, { role: "user", text, id: newId }]);
+      setEnteringIds(new Set([newId]));
+      setExitingIds(new Set());
+      // Clear entering state after animation
+      setTimeout(() => setEnteringIds(new Set()), 400);
+    }, 300);
 
     if (conversation.status !== "connected") {
       startConversation(text);
     } else {
       conversation.sendUserMessage(text);
     }
-  }, [input, conversation, startConversation]);
+  }, [input, conversation, startConversation, messages]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -228,7 +240,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     let lastUser: ChatMessage | null = null;
     let lastUserIdx = -1;
 
-    // Find the last user message
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].role === "user") {
         lastUser = messages[i];
@@ -237,8 +248,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
       }
     }
 
-    // Collect all agent messages after the last user message
-    // (or all agent messages if no user message yet)
     const agents: ChatMessage[] = [];
     const startIdx = lastUserIdx >= 0 ? lastUserIdx + 1 : 0;
     for (let i = startIdx; i < messages.length; i++) {
@@ -247,7 +256,7 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
       }
     }
 
-    // If no agent messages after user, include the initial/last agent before user
+    // Initial state: show the greeting
     if (agents.length === 0 && lastUserIdx < 0) {
       for (let i = messages.length - 1; i >= 0; i--) {
         if (messages[i].role === "agent") {
@@ -265,37 +274,45 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const cardType = lastAgentMsg && messages.length > 1 ? detectCard(lastAgentMsg.text) : null;
   const shouldShowCard = cardType && !shownCards.has(cardType);
 
+  // Determine animation class for a message
+  function getMsgClass(id: number, baseClass: string): string {
+    if (exitingIds.has(id)) return `${baseClass} two-msg-exit`;
+    if (enteringIds.has(id)) return `${baseClass} two-msg-enter`;
+    return baseClass;
+  }
+
   return (
-    <div className="two-msg">
+    <div className="two-msg" ref={containerRef}>
       {/* User's latest message (top) */}
       {lastUserMsg && (
         <div
           key={`u-${lastUserMsg.id}`}
-          className={`two-msg-card two-msg-user ${transitioning ? "two-msg-exit" : "two-msg-enter"}`}
+          className={getMsgClass(lastUserMsg.id, "two-msg-card two-msg-user")}
         >
           <div className="two-msg-text">{lastUserMsg.text}</div>
         </div>
       )}
 
       {/* AI messages (all since last user message) */}
-      {!transitioning && agentMessages.map((msg, idx) => (
+      {agentMessages.map((msg) => (
         <div
           key={`a-${msg.id}`}
-          className={`two-msg-card two-msg-agent two-msg-enter${idx === 0 ? "-delayed" : ""}`}
+          className={getMsgClass(msg.id, "two-msg-card two-msg-agent")}
         >
           <div className="two-msg-agent-indicator">
             <div className="two-msg-agent-dot" />
-            <span className="two-msg-agent-label">Huddle Duck AI</span>
+            <span className="two-msg-agent-label">Ads AI</span>
           </div>
           <div className="two-msg-text">{msg.text}</div>
         </div>
       ))}
 
-      {/* Typing indicator */}
-      {isConnected && conversation.isSpeaking && (
-        <div className="two-msg-card two-msg-agent two-msg-typing">
+      {/* Typing indicator - only when waiting for a response (no agent messages yet after user sent) */}
+      {isConnected && agentMessages.length === 0 && lastUserMsg && (
+        <div className="two-msg-card two-msg-agent two-msg-typing two-msg-enter">
           <div className="two-msg-agent-indicator">
             <div className="two-msg-agent-dot two-msg-agent-dot-speaking" />
+            <span className="two-msg-agent-label">Ads AI</span>
           </div>
           <div className="ai-chat-typing">
             <span />
@@ -307,7 +324,11 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
 
       {/* Connecting state */}
       {isConnecting && (
-        <div className="two-msg-card two-msg-agent two-msg-typing">
+        <div className="two-msg-card two-msg-agent two-msg-typing two-msg-enter">
+          <div className="two-msg-agent-indicator">
+            <div className="two-msg-agent-dot two-msg-agent-dot-speaking" />
+            <span className="two-msg-agent-label">Ads AI</span>
+          </div>
           <div className="ai-chat-typing">
             <span />
             <span />
