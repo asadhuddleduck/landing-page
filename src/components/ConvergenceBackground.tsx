@@ -27,8 +27,9 @@ interface Mote {
   maxLife: number;
 }
 
-const VIRIDIAN = { r: 30, g: 186, b: 143 };
-const SANDSTORM = { r: 247, g: 206, b: 70 };
+// Desaturated (washed-out / white-shifted) palette for subtle particles
+const VIRIDIAN = { r: 140, g: 220, b: 195 };
+const SANDSTORM = { r: 250, g: 230, b: 160 };
 
 function rgba(c: { r: number; g: number; b: number }, a: number): string {
   return `rgba(${c.r},${c.g},${c.b},${a})`;
@@ -104,8 +105,8 @@ export default function ConvergenceBackground() {
         angle: angle + (Math.random() - 0.5) * 0.15,
         speed: 1.5 + Math.random() * 2,
         length: 30 + Math.random() * 80,
-        opacity: 0.06 + Math.random() * 0.12,
-        width: 0.8 + Math.random() * 1.5,
+        opacity: 0.04 + Math.random() * 0.08,
+        width: 0.5 + Math.random() * 1,
       };
     }
 
@@ -147,8 +148,8 @@ export default function ConvergenceBackground() {
         y: my,
         vx: dist > 0 ? (dx / dist) * (0.3 + Math.random() * 0.5) : 0,
         vy: dist > 0 ? (dy / dist) * (0.3 + Math.random() * 0.5) : 0,
-        radius: 0.8 + Math.random() * 2,
-        opacity: 0.12 + Math.random() * 0.2,
+        radius: 0.5 + Math.random() * 1.5,
+        opacity: 0.08 + Math.random() * 0.15,
         life: Math.random() * maxLife,
         maxLife,
       };
@@ -218,7 +219,7 @@ export default function ConvergenceBackground() {
 
         // Slow-then-fast: cubic ramp
         const t = Math.max(0, 1 - dist / 400);
-        const pull = 0.006 + 0.05 * t * t * t;
+        const pull = 0.003 + 0.04 * t * t * t;
         if (dist > 0) {
           m.vx += (dx / dist) * pull;
           m.vy += (dy / dist) * pull;
@@ -240,7 +241,7 @@ export default function ConvergenceBackground() {
         const color = i % 7 === 0 ? SANDSTORM : VIRIDIAN;
 
         // Glow
-        const gRad = m.radius * 6;
+        const gRad = m.radius * 5;
         const grad = ctx!.createRadialGradient(m.x, m.y, 0, m.x, m.y, gRad);
         grad.addColorStop(0, rgba(color, moteOpacity * 0.5));
         grad.addColorStop(1, rgba(color, 0));

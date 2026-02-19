@@ -93,50 +93,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const [showGreeting, setShowGreeting] = useState(true);
   const [greetingExiting, setGreetingExiting] = useState(false);
 
-  // Keyboard scroll fix: after the browser scrolls on focus, fine-tune position
-  // so the input sits ~24px above the keyboard (no bounce, no overshoot)
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const heroEl = document.querySelector(".hero") as HTMLElement | null;
-    if (!heroEl) return;
-
-    let initialHeight = vv.height;
-
-    function handleResize() {
-      if (!vv || !heroEl) return;
-      const keyboardHeight = initialHeight - vv.height;
-
-      if (keyboardHeight > 100) {
-        const inputEl = inputRef.current;
-        if (!inputEl) return;
-        const inputBottom = inputEl.getBoundingClientRect().bottom;
-        const visibleBottom = vv.offsetTop + vv.height;
-        const currentGap = visibleBottom - inputBottom;
-        const idealGap = 24;
-        const adjustment = currentGap - idealGap;
-
-        if (Math.abs(adjustment) > 10) {
-          heroEl.style.transform = `translateY(${adjustment}px)`;
-          heroEl.style.transition = "transform 0.2s ease-out";
-        }
-      } else {
-        heroEl.style.transform = "";
-        heroEl.style.transition = "transform 0.2s ease-out";
-      }
-    }
-
-    vv.addEventListener("resize", handleResize);
-    return () => {
-      vv.removeEventListener("resize", handleResize);
-      if (heroEl) {
-        heroEl.style.transform = "";
-        heroEl.style.transition = "";
-      }
-    };
-  }, []);
-
   const conversation = useConversation({
     onMessage: useCallback(
       ({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
