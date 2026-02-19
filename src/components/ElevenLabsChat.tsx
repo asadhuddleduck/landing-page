@@ -106,16 +106,16 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   // Track whether the greeting exit animation is playing
   const [greetingExiting, setGreetingExiting] = useState(false);
 
-  // Rotate greeting every 5 seconds with crossfade
+  // Rotate greeting every 18 seconds: fade out -> swap -> fade in (no overlap)
   useEffect(() => {
     if (!showGreeting) return;
     const interval = setInterval(() => {
-      setGreetingFading(true);
+      setGreetingFading(true); // fade out
       setTimeout(() => {
         setGreetingIndex((prev) => (prev + 1) % GREETING_MESSAGES.length);
-        setGreetingFading(false);
-      }, 400); // fade out duration
-    }, 5000);
+        setGreetingFading(false); // fade in new text
+      }, 500); // wait for full fade-out before swapping
+    }, 18000);
     return () => clearInterval(interval);
   }, [showGreeting]);
 

@@ -39,8 +39,8 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 
 /* ========== HERO: Headline + Directive + Chat ========== */
 .hero{
-  min-height:100dvh;display:flex;flex-direction:column;align-items:center;
-  justify-content:flex-start;text-align:center;padding:25dvh 24px 0;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;text-align:center;padding:25vh 24px 0;
   position:relative;z-index:1
 }
 .hero-headline{
@@ -154,7 +154,7 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 @keyframes twoMsgPushUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-16px)}}
 
 /* Greeting text crossfade */
-.two-msg-greeting{transition:opacity 0.4s ease}
+.two-msg-greeting{transition:opacity 0.5s ease;min-height:3.4em}
 .two-msg-greeting-fade{opacity:0}
 
 @media(min-width:768px){

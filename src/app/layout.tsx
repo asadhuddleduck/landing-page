@@ -15,7 +15,6 @@ const lato = Lato({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  interactiveWidget: "resizes-content",
 };
 
 export const metadata: Metadata = {
