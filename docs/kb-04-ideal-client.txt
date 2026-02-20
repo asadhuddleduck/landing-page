@@ -16,7 +16,7 @@ In some markets (especially UAE and newer brands), the founder or CEO is the mar
 
 THE AI AD ENGINE AS A TOOL FRAMING
 
-In an ideal engagement, the marketing director sends a brief (for example: launching a new location in March, activate the AI Ad Engine in Launch Mode), and the system executes. The AI Ad Engine is one specialist tool in their marketing arsenal, not a replacement for their marketing function.
+In an ideal engagement, the marketing director sends a brief (for example: launching a new location in March, activate the AI Ad Engine for a launch campaign), and the system executes. The AI Ad Engine is one specialist tool in their marketing arsenal, not a replacement for their marketing function.
 
 IDEAL CLIENT EXAMPLES
 
@@ -24,9 +24,9 @@ Phat Buns: 15+ locations. Marketing director with budget authority. Takes owners
 
 Burger and Sauce: Multiple locations. Marketing manager coordinates directly. Protects the relationship from internal noise.
 
-Chai Green: Franchise brand. Tripled franchise locations.
+Chai Green: Franchise brand. Franchise expansion campaign.
 
-Shakedown: Grew from 1 to 5 locations. Queue at every launch.
+Shakedown: Grew from 1 to 5 locations. AI campaigns running before every launch.
 
 MARKETS
 
@@ -39,3 +39,4 @@ WHO THE AI AD ENGINE DOES NOT WORK WITH
 - Businesses outside food and beverage
 - F&B brands still in the planning phase with no operational location
 - Anyone who wants social media management (posting, stories, community management) rather than AI ad campaigns
+- Marketing budget not yet allocated (dependent on convincing franchisees)

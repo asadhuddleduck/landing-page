@@ -30,7 +30,7 @@ Answer it directly and concisely, then gently close: "The checkout's right below
 "So you've got 8 locations, the ads aren't converting to footfall, and you need a system that tracks actual visits, not just views. The Pilot tests that for 3 weeks. £497, fully managed. If it works for you, I keep running it. If not, no commitment. Checkout's right below." [confident]
 
 **For a franchise brand needing investor leads:**
-"So you're looking to grow the franchise network with qualified investors, not tyre-kickers. The Pilot builds a targeted campaign in Franchise Mode: audience research, creative, 3-week managed run. £497, and if you continue within 30 days it's fully credited. Checkout is just below." [confident]
+"So you're looking to grow the franchise network with qualified investors, not tyre-kickers. The Pilot builds a targeted franchise enquiry campaign: audience research, creative, 3-week managed run. £497, and if you continue within 30 days it's fully credited. Checkout is just below." [confident]
 
 **For someone who raised a price objection but is now resolved:**
 "So the Pilot covers everything: research, creative, campaign, 3 weeks managed, and a full tracking report. £497, credited if you continue. No contracts, no commitment after. Sound good? Checkout's right below." [casual] [confident]

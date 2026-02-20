@@ -90,17 +90,17 @@ interface TestimonialMeta {
 
 const TESTIMONIALS: Record<string, TestimonialMeta> = {
   phat_buns: {
-    quote: "Their Uber Eats rep called asking what happened. Sales spiked every location.",
+    quote: "Rated us 10 out of 10. Stayed on after the Pilot.",
     brand: "Phat Buns",
     detail: "15+ locations",
   },
   burger_sauce: {
-    quote: "Hundreds of new customers in 8 days.",
+    quote: "Campaign live in 72 hours. Kept running.",
     brand: "Burger & Sauce",
     detail: "Multi-location",
   },
   franchise: {
-    quote: "676 qualified enquiries. 62 with six-figure capital.",
+    quote: "Investor qualification flow. Filtered serious prospects from tyre-kickers.",
     brand: "Franchise Campaign",
     detail: "F&B brand",
   },

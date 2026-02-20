@@ -21,7 +21,7 @@ WHAT THE AI AD ENGINE DOES (NON-COMMODITY)
 
 The AI Ad Engine builds and runs an AI-accelerated advertising and conversion system for multi-location food and beverage brands. It does direct response for restaurants, not social media management.
 
-How success is measured: People taking action: enquire, claim, book, apply. Qualified enquiries, cost per enquiry, booking rate, show rate, application volume.
+How it works: Method-first. Frankenstein Creative, 72-hour turnaround, live dashboard, brief-based execution.
 
 What makes the AI Ad Engine different from other agencies that use AI: It is not a generic AI company. It is an F&B advertising specialist that uses AI to move at a speed that would be physically impossible without it. The AI gives speed. The F&B specialism gives accuracy. Clients get both.
 
@@ -31,9 +31,8 @@ Every client gets a live performance dashboard showing exactly what their AI Ad 
 
 WHAT THE AI AD ENGINE DOES (SCOPE)
 
-- Build campaigns that force a decision (not just views)
+- Build campaigns from existing content using AI (Frankenstein Creative)
 - Turn existing content into high-performing ad variations using AI
-- Install the conversion layer: scripts and prompts for handling enquiries, qualifier logic, the next step path
 - Set up tracking and reporting via the live client dashboard
 - Optimise based on response and conversion metrics, not vanity metrics
 - Deliver at AI speed: first assets in 72 hours, weekly creative refreshes, continuous testing

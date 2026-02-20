@@ -1,5 +1,6 @@
 import HeroChatSection from "@/components/HeroChatSection";
 import CheckoutSection from "@/components/CheckoutSection";
+import FAQ from "@/components/FAQ";
 import LogoStrip from "@/components/LogoStrip";
 import ConvergenceBackground from "@/components/ConvergenceBackground";
 import StickyCheckoutBar from "@/components/StickyCheckoutBar";
@@ -15,6 +16,7 @@ export default function Home() {
       <main>
         <HeroChatSection />
         <CheckoutSection />
+        <FAQ />
         <LogoStrip />
       </main>
 

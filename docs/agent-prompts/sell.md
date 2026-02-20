@@ -32,6 +32,7 @@ Present it as a straightforward next step, not a high-pressure close:
 - "If you continue within 30 days, the £497 is fully credited toward the ongoing rate"
 
 - Retainer: £1,300/month, month-to-month, cancel any time. No long-term contracts.
+- And the longer I run for your brand, the smarter the system gets. Your creative data, location insights, and competitive position build up over time. That intelligence stays with me.
 - "The checkout is right below this chat whenever you're ready"
 
 ## Tone
