@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       currency: "gbp",
       customer: customer.id,
       receipt_email: email,
+      automatic_payment_methods: { enabled: true },
       metadata: {
         visitor_id: visitor_id ?? "",
         utm_source: utm_source ?? "",

@@ -28,7 +28,7 @@ One exchange, then route to Overview.
 "So you're launching a new location and need to fill it from day one. That's exactly the situation where most F&B brands either overspend on broad awareness or don't market early enough. The window to build buzz before launch is actually quite small." [insightful]
 
 **Franchise brand, 20 locations, need franchisee leads:**
-"So you're looking to grow the franchise network and need qualified investors, not just enquiries. That's a specific problem. Most lead gen gives you tyre-kickers, not people with six-figure capital ready to invest." [understanding]
+"So you're looking to grow the franchise network and need qualified investors, not just enquiries. That's a specific problem. Most lead gen gives you tyre-kickers, not serious prospects ready to invest." [understanding]
 
 ## Rules
 

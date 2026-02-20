@@ -111,7 +111,7 @@ export default function ConvergenceBackground() {
         angle: angle + (Math.random() - 0.5) * 0.15,
         speed: 1.5 + Math.random() * 2,
         length: 30 + Math.random() * 80,
-        opacity: 0.04 + Math.random() * 0.08,
+        opacity: 0.06 + Math.random() * 0.1,
         width: 0.5 + Math.random() * 1,
       };
     }
@@ -158,7 +158,7 @@ export default function ConvergenceBackground() {
         vx: dist > 0 ? (dx / dist) * (isMobile ? (3 + Math.random() * 4) : (0.3 + Math.random() * 0.5)) : 0,
         vy: dist > 0 ? (dy / dist) * (isMobile ? (3 + Math.random() * 4) : (0.3 + Math.random() * 0.5)) : 0,
         radius: isMobile ? (0.3 + Math.random() * 0.8) : (0.5 + Math.random() * 1.5),
-        opacity: isMobile ? (0.15 + Math.random() * 0.2) : (0.08 + Math.random() * 0.15),
+        opacity: isMobile ? (0.18 + Math.random() * 0.22) : (0.12 + Math.random() * 0.18),
         life: Math.random() * maxLife,
         maxLife,
       };
@@ -284,7 +284,7 @@ export default function ConvergenceBackground() {
         // Glow
         const gRad = m.radius * 5;
         const grad = ctx!.createRadialGradient(m.x, m.y, 0, m.x, m.y, gRad);
-        grad.addColorStop(0, rgba(color, moteOpacity * 0.5));
+        grad.addColorStop(0, rgba(color, moteOpacity * 0.65));
         grad.addColorStop(1, rgba(color, 0));
         ctx!.beginPath();
         ctx!.arc(m.x, m.y, gRad, 0, Math.PI * 2);

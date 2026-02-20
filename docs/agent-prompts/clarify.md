@@ -33,7 +33,7 @@ If they are clearly NOT in food and beverage (e.g., "I sell software", "I'm a de
 Once you have answers to all 3 questions (or enough context to understand their situation):
 → Route to Label subagent. Pass all collected context forward.
 
-Note: We do NOT disqualify based on location count. Even 1-location brands can proceed through the flow. The Clarify stage tailors the pitch, it does not gatekeep.
+Note: Do NOT disqualify based on location count. Even 1-location brands can proceed through the flow. The Clarify stage tailors the pitch, it does not gatekeep.
 
 ## Example Exchange
 

@@ -494,7 +494,7 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 
 /* Trust badge — "Powered by [Stripe logo]" */
 .checkout-trust{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  display:inline-flex;align-items:center;justify-content:center;gap:2px;
   margin:12px auto 0;
   width:100%;
   line-height:1
@@ -663,44 +663,45 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .privacy-page{
   min-height:100vh;padding:80px 24px 60px;
   position:relative;z-index:1;
+  background:var(--black);
 }
-.privacy-container{
+.privacy-content{
   max-width:680px;margin:0 auto;
 }
-.privacy-container h1{
+.privacy-content h1{
   font-family:var(--font-heading);font-size:28px;font-weight:900;
   color:var(--text-primary);letter-spacing:-0.8px;margin-bottom:8px;
 }
 .privacy-updated{
   font-size:13px;color:var(--text-muted);margin-bottom:40px;
 }
-.privacy-container section{margin-bottom:32px}
-.privacy-container h2{
+.privacy-content section{margin-bottom:32px}
+.privacy-content h2{
   font-size:16px;font-weight:700;color:var(--text-primary);
   margin-bottom:12px;letter-spacing:-0.3px;
 }
-.privacy-container p{
+.privacy-content p{
   font-size:14px;line-height:1.7;color:var(--text-secondary);
   margin-bottom:10px;
 }
-.privacy-container ul{
+.privacy-content ul{
   list-style:none;padding:0;margin:0 0 12px;
 }
-.privacy-container li{
+.privacy-content li{
   font-size:14px;line-height:1.7;color:var(--text-secondary);
   padding-left:20px;position:relative;margin-bottom:6px;
 }
-.privacy-container li::before{
+.privacy-content li::before{
   content:"";position:absolute;left:0;top:10px;
   width:6px;height:6px;border-radius:50%;
   background:var(--viridian);opacity:0.5;
 }
-.privacy-container a{
+.privacy-content a{
   color:var(--viridian);text-decoration:none;
   transition:opacity 0.2s;
 }
-.privacy-container a:hover{opacity:0.8}
-.privacy-container strong{color:var(--text-primary);font-weight:700}
+.privacy-content a:hover{opacity:0.8}
+.privacy-content strong{color:var(--text-primary);font-weight:700}
 .privacy-footer{
   margin-top:48px;padding-top:24px;
   border-top:1px solid var(--border);
@@ -715,21 +716,21 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .privacy-subtitle{
   font-size:15px;color:var(--text-primary);margin-bottom:4px;
 }
-.privacy-container h3{
+.privacy-content h3{
   font-size:14px;font-weight:700;color:var(--text-primary);
   margin:20px 0 8px;letter-spacing:-0.2px;
 }
-.privacy-container hr{
+.privacy-content hr{
   border:none;border-top:1px solid var(--border);
   margin:32px 0;
 }
-.privacy-container ol{
+.privacy-content ol{
   list-style:decimal;padding-left:20px;margin:0 0 12px;
 }
-.privacy-container ol li{
+.privacy-content ol li{
   padding-left:4px;
 }
-.privacy-container ol li::before{
+.privacy-content ol li::before{
   display:none;
 }
 .privacy-table-wrap{

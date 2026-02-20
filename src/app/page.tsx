@@ -9,6 +9,9 @@ export default function Home() {
     <>
       <ConvergenceBackground />
 
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/duck-logo.png" alt="Huddle Duck" className="site-brand" />
+
       <main>
         <HeroChatSection />
         <CheckoutSection />

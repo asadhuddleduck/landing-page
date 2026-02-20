@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function PrivacyPolicy() {
   return (
     <main className="privacy-page">
-      <div className="privacy-container">
+      <div className="privacy-content">
         <h1>Privacy Policy</h1>
         <p className="privacy-subtitle">
           <strong>Huddle Duck Ltd</strong>

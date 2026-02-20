@@ -7,7 +7,7 @@ const faqs = [
   {
     question: "What is the AI Ad Engine Pilot?",
     answer:
-      "A 3-week managed advertising engagement. The AI researches your customer avatar, produces ad creative (copy, voiceover, video), builds and launches campaigns, optimises weekly, and delivers a tracking report with a strategy review. Think of it as a mutual trial. You see what it can do, and it identifies whether your business is a fit for ongoing management.",
+      "A 3-week managed advertising engagement. The AI researches your customer avatar, produces ad creative (copy, voiceover, video), builds and launches campaigns, optimises weekly, and delivers a tracking report with a strategy review. Think of it as a mutual trial. You see what I can do, and I learn whether your business is a fit for ongoing management.",
   },
   {
     question: "How long does the pilot run?",
