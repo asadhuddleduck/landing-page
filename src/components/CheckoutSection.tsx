@@ -16,8 +16,10 @@ const features = [
   "Deep audience research from social data & competitor analysis",
   "Ad creative remade from your existing content",
   "Full AI campaign setup & 3-week managed run",
+  "First campaign assets within 72 hours",
+  "Live performance dashboard included",
   "Tracking report & strategy review call",
-  "Ad spend not included - recommended 1x your AOV per day per location",
+  "Ad spend not included — minimum £10/location/day recommended",
 ];
 
 type CheckoutStep = "idle" | "details" | "paying" | "success";

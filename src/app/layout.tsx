@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Lato } from "next/font/google";
+import { Lato, Caveat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import TrackingScript from "@/components/TrackingScript";
 import MetaPixel from "@/components/MetaPixel";
@@ -10,6 +10,13 @@ const lato = Lato({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
   variable: "--font-lato",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-caveat",
   display: "swap",
 });
 
@@ -60,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lato.variable} ${lato.className}`}>
+      <body className={`${lato.variable} ${caveat.variable} ${lato.className}`}>
         {children}
         <TrackingScript />
         <MetaPixel />

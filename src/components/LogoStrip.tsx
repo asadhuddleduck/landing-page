@@ -6,7 +6,6 @@ const logos = [
   { src: "/logos/phatbuns.png", alt: "PHAT Buns", h: 36 },
   { src: "/logos/doughclub-new.png", alt: "Dough Club", h: 38 },
   { src: "/logos/chai-green.png", alt: "Chai Green", h: 48 },
-  { src: "/logos/dolce-desserts.png", alt: "Dolce Desserts", h: 38 },
   { src: "/logos/boo.png", alt: "Boo", h: 26 },
   { src: "/logos/shakedown.png", alt: "Shakedown", h: 42 },
   { src: "/logos/drip-chicken.png", alt: "Drip Chicken", h: 40 },

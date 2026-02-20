@@ -8,7 +8,7 @@ import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
 
-const GREETING_MESSAGE = "Your competitors haven't found this yet. Tell me what you sell and I'll show you what's possible.";
+const GREETING_MESSAGE = "Tell me about your restaurants. I'll show you exactly how the pilot would work for your brand.";
 
 // Animated placeholder phrases — randomly assembled from parts
 const PLACEHOLDER_CUISINES = [
@@ -135,9 +135,10 @@ function getPowerBarLabel(zone: string): string {
 
 interface ElevenLabsChatProps {
   onConversationEnd?: (outcome: string) => void;
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
-export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProps) {
+export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: ElevenLabsChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
@@ -145,12 +146,12 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [showGreeting, setShowGreeting] = useState(true);
+  const [showGreeting, setShowGreeting] = useState(false);
   const [greetingExiting, setGreetingExiting] = useState(false);
 
-  // Animated typing placeholder
+  // Animated typing placeholder with blinking cursor
   const [placeholderText, setPlaceholderText] = useState("");
-  const placeholderRef = useRef({ phrase: "", charIdx: 0, phase: "typing" as "typing" | "hold" | "erasing" });
+  const placeholderRef = useRef({ phrase: "", charIdx: 0, phase: "typing" as "typing" | "hold" | "erasing", holdTick: 0 });
 
   useEffect(() => {
     // Don't animate once connected
@@ -160,21 +161,28 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     placeholderRef.current.phrase = buildPlaceholder();
     placeholderRef.current.charIdx = 0;
     placeholderRef.current.phase = "typing";
+    placeholderRef.current.holdTick = 0;
 
     const interval = setInterval(() => {
       const p = placeholderRef.current;
 
       if (p.phase === "typing") {
         p.charIdx++;
-        setPlaceholderText(p.phrase.slice(0, p.charIdx));
+        setPlaceholderText(p.phrase.slice(0, p.charIdx) + "|");
         if (p.charIdx >= p.phrase.length) {
           p.phase = "hold";
+          p.holdTick = 0;
           // Hold for 2s before erasing
           setTimeout(() => { p.phase = "erasing"; }, 2000);
         }
+      } else if (p.phase === "hold") {
+        p.holdTick++;
+        // Blink cursor every ~6 ticks (480ms)
+        const showCursor = Math.floor(p.holdTick / 6) % 2 === 0;
+        setPlaceholderText(p.phrase + (showCursor ? "|" : ""));
       } else if (p.phase === "erasing") {
         p.charIdx--;
-        setPlaceholderText(p.phrase.slice(0, p.charIdx));
+        setPlaceholderText(p.phrase.slice(0, p.charIdx) + "|");
         if (p.charIdx <= 0) {
           // Pick a new phrase
           p.phrase = buildPlaceholder();
@@ -182,7 +190,6 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
           p.phase = "typing";
         }
       }
-      // "hold" phase: do nothing, timer above will switch to erasing
     }, 80);
 
     return () => clearInterval(interval);
@@ -198,7 +205,7 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     if (!headlineVisibleRef.current) return;
     headlineVisibleRef.current = false;
     const headline = document.querySelector(".hero-headline") as HTMLElement;
-    const directive = document.querySelector(".hero-directive") as HTMLElement;
+    const directive = document.querySelector(".hero-sub") as HTMLElement;
     const dur = fast ? "0.3s" : "0.6s";
     if (headline) {
       headline.style.transition = `opacity ${dur} ease, transform ${dur} ease`;
@@ -216,7 +223,7 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     if (headlineVisibleRef.current) return;
     headlineVisibleRef.current = true;
     const headline = document.querySelector(".hero-headline") as HTMLElement;
-    const directive = document.querySelector(".hero-directive") as HTMLElement;
+    const directive = document.querySelector(".hero-sub") as HTMLElement;
     // Snap back in quickly
     if (headline) {
       headline.style.transition = "opacity 0.2s ease, transform 0.2s ease";
@@ -377,6 +384,22 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
     });
   }, [input, conversation, startConversation, showGreeting]);
 
+  // Send a preset message from qualifier buttons
+  const sendPreset = useCallback((text: string) => {
+    setInput("");
+    onTypingChange?.(false);
+    setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
+
+    if (conversation.status !== "connected") {
+      startConversation(text).then(() => {
+        requestAnimationFrame(() => inputRef.current?.focus());
+      });
+    } else {
+      conversation.sendUserMessage(text);
+    }
+    inputRef.current?.focus();
+  }, [conversation, startConversation, onTypingChange]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -389,12 +412,14 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInput(e.target.value);
+      const val = e.target.value;
+      setInput(val);
+      onTypingChange?.(val.length > 0);
       if (conversation.status === "connected") {
         conversation.sendUserActivity();
       }
     },
-    [conversation]
+    [conversation, onTypingChange]
   );
 
   const markCardShown = useCallback((cardType: string) => {
@@ -447,17 +472,24 @@ export default function ElevenLabsChat({ onConversationEnd }: ElevenLabsChatProp
 
   return (
     <div className="two-msg" ref={containerRef}>
-      {/* Rotating greeting (before conversation starts) */}
-      {showGreeting && (
-        <div
-          className={`two-msg-card two-msg-agent${greetingExiting ? " two-msg-push-up" : ""}`}
-        >
-          <div className="two-msg-agent-indicator">
-            <div className="two-msg-agent-dot" />
-            <span className="two-msg-agent-label">Ads AI</span>
-          </div>
-          <div className="two-msg-text">
-            {GREETING_MESSAGE}
+      {/* Prominent prompt — shown before conversation starts */}
+      {!hasStarted && (
+        <div className="chat-prompt">
+          <p className="chat-prompt-text">Tell us about your brand</p>
+          <p className="chat-prompt-payoff">This AI will map out your campaign</p>
+          <div className="chat-prompt-buttons">
+            <button
+              className="chat-prompt-btn chat-prompt-btn--yes"
+              onClick={() => sendPreset("I run a food and drink business")}
+            >
+              I sell food or drink
+            </button>
+            <button
+              className="chat-prompt-btn chat-prompt-btn--no"
+              onClick={() => sendPreset("I don't run a food business, but I'm curious how this works")}
+            >
+              No, just looking
+            </button>
           </div>
         </div>
       )}
