@@ -27,9 +27,8 @@ interface Mote {
   maxLife: number;
 }
 
-// Desaturated (washed-out / white-shifted) palette for subtle particles
-const VIRIDIAN = { r: 140, g: 220, b: 195 };
-const SANDSTORM = { r: 250, g: 230, b: 160 };
+// Pure white for all particles — stars in space
+const WHITE = { r: 255, g: 255, b: 255 };
 
 function rgba(c: { r: number; g: number; b: number }, a: number): string {
   return `rgba(${c.r},${c.g},${c.b},${a})`;
@@ -83,7 +82,7 @@ export default function ConvergenceBackground() {
     // Create streaks — fewer on mobile so they feel sparse and purposeful
     const isMobile = w < 768;
     const isLowEnd = isMobile && (navigator.hardwareConcurrency ?? 4) <= 4;
-    const STREAK_COUNT = isLowEnd ? 14 : (isMobile ? 22 : 40);
+    const STREAK_COUNT = isLowEnd ? 17 : (isMobile ? 26 : 48);
     const streaks: Streak[] = [];
 
     function spawnStreak(): Streak {
@@ -108,11 +107,11 @@ export default function ConvergenceBackground() {
       return {
         x: sx,
         y: sy,
-        angle: angle + (Math.random() - 0.5) * 0.15,
+        angle: angle + (Math.random() - 0.5) * (isMobile ? 0.05 : 0.15),
         speed: 1.5 + Math.random() * 2,
-        length: 30 + Math.random() * 80,
-        opacity: 0.06 + Math.random() * 0.1,
-        width: 0.5 + Math.random() * 1,
+        length: 36 + Math.random() * 96,
+        opacity: isMobile ? (0.11 + Math.random() * 0.21) : (0.08 + Math.random() * 0.15),
+        width: 0.6 + Math.random() * 1.2,
       };
     }
 
@@ -128,7 +127,7 @@ export default function ConvergenceBackground() {
     }
 
     // Create motes — fewer on mobile, even fewer on low-end devices
-    const MOTE_COUNT = isLowEnd ? 8 : (isMobile ? 12 : 60);
+    const MOTE_COUNT = isLowEnd ? 10 : (isMobile ? 14 : 72);
     const motes: Mote[] = [];
 
     function spawnMote(): Mote {
@@ -150,15 +149,15 @@ export default function ConvergenceBackground() {
       const dx = focal.x - mx;
       const dy = focal.y - my;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const maxLife = 300 + Math.random() * 400;
+      const maxLife = isMobile ? (500 + Math.random() * 600) : (300 + Math.random() * 400);
 
       return {
         x: mx,
         y: my,
-        vx: dist > 0 ? (dx / dist) * (isMobile ? (3 + Math.random() * 4) : (0.3 + Math.random() * 0.5)) : 0,
-        vy: dist > 0 ? (dy / dist) * (isMobile ? (3 + Math.random() * 4) : (0.3 + Math.random() * 0.5)) : 0,
-        radius: isMobile ? (0.3 + Math.random() * 0.8) : (0.5 + Math.random() * 1.5),
-        opacity: isMobile ? (0.18 + Math.random() * 0.22) : (0.12 + Math.random() * 0.18),
+        vx: dist > 0 ? (dx / dist) * (isMobile ? (0.4 + Math.random() * 0.6) : (0.3 + Math.random() * 0.5)) : 0,
+        vy: dist > 0 ? (dy / dist) * (isMobile ? (0.4 + Math.random() * 0.6) : (0.3 + Math.random() * 0.5)) : 0,
+        radius: isMobile ? (0.2 + Math.random() * 0.5) : (0.4 + Math.random() * 1.1),
+        opacity: isMobile ? (0.48 + Math.random() * 0.22) : (0.17 + Math.random() * 0.26),
         life: Math.random() * maxLife,
         maxLife,
       };
@@ -176,8 +175,8 @@ export default function ConvergenceBackground() {
     let streakFadeRadius = w < 768 ? Math.max(120, screenDiag * 0.18) : Math.max(80, screenDiag * 0.12);  // event horizon: bigger on mobile
     let streakTargetSpeed = 3.5;
     let streakAccelRate = 0.02;
-    let streakHomingBase = 0.008;
-    let streakGravityRadius = 0;  // streaks use flat homing now (gravity well is for motes)
+    let streakHomingBase = isMobile ? 0.03 : 0.008;
+    let streakGravityRadius = isMobile ? screenDiag * 0.5 : 0;
 
     // Mote pull radius — much bigger on mobile so they accelerate from far away
     let motePullRadius = w < 768 ? screenDiag * 1.2 : Math.max(400, screenDiag * 0.55);
@@ -228,9 +227,9 @@ export default function ConvergenceBackground() {
         const tailY = s.y - Math.sin(s.angle) * s.length;
 
         const grad = ctx!.createLinearGradient(tailX, tailY, s.x, s.y);
-        grad.addColorStop(0, rgba(VIRIDIAN, 0));
-        grad.addColorStop(0.7, rgba(VIRIDIAN, streakOpacity * 0.5));
-        grad.addColorStop(1, rgba(VIRIDIAN, streakOpacity));
+        grad.addColorStop(0, rgba(WHITE, 0));
+        grad.addColorStop(0.7, rgba(WHITE, streakOpacity * 0.5));
+        grad.addColorStop(1, rgba(WHITE, streakOpacity));
 
         ctx!.beginPath();
         ctx!.moveTo(tailX, tailY);
@@ -255,7 +254,7 @@ export default function ConvergenceBackground() {
         // Pull toward focal — on mobile, strong pull from very far away
         const t = Math.max(0, 1 - dist / motePullRadius);
         const basePull = isMobile
-          ? 0.04 + 0.35 * t * t   // quadratic ramp: strong even at edges, fierce close in
+          ? 0.008 + 0.15 * t * t   // quadratic ramp: noticeable pull even mid-screen, strong near center
           : 0.003 + 0.04 * t * t * t;
         if (dist > 0) {
           m.vx += (dx / dist) * basePull;
@@ -263,7 +262,7 @@ export default function ConvergenceBackground() {
         }
 
         // Less damping on mobile so they maintain speed
-        const damping = isMobile ? 0.97 : 0.995;
+        const damping = isMobile ? 0.993 : 0.995;
         m.vx *= damping;
         m.vy *= damping;
 
@@ -279,10 +278,10 @@ export default function ConvergenceBackground() {
         if (lifeProg > 0.8) moteOpacity *= (1 - lifeProg) / 0.2;
         if (dist < streakFadeRadius) moteOpacity *= dist / streakFadeRadius;
 
-        const color = i % 7 === 0 ? SANDSTORM : VIRIDIAN;
+        const color = WHITE;
 
         // Glow
-        const gRad = m.radius * 5;
+        const gRad = m.radius * 4;
         const grad = ctx!.createRadialGradient(m.x, m.y, 0, m.x, m.y, gRad);
         grad.addColorStop(0, rgba(color, moteOpacity * 0.65));
         grad.addColorStop(1, rgba(color, 0));
@@ -297,8 +296,11 @@ export default function ConvergenceBackground() {
         ctx!.fillStyle = rgba(color, moteOpacity);
         ctx!.fill();
 
-        // Respawn once consumed by the event horizon (or expired)
-        if (m.life > m.maxLife || dist < streakFadeRadius * 0.3) {
+        // Respawn once consumed by the event horizon, expired, or escaping
+        // Dot product: if velocity points away from center, the mote escaped — kill it
+        const dotProduct = m.vx * dx + m.vy * dy;
+        const isEscaping = dotProduct < 0 && dist < streakFadeRadius * 2;
+        if (m.life > m.maxLife || dist < streakFadeRadius * 0.3 || isEscaping) {
           motes[i] = spawnMote();
         }
       }
@@ -322,8 +324,8 @@ export default function ConvergenceBackground() {
       streakFadeRadius = w < 768 ? Math.max(120, screenDiag * 0.18) : Math.max(80, screenDiag * 0.12);
       streakTargetSpeed = 3.5;
       streakAccelRate = 0.02;
-      streakHomingBase = 0.008;
-      streakGravityRadius = 0;
+      streakHomingBase = w < 768 ? 0.03 : 0.008;
+      streakGravityRadius = w < 768 ? screenDiag * 0.5 : 0;
       motePullRadius = w < 768 ? screenDiag * 1.2 : Math.max(400, screenDiag * 0.55);
     }
 
