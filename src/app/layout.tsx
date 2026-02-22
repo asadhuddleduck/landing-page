@@ -27,18 +27,18 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AI Ad Engine for F&B Brands | Huddle Duck",
+  title: "Your food looks incredible. Your ads don't. | Huddle Duck",
   description:
-    "AI that makes sure everyone near your restaurant knows about you. 3-week managed pilot for £497.",
+    "AI-powered advertising built for restaurant chains. 3-week managed pilot for £497.",
   metadataBase: new URL("https://start.huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "AI Ad Engine for F&B Brands | Huddle Duck",
+    title: "Your food looks incredible. Your ads don't.",
     description:
-      "AI that makes sure everyone near your restaurant knows about you. 3-week managed pilot for £497.",
+      "AI-powered advertising built for restaurant chains. 3-week managed pilot for £497.",
     url: "https://start.huddleduck.co.uk",
     images: [
       {
@@ -53,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Ad Engine for F&B Brands | Huddle Duck",
+    title: "Your food looks incredible. Your ads don't.",
     description:
-      "AI that makes sure everyone near your restaurant knows about you. 3-week managed pilot for £497.",
+      "AI-powered advertising built for restaurant chains. 3-week managed pilot for £497.",
     images: ["/og-image.jpg"],
   },
 };

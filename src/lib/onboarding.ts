@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { stripe } from "./stripe";
 import { db } from "./db";
-import { addContact, triggerEvent } from "./loops";
+import { addContact, triggerEvent, sendTransactional } from "./loops";
 import { createPurchaseTask } from "./notion";
 import { sendConversionEvent } from "./meta-capi";
 
@@ -41,7 +41,7 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
       ],
     }),
 
-    // 2. Loops: add contact then trigger event (sequential: contact must exist first)
+    // 2. Loops: add contact, trigger event, send purchase confirmation email
     (async () => {
       await addContact({
         email,
@@ -57,6 +57,15 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
         currency: "GBP",
         product: "AI Ad Engine Pilot",
       });
+      // Transactional purchase confirmation email
+      const txnId = process.env.LOOPS_PURCHASE_CONFIRMATION_ID;
+      if (txnId) {
+        await sendTransactional(email, txnId, {
+          firstName: name?.split(" ")[0] ?? "there",
+          product: "AI Ad Engine Pilot",
+          amount: "£497",
+        });
+      }
     })(),
 
     // 3. Notion: create task for Akmal
@@ -147,7 +156,7 @@ export async function handlePaymentIntentPurchase(
       ],
     }),
 
-    // 2. Loops: add contact then trigger event
+    // 2. Loops: add contact, trigger event, send purchase confirmation email
     (async () => {
       await addContact({
         email,
@@ -163,6 +172,15 @@ export async function handlePaymentIntentPurchase(
         currency: "GBP",
         product: "AI Ad Engine Pilot",
       });
+      // Transactional purchase confirmation email
+      const txnId = process.env.LOOPS_PURCHASE_CONFIRMATION_ID;
+      if (txnId) {
+        await sendTransactional(email, txnId, {
+          firstName: name?.split(" ")[0] ?? "there",
+          product: "AI Ad Engine Pilot",
+          amount: "£497",
+        });
+      }
     })(),
 
     // 3. Notion: create task for Akmal

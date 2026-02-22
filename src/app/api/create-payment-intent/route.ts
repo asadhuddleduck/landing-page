@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { addContact, triggerEvent } from "@/lib/loops";
 
 export const runtime = "nodejs";
 
@@ -41,6 +42,25 @@ export async function POST(request: NextRequest) {
         utm_campaign: utm_campaign ?? "",
       },
     });
+
+    // Fire checkout_started event to Loops (enables abandoned cart recovery).
+    // Non-blocking: don't let Loops failures break the checkout flow.
+    addContact({
+      email,
+      firstName: name?.split(" ")[0] ?? null,
+      lastName: name?.split(" ").slice(1).join(" ") || null,
+      source: "checkout_started",
+      utmSource: utm_source ?? null,
+      utmMedium: utm_medium ?? null,
+      utmCampaign: utm_campaign ?? null,
+    })
+      .then(() => triggerEvent(email, "checkout_started", {
+        amount: 497,
+        currency: "GBP",
+        product: "AI Ad Engine Pilot",
+        payment_intent_id: paymentIntent.id,
+      }))
+      .catch((err) => console.error("[create-payment-intent] Loops error:", err));
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
