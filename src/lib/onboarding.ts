@@ -11,6 +11,16 @@ import { sendConversionEvent } from "./meta-capi";
  * Fans out to all downstream services in parallel. Never throws.
  */
 export async function handlePurchase(session: Stripe.Checkout.Session) {
+  // Dedup: skip if this event was already processed (Stripe retries on 5xx)
+  const existing = await db.execute({
+    sql: "SELECT 1 FROM purchases WHERE stripe_session_id = ?",
+    args: [session.id],
+  });
+  if (existing.rows.length > 0) {
+    console.log(`[onboarding] Duplicate webhook for session ${session.id}, skipping`);
+    return;
+  }
+
   const email =
     session.customer_details?.email ?? session.customer_email ?? "";
   const name = session.customer_details?.name ?? null;
@@ -102,6 +112,16 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
 export async function handlePaymentIntentPurchase(
   paymentIntent: Stripe.PaymentIntent
 ) {
+  // Dedup: skip if this event was already processed (Stripe retries on 5xx)
+  const existing = await db.execute({
+    sql: "SELECT 1 FROM purchases WHERE stripe_session_id = ?",
+    args: [paymentIntent.id],
+  });
+  if (existing.rows.length > 0) {
+    console.log(`[onboarding] Duplicate webhook for PI ${paymentIntent.id}, skipping`);
+    return;
+  }
+
   const metadata = paymentIntent.metadata ?? {};
 
   // Fetch customer details from Stripe

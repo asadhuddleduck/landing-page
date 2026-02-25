@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
       await handlePurchase(session);
     } catch (err) {
       console.error("[webhook] Onboarding error (session):", err);
+      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
     }
   } else if (event.type === "payment_intent.succeeded") {
     // New flow (inline Payment Element)
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
       await handlePaymentIntentPurchase(paymentIntent);
     } catch (err) {
       console.error("[webhook] Onboarding error (payment_intent):", err);
+      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
     }
   }
 

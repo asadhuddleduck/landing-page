@@ -3,7 +3,11 @@ import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
-const PRICE_ID = process.env.STRIPE_PRICE_ID!.trim();
+function getPriceId(): string {
+  const id = process.env.STRIPE_PRICE_ID?.trim();
+  if (!id) throw new Error("STRIPE_PRICE_ID environment variable is not set");
+  return id;
+}
 
 // Simple in-memory rate limiting
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: PRICE_ID, quantity: 1 }],
+      line_items: [{ price: getPriceId(), quantity: 1 }],
       payment_method_types: ["card"],
       billing_address_collection: "required",
       phone_number_collection: { enabled: true },
