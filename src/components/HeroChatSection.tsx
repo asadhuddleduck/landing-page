@@ -1,16 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import ElevenLabsChat from "./ElevenLabsChat";
 import LogoStrip from "./LogoStrip";
 
 export default function HeroChatSection() {
   const [, setChatOutcome] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-
-  const handleTypingChange = useCallback((typing: boolean) => {
-    setIsTyping(typing);
-  }, []);
 
   return (
     <section className="hero">
@@ -19,11 +14,10 @@ export default function HeroChatSection() {
       <div className="hero-chat">
         <ElevenLabsChat
           onConversationEnd={(outcome) => setChatOutcome(outcome)}
-          onTypingChange={handleTypingChange}
         />
       </div>
 
-      <div className={`hero-logo-wrap${isTyping ? " hero-logo-wrap--hidden" : ""}`}>
+      <div className="hero-logo-wrap">
         <LogoStrip />
       </div>
     </section>

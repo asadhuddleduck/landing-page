@@ -16,6 +16,10 @@ export default function Footer() {
           Huddle Duck
         </a>
         . All rights reserved.
+        {" | "}
+        <a href="/privacy" className="footer-link">
+          Privacy Policy
+        </a>
       </p>
     </footer>
   );
