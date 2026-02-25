@@ -38,14 +38,16 @@ export default async function SuccessPage({
       const pi = await stripe.paymentIntents.retrieve(payment_intent, {
         expand: ["customer"],
       });
-      const customer = pi.customer;
-      if (customer && typeof customer !== "string" && !customer.deleted) {
-        if (customer.name) {
-          customerName = customer.name.split(" ")[0];
+      if (pi.status === "succeeded") {
+        const customer = pi.customer;
+        if (customer && typeof customer !== "string" && !customer.deleted) {
+          if (customer.name) {
+            customerName = customer.name.split(" ")[0];
+          }
         }
+        sessionRef = pi.id.slice(-8).toUpperCase();
+        eventId = pi.id;
       }
-      sessionRef = pi.id.slice(-8).toUpperCase();
-      eventId = pi.id;
     } catch {
       // Invalid PI. Show generic thank you
     }
@@ -53,11 +55,13 @@ export default async function SuccessPage({
     // Legacy flow: Checkout Session redirect
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id);
-      if (session.customer_details?.name) {
-        customerName = session.customer_details.name.split(" ")[0];
+      if (session.payment_status === "paid") {
+        if (session.customer_details?.name) {
+          customerName = session.customer_details.name.split(" ")[0];
+        }
+        sessionRef = session.id.slice(-8).toUpperCase();
+        eventId = session.id;
       }
-      sessionRef = session.id.slice(-8).toUpperCase();
-      eventId = session.id;
     } catch {
       // Invalid session. Show generic thank you
     }

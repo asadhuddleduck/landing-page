@@ -31,8 +31,7 @@ export async function POST(request: NextRequest) {
     }
     const { visitor_id, utm_source, utm_medium, utm_campaign } = body;
 
-    const origin =
-      request.headers.get("origin") || "https://start.huddleduck.co.uk";
+    const origin = "https://start.huddleduck.co.uk";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
