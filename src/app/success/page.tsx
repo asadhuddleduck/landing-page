@@ -66,7 +66,7 @@ export default async function SuccessPage({
   return (
     <main
       className="min-h-screen flex items-center justify-center px-6 py-20"
-      style={{ background: "var(--night-deep)" }}
+      style={{ background: "var(--black)" }}
     >
       <div className="max-w-lg w-full text-center">
         {/* Success icon */}
@@ -116,7 +116,7 @@ export default async function SuccessPage({
         {/* What happens next */}
         <div
           className="rounded-2xl p-8 text-left mb-10"
-          style={{ background: "var(--night-card)" }}
+          style={{ background: "var(--black-card)" }}
         >
           <h2
             className="text-lg font-bold mb-6"

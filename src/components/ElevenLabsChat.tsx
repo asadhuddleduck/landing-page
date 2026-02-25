@@ -567,7 +567,6 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
           autoComplete="off"
           enterKeyHint="send"
           data-form-type="other"
-          onContextMenu={(e) => e.preventDefault()}
         />
       </div>
 

@@ -5,9 +5,30 @@ export const runtime = "nodejs";
 
 const PRICE_ID = process.env.STRIPE_PRICE_ID!.trim();
 
+// Simple in-memory rate limiting
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 5;
+const RATE_WINDOW = 600_000; // 10 minutes
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+    if (entry && now < entry.resetAt) {
+      if (entry.count >= RATE_LIMIT) {
+        return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      }
+      entry.count++;
+    } else {
+      rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+    }
+
     const body = await request.json();
+    if (typeof body !== "object" || body === null) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
     const { visitor_id, utm_source, utm_medium, utm_campaign } = body;
 
     const origin =

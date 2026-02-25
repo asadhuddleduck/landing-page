@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 
@@ -9,16 +9,24 @@ interface StickyCheckoutCTAProps {
 }
 
 export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProps) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const hasSeenCheckout = useRef(false);
 
-  // Hide when #checkout section is in viewport
   useEffect(() => {
     const checkoutEl = document.getElementById("checkout");
     if (!checkoutEl) return;
 
+    // Track when checkout enters/leaves viewport
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setVisible(!entry.isIntersecting);
+        if (entry.isIntersecting) {
+          hasSeenCheckout.current = true;
+          setVisible(false);
+        } else if (hasSeenCheckout.current) {
+          // Checkout left viewport — only show if it's ABOVE us (we scrolled past)
+          const rect = checkoutEl.getBoundingClientRect();
+          setVisible(rect.top < 0);
+        }
       },
       { threshold: 0.1 }
     );

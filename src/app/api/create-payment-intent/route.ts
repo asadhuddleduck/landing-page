@@ -4,8 +4,28 @@ import { addContact, triggerEvent } from "@/lib/loops";
 
 export const runtime = "nodejs";
 
+// Simple in-memory rate limiting (resets on cold start, basic bot protection)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 5;
+const RATE_WINDOW = 600_000; // 10 minutes
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+    if (entry && now < entry.resetAt) {
+      if (entry.count >= RATE_LIMIT) {
+        return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      }
+      entry.count++;
+    } else {
+      rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+    }
+
     const body = await request.json();
     const {
       email,
@@ -17,8 +37,8 @@ export async function POST(request: NextRequest) {
       utm_campaign,
     } = body;
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
+      return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
     }
 
     // Create a Stripe Customer so we capture contact details
