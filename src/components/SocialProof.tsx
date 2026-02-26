@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const metrics = [
   { end: 125, suffix: "+", label: "locations", prefix: "" },
-  { end: 9.7, suffix: "M+", label: "ad spend managed", prefix: "£", decimals: 1 },
-  { end: 10, suffix: "/10", label: "avg client NPS (3mo+)", prefix: "" },
+  { end: 10, suffix: "/10", label: "avg client rating (3mo+)", prefix: "" },
   { end: 7, suffix: "", label: "years running", prefix: "" },
 ];
 
@@ -13,10 +12,9 @@ interface MetricDef {
   end: number;
   suffix: string;
   prefix: string;
-  decimals?: number;
 }
 
-function AnimatedNumber({ end, suffix, prefix, decimals }: MetricDef) {
+function AnimatedNumber({ end, suffix, prefix }: MetricDef) {
   const [value, setValue] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const hasAnimated = useRef(false);
@@ -50,11 +48,9 @@ function AnimatedNumber({ end, suffix, prefix, decimals }: MetricDef) {
     return () => observer.disconnect();
   }, [end]);
 
-  const display = decimals
-    ? value.toFixed(value >= end ? decimals : 1)
-    : end >= 1000
-      ? Math.round(value).toLocaleString()
-      : String(Math.round(value));
+  const display = end >= 1000
+    ? Math.round(value).toLocaleString()
+    : String(Math.round(value));
 
   return (
     <span ref={ref} className="social-proof-number">
@@ -69,7 +65,7 @@ export default function SocialProof() {
       <div className="social-proof-strip">
         {metrics.map((m, i) => (
           <div key={m.label} className="social-proof-item">
-            <AnimatedNumber end={m.end} suffix={m.suffix} prefix={m.prefix} decimals={m.decimals} />
+            <AnimatedNumber end={m.end} suffix={m.suffix} prefix={m.prefix} />
             <span className="social-proof-label">{m.label}</span>
             {i < metrics.length - 1 && <span className="social-proof-divider" />}
           </div>

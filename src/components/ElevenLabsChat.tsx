@@ -8,7 +8,7 @@ import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
 const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
 
-const GREETING_MESSAGE = "Tell me about your restaurants. I'll show you exactly how the pilot would work for your brand.";
+const GREETING_MESSAGE = "Tell me about your restaurants. I'll show you exactly how the trial would work for your brand.";
 
 // Animated placeholder phrases — randomly assembled from parts
 const PLACEHOLDER_CUISINES = [
@@ -87,7 +87,7 @@ function detectCard(text: string): "pricing" | "testimonial" | "cta" | null {
   if (lower.includes("checkout") || lower.includes("right below") || lower.includes("go ahead")) {
     return "cta";
   }
-  if (lower.includes("497") || (lower.includes("pilot") && lower.includes("£"))) {
+  if (lower.includes("497") || (lower.includes("trial") && lower.includes("£"))) {
     return "pricing";
   }
   if (

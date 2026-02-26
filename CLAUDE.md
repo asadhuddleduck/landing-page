@@ -1,15 +1,18 @@
-# Landing Page - Huddle Duck AI Ad Engine Pilot
+# Landing Page - Huddle Duck AI Ad Engine
 
 ## What This Is
-Self-serve landing page for Huddle Duck's AI Ad Engine Pilot (£497 one-time).
+Self-serve landing page for Huddle Duck's AI Ad Engine. Two tiers:
+- **Trial**: £497 one-time (3-week managed campaign)
+- **Unlimited**: £1,300/month (ongoing management, month-to-month)
+
 Hosted at `start.huddleduck.co.uk`. Uses an ElevenLabs AI chat agent as the primary sales interaction.
 
 ## Tech Stack
 - Next.js 16 (App Router, TypeScript, React 19)
 - Tailwind CSS v4 (`@tailwindcss/postcss`)
 - `@vercel/analytics`
-- Stripe (checkout + webhooks, `stripe` SDK v20 with `createFetchHttpClient()`)
-- ElevenLabs convai widget (custom element, dynamically injected via `useEffect`)
+- Stripe (PaymentIntent for Trial, Checkout Session for Unlimited subscriptions)
+- ElevenLabs React SDK (`@elevenlabs/react` useConversation hook, text-only chat)
 - Turso/LibSQL (purchase records, lazy proxy pattern)
 - Loops.so (email automation via API)
 - Notion API (task creation in Actions DB)
@@ -17,70 +20,87 @@ Hosted at `start.huddleduck.co.uk`. Uses an ElevenLabs AI chat agent as the prim
 - Meta Pixel (client-side pixel events via `fbevents.js`, deduplicated with CAPI)
 - Attribution tracking (visitor cookies + UTMs, POSTs to attribution-tracker API)
 - Hosting: Vercel
-- DNS: Cloudflare (`start.huddleduck.co.uk` CNAME → `cname.vercel-dns.com`)
+- DNS: Cloudflare (`start.huddleduck.co.uk` CNAME -> `cname.vercel-dns.com`)
 
 ## Design System
-Dark theme ported from `client-dashboards`. CSS custom properties in `globals.css`:
+Dark theme. CSS custom properties in `globals.css`:
+- Background: near-black `#050505` / `#0A0A0A`
 - Primary brand: viridian `#1EBA8F`
 - Accent: sandstorm `#F7CE46`
-- Backgrounds: night-deep `#001E2B`, night `#00334B`, night-card `#002639`
-- Text: primary `#F0F4F8`, secondary `#8BA3B8`, muted `#5A7A94`
+- Text: primary `#FFFFFF`, secondary `#999999`, muted `#555555`
+- Borders: `rgba(255,255,255,0.08)`
+- Fonts: Lato (body via `--font-primary`) + Caveat (handwritten accent via `--font-accent`)
+- Cards: `rgba(255,255,255,0.03)` bg, `rgba(255,255,255,0.08)` border
 
 ## File Map
 ```
 src/
   app/
-    globals.css            # Design system CSS variables + animations
-    layout.tsx             # Root layout, Inter font, metadata/OG tags
-    page.tsx               # Main page assembling all sections
-    success/page.tsx       # Post-purchase thank you page (server, fetches Stripe session)
+    globals.css              # Design system CSS variables + animations
+    layout.tsx               # Root layout, Lato + Caveat fonts, metadata/OG, AggregateOffer JSON-LD
+    page.tsx                 # Main page assembling all sections
+    sitemap.ts               # / and /privacy (success excluded)
+    robots.ts                # Allow all crawlers
+    success/page.tsx         # Post-purchase page (handles both session_id and payment_intent params)
+    privacy/page.tsx         # Privacy policy (static)
     api/
-      checkout/route.ts    # POST: creates Stripe Checkout Session (£497)
-      webhook/stripe/route.ts  # POST: handles checkout.session.completed webhook
+      checkout/route.ts      # POST: creates Stripe Checkout Session (Unlimited subscription or Trial payment)
+      create-payment-intent/route.ts  # POST: creates PaymentIntent for Trial inline payment
+      webhook/stripe/route.ts         # POST: handles checkout.session.completed + payment_intent.succeeded
+      webhook/elevenlabs/route.ts     # POST: ElevenLabs conversation webhook
   components/
-    Header.tsx             # Sticky header with duck logo + F&B badge (server)
-    HeroSection.tsx        # Hero headline with gradient text (server)
-    InfoAnimation.tsx      # 3-step process cards (server, placeholder for Framer Motion)
-    ElevenLabsChat.tsx     # ElevenLabs widget (client, loading/error states, 10s timeout)
-    CheckoutSection.tsx    # Pricing card + checkout button (client, visitor_id + pixel events)
-    SocialProof.tsx        # 3 testimonial cards (server, placeholder content)
-    FAQ.tsx                # 5-item expandable accordion (client, useState)
-    Footer.tsx             # Footer with logo + copyright (server)
-    MetaPixel.tsx          # Meta Pixel base code + trackPixelEvent export (client)
-    TrackingScript.tsx     # Attribution tracking POST to /api/track (client)
-    SuccessPixel.tsx       # Purchase pixel event on /success page (client)
-    CookieNotice.tsx       # Soft "We use cookies" dismissible banner (client)
+    Header.tsx               # Minimal header with logo + brand text (server)
+    HeroChatSection.tsx      # Hero section with ElevenLabs chat integration (client)
+    ElevenLabsChat.tsx       # ElevenLabs React SDK chat interface (client, text-only mode)
+    ChatCards.tsx             # Pricing card, testimonial cards, CTA card shown during/after chat (client)
+    LogoStrip.tsx             # Client brand logo carousel (server)
+    ConvergenceBackground.tsx # Animated background canvas (client)
+    SocialProof.tsx           # 3 animated stats: locations, rating, years (client)
+    CaseStudies.tsx           # 7 case study cards with expand/collapse (client)
+    FounderSection.tsx        # Founder profile section (server)
+    CheckoutSection.tsx       # Two-tier pricing cards + contact form + payment flow (client)
+    PaymentForm.tsx           # Stripe PaymentElement for inline Trial payment (client)
+    StickyCheckoutCTA.tsx     # Sticky bottom bar CTA after scrolling past checkout (client)
+    FAQ.tsx                   # 6-item accordion with highlighted key phrases (client)
+    Footer.tsx                # Minimal footer (server)
+    MetaPixel.tsx             # Meta Pixel base code + trackPixelEvent export (client)
+    TrackingScript.tsx        # Attribution tracking POST to /api/track (client)
+    SuccessPixel.tsx          # Purchase pixel event on /success page (client)
+    CookieNotice.tsx          # Soft "We use cookies" dismissible banner (client)
   lib/
-    db.ts                  # Turso lazy proxy (from client-dashboards)
-    stripe.ts              # Stripe client (fetchHttpClient for Vercel compat)
-    loops.ts               # Loops.so API wrapper (from attribution-tracker)
-    meta-capi.ts           # Meta Conversions API (from attribution-tracker)
-    notion.ts              # Notion task creation in Actions DB
-    onboarding.ts          # Post-purchase orchestrator (Promise.allSettled)
-    visitor.ts             # Cookie utilities: getVisitorId, getStoredUtms, getFbCookies
+    db.ts                    # Turso lazy proxy (from client-dashboards)
+    stripe.ts                # Stripe client (fetchHttpClient for Vercel compat)
+    loops.ts                 # Loops.so API wrapper (from attribution-tracker)
+    meta-capi.ts             # Meta Conversions API (from attribution-tracker)
+    notion.ts                # Notion task creation in Actions DB
+    onboarding.ts            # Post-purchase orchestrator (Promise.allSettled, atomic dedup)
+    visitor.ts               # Cookie utilities: getVisitorId, getStoredUtms, getFbCookies
 public/
-  duck-logo.png            # Huddle Duck logo
-  favicon.png              # Favicon (dark background)
-  og-image.jpg             # OG image for social sharing
+  duck-logo.png              # Huddle Duck logo
+  favicon.png                # Favicon (dark background)
+  og-image.jpg               # OG image for social sharing
+  logos/                     # Client brand logos for case studies + logo strip
 ```
 
+## Page Order
+Header -> HeroChatSection (with ElevenLabsChat + LogoStrip) -> SocialProof -> CaseStudies -> FounderSection -> CheckoutSection -> FAQ -> Footer
+
 ## ElevenLabs Integration
-- Agent ID: `4f58a5783e990de16e22e8effd8ba103118c603a76f123afbde18a66f4e1466e`
-- Loaded via: `useEffect` dynamically creates `<script>` tag and `<elevenlabs-convai>` custom element
-- Script URL: `https://unpkg.com/@elevenlabs/convai-widget-embed`
-- The widget renders as a floating orb in the bottom-right corner of the page
+- Agent ID: `agent_4501khrpmw5ceq8v78xbwzjjjh58`
+- Uses `@elevenlabs/react` SDK (`useConversation` hook) in text-only mode
+- CLOSER workflow: 8 subagent nodes (Opener -> Clarify -> Label -> Overview -> Sell -> Explain -> Reinforce -> Warm Exit)
+- 6 KB docs uploaded (IDs: A6zbmWoH0y6afhA9OTaf, IAPmRpv5R5mV8NhUjyvS, afXEPDvJU6eCWDJJ2Ok9, s5JhwFnGk0IG4wARaaaV, cJcA31AaMZy8QWulhJ4V, 7XpfPdnaX7z00TAylTMX)
+- Dynamic variables: visitor_id, UTMs, returning_visitor context
 
 ## Environment Variables
 
 ### In `.env.local` and Vercel
 | Variable | Purpose |
 |---|---|
-| `CLOUDFLARE_API_KEY` | Cloudflare Global API Key (for DNS management) |
-| `CLOUDFLARE_EMAIL` | Cloudflare account email |
-| `CLOUDFLARE_ZONE_ID` | Zone ID for huddleduck.co.uk |
-| `STRIPE_SECRET_KEY` | Stripe checkout (sk_live_...) |
+| `STRIPE_SECRET_KEY` | Stripe API (sk_live_...) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe.js browser-side (pk_live_...) |
-| `STRIPE_PRICE_ID` | Stripe Price ID for £497 product |
+| `STRIPE_PRICE_ID` | Stripe Price ID for £497 Trial product |
+| `STRIPE_UNLIMITED_PRICE_ID` | Stripe Price ID for £1,300/mo Unlimited subscription |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signature verification (whsec_...) |
 | `LOOPS_API_KEY` | Loops.so email automation |
 | `NOTION_TOKEN` | Notion API for task creation |
@@ -89,13 +109,19 @@ public/
 | `TURSO_DATABASE_URL` | Turso DB for purchase records |
 | `TURSO_AUTH_TOKEN` | Turso auth |
 | `NEXT_PUBLIC_TRACKING_URL` | Attribution tracker Vercel URL |
+| `ELEVENLABS_API_KEY` | ElevenLabs API for agent management |
+| `ELEVENLABS_WEBHOOK_SECRET` | ElevenLabs conversation webhook verification |
+| `CLOUDFLARE_API_KEY` | Cloudflare Global API Key (DNS management) |
+| `CLOUDFLARE_EMAIL` | Cloudflare account email |
+| `CLOUDFLARE_ZONE_ID` | Zone ID for huddleduck.co.uk |
 
 ### Key Values
 - `STRIPE_PRICE_ID`: `price_1T25qbEMAaEi0IoguZpHE4GB` (£497 GBP, one-time)
-- Stripe Product ID: `prod_U062C0TCKDiq7U` ("AI Ad Engine Pilot")
-- Stripe Webhook ID: `we_1T25xGEMAaEi0IogUV98EJTE`
+- `STRIPE_UNLIMITED_PRICE_ID`: `price_1T52ZXEMAaEi0IogKnHfM4fI` (£1,300 GBP, recurring monthly)
+- Stripe Product ID (Trial): `prod_U062C0TCKDiq7U` ("AI Ad Engine Trial")
+- Stripe Webhook ID: `we_1T25xGEMAaEi0IogUV98EJTE` (subscribed to: checkout.session.completed, payment_intent.succeeded)
 - `META_PIXEL_ID`: `1780686211962897`
-- ElevenLabs Agent ID: `4f58a5783e990de16e22e8effd8ba103118c603a76f123afbde18a66f4e1466e`
+- ElevenLabs Agent ID: `agent_4501khrpmw5ceq8v78xbwzjjjh58`
 - Akmal's Notion User ID: `ac601ede-0d62-4107-b59e-21c0530b5348`
 - Notion Actions DB ID: `2c384fd7-bc4e-81a1-b469-e33afbf19157`
 - Notion Actions DB data source: `collection://2c384fd7-bc4e-813d-99c4-000b9a6385c8`
@@ -105,58 +131,48 @@ public/
 
 ## DNS
 - Domain: `start.huddleduck.co.uk`
-- CNAME: `start` → `cname.vercel-dns.com` (DNS only, not proxied)
+- CNAME: `start` -> `cname.vercel-dns.com` (DNS only, not proxied)
 - Cloudflare Zone ID: `253840e28c6c8ec53828f5929bc45732`
 - Nameservers: `adelaide.ns.cloudflare.com`, `phil.ns.cloudflare.com`
 
-## Stripe Integration
-- **Checkout flow**: Button click → POST `/api/checkout` → Stripe Checkout Session → redirect to Stripe → `/success?session_id=...`
-- **Webhook**: `checkout.session.completed` → fires 4 downstream actions via `Promise.allSettled`:
-  1. Turso: `INSERT OR REPLACE` purchase record (idempotent)
-  2. Loops: `addContact` + `triggerEvent("purchase_completed")`
-  3. Notion: create task in Actions DB for Akmal
-  4. Meta CAPI: `Purchase` event with `stripe_{session_id}` for dedup
-- **Stripe SDK**: Must use `Stripe.createFetchHttpClient()` on Vercel (default node:http fails)
-- **Webhook endpoint**: `https://start.huddleduck.co.uk/api/webhook/stripe`
+## Payment Architecture
+Two parallel payment flows:
+
+**Trial (£497 one-time) - Inline:**
+Button click -> POST `/api/create-payment-intent` -> PaymentIntent created -> Stripe PaymentElement renders inline -> User pays -> `/success?payment_intent=pi_xxx` -> Webhook: `payment_intent.succeeded` -> `handlePaymentIntentPurchase`
+
+**Unlimited (£1,300/mo subscription) - Redirect:**
+Button click -> POST `/api/checkout` -> Checkout Session created (subscription mode) -> Redirect to Stripe hosted page -> `/success?session_id=cs_xxx` -> Webhook: `checkout.session.completed` -> `handlePurchase`
+
+**Webhook dedup:** PaymentIntents from Checkout Sessions are skipped via `metadata.tier` check. Only PIs created by our `/api/create-payment-intent` route have `metadata.tier` set.
+
+**Post-purchase orchestration** (both flows, via `Promise.allSettled`):
+1. Turso: Atomic `INSERT ... ON CONFLICT(stripe_session_id) DO NOTHING` (dedup)
+2. Loops: `addContact` + `triggerEvent("purchase_completed")` + `sendTransactional`
+3. Notion: Create task for Akmal in Actions DB
+4. Meta CAPI: `Purchase` event with `stripe_{id}` for pixel dedup
 
 ## Turso Database
 - DB name: `landing-page`
-- Table: `purchases` (stripe_session_id UNIQUE, email, name, phone, amount_total, currency, UTMs, visitor_id)
+- Table: `purchases` (stripe_session_id UNIQUE, stripe_customer_id, email, name, phone, amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign, tier, stripe_subscription_id, recurring, created_at)
 - Query: `turso db shell landing-page "SELECT * FROM purchases"`
 
-## Session Plan
-- **Session 1** (DONE): Project scaffold, design system, all components, ElevenLabs widget, deploy
-- **Session 2** (DONE): Stripe checkout, post-purchase automation (Loops, Notion task, Meta CAPI, Turso)
-- **Session 3** (DONE): Attribution tracking, Meta Pixel, cookie notice, SEO, production polish
-- **Session 4** (DONE): Landing page copy, info animation (Framer Motion), social proof content
-- **Session 5** (DONE): Various fixes and refinements
-- **Session 6** (DONE): Full design overhaul v2 — "Singularity Aesthetic" redesign. Near-black (#050505) background, CSS-only breathing singularity orb as hero centrepiece, Playfair Display serif headlines + Inter body font pairing, radical minimalism with generous clamp()-based spacing. Stripped all glassmorphism, particles, gradient borders, shimmer effects. InfoAnimation consolidated as 3-step summary inside CheckoutSection. SocialProof condensed to metrics-only strip. Header/Footer minimised.
-
-## Design System (Session 6 v2 — Singularity)
-- **Background**: Near-black `#050505` with single subtle radial glow (`.bg-glow`)
-- **Fonts**: Playfair Display (serif, headlines via `--font-serif`) + Inter (body via `--font-sans`)
-- **Singularity orb**: CSS-only breathing orb (`.singularity`, `.singularity-core`, `.singularity-glow`, `.singularity-ring`, `.singularity-ring-outer`) — 5s breathing animation, rotating rings
-- **Cards**: `.card` class — `rgba(255,255,255,0.03)` bg, `rgba(255,255,255,0.08)` border, 1rem radius
-- **Spacing**: `section-spacing` class uses `clamp(4rem, 12vw, 8rem)` padding
-- **Colours**: `--viridian: #1EBA8F`, `--sandstorm: #F7CE46`, `--text-primary: #E8E8E8`, `--text-secondary: #888888`, `--text-muted: #555555`
-- **Borders**: White-based (`rgba(255,255,255,0.08)`) not viridian-based
-- **No**: glass cards, gradient borders, aurora mesh, dot grid, particles, shimmer, glow-pulse
-- **Page order**: Hero → ElevenLabsChat → SocialProof → CheckoutSection → FAQ
-
 ## Attribution & Tracking
-- **Visitor ID**: `_vid` cookie (365 days, `crypto.randomUUID()`) — created by `visitor.ts`
+- **Visitor ID**: `_vid` cookie (365 days, `crypto.randomUUID()`) - created by `visitor.ts`
 - **UTMs**: First-touch UTMs stored in `_utms` cookie (JSON), never overwritten
 - **TrackingScript**: POSTs page views to `NEXT_PUBLIC_TRACKING_URL/api/track` with visitor_id, UTMs, _fbc/_fbp
-- **Meta Pixel**: `fbevents.js` injected on load. Fires PageView, InitiateCheckout, Purchase
-- **CAPI dedup**: Purchase pixel uses `event_id: stripe_{session_id}` matching server-side CAPI in onboarding.ts
+- **Meta Pixel**: `fbevents.js` injected on load. Fires PageView, InitiateCheckout (tier-aware value), Purchase (on success)
+- **CAPI dedup**: Purchase pixel uses `event_id: stripe_{id}` matching server-side CAPI in onboarding.ts
+- **fbc/fbp passthrough**: Browser cookies -> API route body -> Stripe metadata -> webhook -> Meta CAPI
 - **Attribution tracker**: Deployed at `https://attribution-tracker.vercel.app` (separate Turso DB: `attribution-tracker`)
 - **Cookie notice**: Soft banner with "Got it" button, stored in localStorage, no consent gating
 
 ## SEO
-- `robots.ts` — allows all crawlers, points to sitemap
-- `sitemap.ts` — lists `/` and `/success`
-- JSON-LD structured data in layout.tsx (Organization + Product schemas)
+- `robots.ts` - allows all crawlers, points to sitemap
+- `sitemap.ts` - lists `/` and `/privacy` (success page excluded)
+- JSON-LD: Organization schema + AggregateOffer (lowPrice 497, highPrice 1300, offerCount 2)
 - Full OG/Twitter metadata in layout.tsx
+- Success page has `robots: { index: false, follow: false }`
 
-## Build Plan
-Full build plan at `~/.claude/plans/effervescent-tumbling-crystal.md`
+## Key Architectural Decisions
+See `DECISIONS.md` for 22 documented decisions covering payment flows, webhook design, dedup, pricing, tracking, and external system integration.

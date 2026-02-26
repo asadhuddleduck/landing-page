@@ -9,7 +9,12 @@ import { track } from "@vercel/analytics";
  * Uses stripe_{eventId} as event_id to deduplicate with server-side CAPI.
  * eventId can be a checkout session ID or a payment intent ID.
  */
-export default function SuccessPixel({ eventId }: { eventId: string }) {
+interface SuccessPixelProps {
+  eventId: string;
+  value?: number;
+}
+
+export default function SuccessPixel({ eventId, value = 497 }: SuccessPixelProps) {
   const hasFired = useRef(false);
 
   useEffect(() => {
@@ -18,12 +23,12 @@ export default function SuccessPixel({ eventId }: { eventId: string }) {
 
     trackPixelEvent(
       "Purchase",
-      { value: 497, currency: "GBP" },
+      { value, currency: "GBP" },
       `stripe_${eventId}`
     );
 
     track("purchase_completed", { event_id: eventId });
-  }, [eventId]);
+  }, [eventId, value]);
 
   return null;
 }

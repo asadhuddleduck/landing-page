@@ -1,31 +1,16 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { getVisitorId, getStoredUtms } from "@/lib/visitor";
+import { getVisitorId, getStoredUtms, getFbCookies } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 import PaymentForm from "./PaymentForm";
-
-const steps = [
-  "AI deep-researches your audience",
-  "Your real content remade into ads",
-  "3 weeks managed, then you decide",
-];
-
-const features = [
-  "Deep audience research from social data & competitor analysis",
-  "Ad creative remade from your existing content",
-  "Full AI campaign setup & 3-week managed run",
-  "First campaign assets within 72 hours",
-  "Live performance dashboard included",
-  "Tracking report & strategy review call",
-  "Ad spend not included — minimum £10/location/day recommended",
-];
 
 type CheckoutStep = "idle" | "details" | "paying" | "success";
 
 export default function CheckoutSection() {
   const [step, setStep] = useState<CheckoutStep>("idle");
+  const [selectedTier, setSelectedTier] = useState<"trial" | "unlimited">("trial");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -34,9 +19,45 @@ export default function CheckoutSection() {
   const [paymentIntentId, setPaymentIntentId] = useState("");
   const [error, setError] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
+  const submitting = useRef(false);
+
+  const steps = selectedTier === "unlimited"
+    ? [
+        "AI deep-researches your audience",
+        "Your real content remade into ads",
+        "Ongoing monthly management",
+      ]
+    : [
+        "AI deep-researches your audience",
+        "Your real content remade into ads",
+        "3 weeks managed, then you decide",
+      ];
+
+  const features = selectedTier === "unlimited"
+    ? [
+        "Deep audience research from social data & competitor analysis",
+        "Ad creative remade from your existing content",
+        "Unlimited AI campaigns, managed monthly",
+        "First campaign assets within 72 hours",
+        "Live performance dashboard included",
+        "Monthly performance reports & strategy calls",
+        "Ad spend not included. Minimum £10/location/day recommended",
+      ]
+    : [
+        "Deep audience research from social data & competitor analysis",
+        "Ad creative remade from your existing content",
+        "Full AI campaign setup & 3-week managed run",
+        "First campaign assets within 72 hours",
+        "Live performance dashboard included",
+        "Tracking report & strategy review call",
+        "Ad spend not included. Minimum £10/location/day recommended",
+      ];
 
   function handleStartCheckout() {
-    trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
+    trackPixelEvent("InitiateCheckout", {
+      value: selectedTier === "unlimited" ? 1300 : 497,
+      currency: "GBP",
+    });
     track("checkout_click");
     setStep("details");
     // Scroll the form into view after a tick
@@ -46,8 +67,10 @@ export default function CheckoutSection() {
   }
 
   async function handleContinueToPayment(e: React.FormEvent) {
+    if (submitting.current) return;
     e.preventDefault();
-    if (!email) return;
+    submitting.current = true;
+    if (!email) { submitting.current = false; return; }
 
     setLoading(true);
     setError("");
@@ -67,38 +90,72 @@ export default function CheckoutSection() {
         utms.utm_campaign = stored.utm_campaign || "";
       }
 
-      const res = await fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          phone,
-          visitor_id: vid,
-          ...utms,
-        }),
-      });
+      const { fbc, fbp } = getFbCookies();
 
-      const data = await res.json();
+      if (selectedTier === "unlimited") {
+        // Unlimited tier: redirect to Stripe Checkout
+        const res = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tier: "unlimited",
+            email,
+            name,
+            phone,
+            visitor_id: vid,
+            fbc,
+            fbp,
+            ...utms,
+          }),
+        });
 
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
-        setPaymentIntentId(data.paymentIntentId);
-        setStep("paying");
-        setTimeout(() => {
-          formRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }, 100);
+        const data = await res.json();
+
+        if (data.url) {
+          window.location.href = data.url;
+          return; // Keep loading state while redirecting
+        } else {
+          console.error("[checkout] No redirect URL returned:", data);
+          setError("Something went wrong. Please try again.");
+        }
       } else {
-        console.error("[checkout] No client secret returned:", data);
-        setError("Something went wrong. Please try again.");
+        // Trial tier: existing PaymentIntent flow
+        const res = await fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            name,
+            phone,
+            visitor_id: vid,
+            fbc,
+            fbp,
+            ...utms,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
+          setPaymentIntentId(data.paymentIntentId);
+          setStep("paying");
+          setTimeout(() => {
+            formRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }, 100);
+        } else {
+          console.error("[checkout] No client secret returned:", data);
+          setError("Something went wrong. Please try again.");
+        }
       }
     } catch (err) {
       console.error("[checkout] Error:", err);
       setError("Something went wrong. Please try again.");
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   }
@@ -106,13 +163,79 @@ export default function CheckoutSection() {
   return (
     <section id="checkout" className="section">
       <div className="checkout-card">
-        <p className="checkout-label">AI Ad Engine Pilot</p>
+        {/* Tier selector — two cards side by side */}
+        <div className="pricing-grid" role="radiogroup" aria-label="Select pricing tier">
+          {/* Trial card */}
+          <div
+            className={`pricing-tier ${selectedTier === "trial" ? "pricing-tier--selected" : ""}`}
+            role="radio"
+            tabIndex={0}
+            aria-checked={selectedTier === "trial"}
+            onClick={() => {
+              if (selectedTier !== "trial") {
+                setSelectedTier("trial");
+                setStep("idle");
+                setClientSecret("");
+                setPaymentIntentId("");
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (selectedTier !== "trial") {
+                  setSelectedTier("trial");
+                  setStep("idle");
+                  setClientSecret("");
+                  setPaymentIntentId("");
+                }
+              }
+            }}
+          >
+            <span className="pricing-tier-badge pricing-tier-badge--new">NEW</span>
+            <p className="pricing-tier-name">AI Ad Engine Trial</p>
+            <div className="pricing-tier-price">
+              <span className="pricing-tier-currency">£</span>
+              <span className="pricing-tier-amount">497</span>
+            </div>
+            <p className="pricing-tier-period">one-time</p>
+            <p className="pricing-tier-detail">1 campaign</p>
+          </div>
 
-        <div className="checkout-price">
-          <span className="checkout-currency">£</span>
-          <span className="checkout-amount">497</span>
+          {/* Unlimited card */}
+          <div
+            className={`pricing-tier ${selectedTier === "unlimited" ? "pricing-tier--selected" : ""}`}
+            role="radio"
+            tabIndex={0}
+            aria-checked={selectedTier === "unlimited"}
+            onClick={() => {
+              if (selectedTier !== "unlimited") {
+                setSelectedTier("unlimited");
+                setStep("idle");
+                setClientSecret("");
+                setPaymentIntentId("");
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (selectedTier !== "unlimited") {
+                  setSelectedTier("unlimited");
+                  setStep("idle");
+                  setClientSecret("");
+                  setPaymentIntentId("");
+                }
+              }
+            }}
+          >
+            <p className="pricing-tier-name">AI Ad Engine Unlimited</p>
+            <div className="pricing-tier-price">
+              <span className="pricing-tier-currency">£</span>
+              <span className="pricing-tier-amount">1,300</span>
+            </div>
+            <p className="pricing-tier-period">per month</p>
+            <p className="pricing-tier-detail">Unlimited campaigns</p>
+          </div>
         </div>
-        <p className="checkout-payment-type">one-time payment</p>
 
         <hr className="checkout-divider" />
 
@@ -155,7 +278,7 @@ export default function CheckoutSection() {
         {step === "idle" && (
           <>
             <button onClick={handleStartCheckout} className="checkout-btn">
-              Start Your Pilot
+              {selectedTier === "trial" ? "Start Your Trial" : "Start Unlimited"}
             </button>
             <div className="checkout-trust">
               <span>Powered by</span>
@@ -293,8 +416,8 @@ export default function CheckoutSection() {
         )}
       </div>
 
-      {/* Credit guarantee badge — below the card */}
-      {step !== "success" && (
+      {/* Credit guarantee badge — below the card, only for trial tier */}
+      {step !== "success" && selectedTier === "trial" && (
         <div className="guarantee-badge">
           <div className="guarantee-badge-shield">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -303,7 +426,7 @@ export default function CheckoutSection() {
           </div>
           <div className="guarantee-badge-content">
             <p className="guarantee-badge-label">CREDIT GUARANTEE</p>
-            <p className="guarantee-badge-text">Your pilot fee is fully credited when you upgrade.</p>
+            <p className="guarantee-badge-text">£497 Trial fee fully credited if you upgrade within 30 days.</p>
           </div>
         </div>
       )}

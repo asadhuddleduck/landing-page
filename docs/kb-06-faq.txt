@@ -1,40 +1,39 @@
 FREQUENTLY ASKED QUESTIONS
 
-WHAT IS THE AI AD ENGINE PILOT?
-A 3-week managed AI ad campaign where the system researches your audience, produces ad creative (copy, voiceover, video), builds and launches campaigns, optimises weekly, and delivers a tracking report with a strategy review. Think of it as a mutual trial: you see what the AI Ad Engine can do, and it determines if your business is a fit for ongoing management.
+WHAT DO I GET FOR £497?
+A fully managed 3-week advertising campaign. The AI researches your audience, produces ad creative from your existing content, builds and launches your campaigns, and optimises them weekly. At the end, you get a full tracking report and a strategy review call. Think of it as a mutual trial. You see real results, and we both decide if ongoing management is the right fit.
 
-HOW LONG DOES THE PILOT RUN?
-The managed campaign runs for 3 weeks from launch day. Before that, there is a research and creative production phase where the audience profile and assets are built. After the 3-week run, you receive a full tracking report and strategy review call.
+IS AD SPEND INCLUDED IN THE PRICE?
+The £497 covers strategy, creative production, and campaign management. Ad spend is separate. You pay Meta directly. We recommend a minimum of £10 per location per day. So for a single location, your total investment is £497 plus roughly £210 in ad spend over the 3 weeks.
 
-WHAT PLATFORMS DO YOU ADVERTISE ON?
-The AI Ad Engine runs AI ad campaigns across social platforms, but not the way most agencies do. Most agencies run standard ads which rarely work for food businesses. The AI Ad Engine uses platform APIs as a delivery vehicle to reach a specific audience at scale. The strategy is the audience research and targeting. The platform is just how it gets delivered.
+HOW IS THIS DIFFERENT FROM A MARKETING AGENCY?
+A traditional agency charges £2,000 to £5,000 per month, takes weeks to onboard, and runs the same playbook for every client. The AI deep-researches your specific audience, competitors, and local market before a single ad goes live. You get a strategy built on data, not guesswork. The Trial is £497 for 3 weeks of fully managed campaigns. Compare that to a single month with a traditional agency.
 
-DO I NEED TO PROVIDE AD CREATIVE OR A BUDGET?
-All creative (ad copy, voiceover scripts, and video assets) is produced as part of the Pilot. Existing content is repurposed into conversion-focused ad variations. You do need to cover your own ad budget separately, with a minimum of £10 per location per day. The £497 Pilot fee covers strategy, production, and management work.
+WHAT HAPPENS WHEN THE TRIAL ENDS?
+Two options. You can upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing AI-managed campaigns, monthly reports, and strategy calls. Month-to-month, cancel any time. Or you take the insights from your tracking report and run things yourself. Either way, your £497 Trial fee is fully credited if you upgrade within 30 days.
 
-WILL MY ADS LOOK LIKE THEY WERE MADE BY AI?
-No. AI content is never generated from scratch. Your customers can spot that instantly and it erodes trust. Instead, your existing social media content is remade into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.
+IS THERE A LONG-TERM CONTRACT?
+No. The Trial is a one-time payment. If you upgrade to Unlimited, it is month-to-month. No lock-in, no cancellation fees, no notice period. You stay because the results make sense, not because of a contract.
 
-HOW IS THIS DIFFERENT FROM HIRING A MARKETING AGENCY?
-A traditional agency charges £2,000 to £5,000 per month, takes weeks to onboard, and runs generic playbooks. The AI Ad Engine deep-researches your specific audience, competitors, and market before a single ad goes live. You get a strategy built on data, not guesswork, at a fraction of the cost. The Pilot is £497 for 3 weeks of fully managed AI ad campaigns. Compare that to a single billboard, a TV commercial, or a month with a traditional agency.
+DOES THE PRICE CHANGE IF I HAVE MULTIPLE LOCATIONS?
+Same price, whether you have 2 locations or 200. Each location gets its own targeting and campaigns tailored to its local audience. Start with a Trial or Unlimited plan and we scale from there.
 
-WHAT HAPPENS AFTER THE PILOT ENDS?
-You can upgrade to ongoing management. Month-to-month, no long-term contracts. Your £497 Pilot fee is fully credited when you upgrade within 30 days. The retainer is £1,300 per month. Or you can take the insights from your tracking report and run campaigns yourself.
+ADDITIONAL CONTEXT FOR THE AI AGENT (not shown on the landing page):
 
 IS THIS AVAILABLE OUTSIDE THE UK?
 Yes. The AI Ad Engine works globally. UK is the primary market, with UAE and Dubai as secondary markets. The system works anywhere AI ad campaigns can run.
 
 WHAT IF YOU DO NOT HAVE MUCH SOCIAL MEDIA CONTENT TO REPURPOSE?
-The system can work with minimal content, but it helps to have some. During the Pilot intake, available content is assessed. Even a handful of food photos or short clips from social media can be repurposed into effective ad variations.
+The system can work with minimal content, but it helps to have some. During the Trial intake, available content is assessed. Even a handful of food photos or short clips from social media can be repurposed into effective ad variations.
 
 HOW QUICKLY CAN YOU START?
-First campaign assets are ready within 72 hours of onboarding. The Pilot itself runs for 3 weeks once campaigns go live.
+First campaign assets are ready within 72 hours of onboarding. The Trial itself runs for 3 weeks once campaigns go live.
 
-CAN YOU RUN THIS FOR JUST ONE LOCATION?
-Yes. The Pilot can focus on one location. The system is designed for multi-location scale, but works fine for individual location campaigns too.
+WHAT PLATFORMS DO YOU ADVERTISE ON?
+Meta (Facebook and Instagram), but not the way most agencies use it. The AI uses Meta's API as a delivery vehicle to reach a specific audience at scale. The strategy is the audience research and targeting. Meta is just how it gets delivered.
 
-DO YOU WORK WITH ALCOHOLIC BEVERAGE BRANDS?
-The core focus is non-alcoholic F&B brands: restaurants, cafes, dessert shops, burger brands, QSR chains, and similar concepts. Alcoholic beverage brands may have additional advertising restrictions that could limit campaign effectiveness.
+WILL MY ADS LOOK LIKE THEY WERE MADE BY AI?
+No. AI content is never generated from scratch. Existing social media content is remade into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.
 
 WHAT IF IT DOES NOT WORK?
-The Pilot is a 3-week test. You will see real data within that time. If it is not working, you have spent £497 and you know. No contracts, no ongoing commitment. That is exactly why the process starts with a Pilot instead of asking for a retainer upfront.
+The Trial is a 3-week test. You will see real data within that time. If it is not working, you have spent £497 and you know. No contracts, no ongoing commitment. That is exactly why the process starts with a Trial instead of asking for a monthly commitment upfront.

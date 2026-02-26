@@ -42,10 +42,10 @@ export default function PrivacyPolicy() {
             <strong>Data Controller:</strong> Asad Shah, Founder
           </p>
           <p>
-            We are an AI-accelerated paid advertising agency serving
-            multi-location food and beverage brands. We build and manage
-            advertising campaigns using Meta platforms (Facebook and Instagram),
-            automated messaging tools, and related technologies.
+            We are an AI-powered advertising tool built for multi-location
+            food and beverage brands. We build and manage advertising campaigns
+            using Meta platforms (Facebook and Instagram), automated messaging
+            tools, and related technologies.
           </p>
           <p>
             This privacy policy explains how we collect, use, store, share, and

@@ -11,47 +11,64 @@ import { sendConversionEvent } from "./meta-capi";
  * Fans out to all downstream services in parallel. Never throws.
  */
 export async function handlePurchase(session: Stripe.Checkout.Session) {
-  // Dedup: skip if this event was already processed (Stripe retries on 5xx)
-  const existing = await db.execute({
-    sql: "SELECT 1 FROM purchases WHERE stripe_session_id = ?",
-    args: [session.id],
-  });
-  if (existing.rows.length > 0) {
-    console.log(`[onboarding] Duplicate webhook for session ${session.id}, skipping`);
-    return;
-  }
-
   const email =
     session.customer_details?.email ?? session.customer_email ?? "";
   const name = session.customer_details?.name ?? null;
   const phone = session.customer_details?.phone ?? null;
   const metadata = session.metadata ?? {};
 
-  const results = await Promise.allSettled([
-    // 1. Record in Turso (idempotent via INSERT OR REPLACE on unique stripe_session_id)
-    db.execute({
-      sql: `INSERT OR REPLACE INTO purchases
-            (stripe_session_id, stripe_customer_id, email, name, phone,
-             amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [
-        session.id,
-        typeof session.customer === "string"
-          ? session.customer
-          : session.customer?.id ?? null,
-        email,
-        name,
-        phone,
-        session.amount_total,
-        session.currency,
-        metadata.visitor_id ?? null,
-        metadata.utm_source ?? null,
-        metadata.utm_medium ?? null,
-        metadata.utm_campaign ?? null,
-      ],
-    }),
+  const tier = (metadata.tier as "trial" | "unlimited") ?? "trial";
+  const amount = tier === "unlimited" ? 1300 : 497;
+  const productName = tier === "unlimited" ? "AI Ad Engine Unlimited" : "AI Ad Engine Trial";
+  const subscriptionId = session.subscription
+    ? typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription.id
+    : null;
 
-    // 2. Loops: add contact, trigger event, send purchase confirmation email
+  const fbc = metadata.fbc || undefined;
+  const fbp = metadata.fbp || undefined;
+  const clientIp = metadata.client_ip || undefined;
+  const clientUa = metadata.client_ua || undefined;
+
+  // 1. Atomic dedup via INSERT ... ON CONFLICT DO NOTHING
+  const insertResult = await db.execute({
+    sql: `INSERT INTO purchases
+          (stripe_session_id, stripe_customer_id, email, name, phone,
+           amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign,
+           tier, stripe_subscription_id, recurring)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(stripe_session_id) DO NOTHING`,
+    args: [
+      session.id,
+      typeof session.customer === "string"
+        ? session.customer
+        : session.customer?.id ?? null,
+      email,
+      name,
+      phone,
+      session.amount_total,
+      session.currency,
+      metadata.visitor_id ?? null,
+      metadata.utm_source ?? null,
+      metadata.utm_medium ?? null,
+      metadata.utm_campaign ?? null,
+      tier,
+      subscriptionId,
+      tier === "unlimited" ? 1 : 0,
+    ],
+  });
+
+  if (insertResult.rowsAffected === 0) {
+    console.log(`[onboarding] Duplicate webhook for session ${session.id}, skipping`);
+    return;
+  }
+
+  console.log(`[onboarding] Turso succeeded`);
+
+  // 2. Side effects (only reached if INSERT succeeded)
+  const results = await Promise.allSettled([
+    // Loops: add contact, trigger event, send purchase confirmation email
     (async () => {
       await addContact({
         email,
@@ -63,38 +80,42 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
         utmCampaign: metadata.utm_campaign ?? null,
       });
       await triggerEvent(email, "purchase_completed", {
-        amount: 497,
+        amount,
         currency: "GBP",
-        product: "AI Ad Engine Pilot",
+        product: productName,
       });
       // Transactional purchase confirmation email
       const txnId = process.env.LOOPS_PURCHASE_CONFIRMATION_ID;
       if (txnId) {
         await sendTransactional(email, txnId, {
           firstName: name?.split(" ")[0] ?? "there",
-          product: "AI Ad Engine Pilot",
-          amount: "£497",
+          product: productName,
+          amount: `£${amount.toLocaleString("en-GB")}`,
         });
       }
     })(),
 
-    // 3. Notion: create task for Akmal
-    createPurchaseTask({ email, name }),
+    // Notion: create task for Akmal
+    createPurchaseTask({ email, name, tier }),
 
-    // 4. Meta CAPI: Purchase event (event_id for dedup with browser pixel)
+    // Meta CAPI: Purchase event (event_id for dedup with browser pixel)
     sendConversionEvent({
       eventName: "Purchase",
       eventId: `stripe_${session.id}`,
       email,
       phone,
-      value: 497,
+      value: amount,
       currency: "GBP",
       eventSourceUrl: "https://start.huddleduck.co.uk",
+      fbc,
+      fbp,
+      ipAddress: clientIp,
+      userAgent: clientUa,
     }),
   ]);
 
   // Log results for observability
-  const labels = ["Turso", "Loops", "Notion", "Meta CAPI"];
+  const labels = ["Loops", "Notion", "Meta CAPI"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding] ${labels[i]} failed:`, result.reason);
@@ -112,16 +133,6 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
 export async function handlePaymentIntentPurchase(
   paymentIntent: Stripe.PaymentIntent
 ) {
-  // Dedup: skip if this event was already processed (Stripe retries on 5xx)
-  const existing = await db.execute({
-    sql: "SELECT 1 FROM purchases WHERE stripe_session_id = ?",
-    args: [paymentIntent.id],
-  });
-  if (existing.rows.length > 0) {
-    console.log(`[onboarding] Duplicate webhook for PI ${paymentIntent.id}, skipping`);
-    return;
-  }
-
   const metadata = paymentIntent.metadata ?? {};
 
   // Fetch customer details from Stripe
@@ -154,29 +165,47 @@ export async function handlePaymentIntentPurchase(
     email = paymentIntent.receipt_email;
   }
 
-  const results = await Promise.allSettled([
-    // 1. Record in Turso (uses PI ID in stripe_session_id column for idempotency)
-    db.execute({
-      sql: `INSERT OR REPLACE INTO purchases
-            (stripe_session_id, stripe_customer_id, email, name, phone,
-             amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [
-        paymentIntent.id,
-        customerId,
-        email,
-        name,
-        phone,
-        paymentIntent.amount,
-        paymentIntent.currency,
-        metadata.visitor_id ?? null,
-        metadata.utm_source ?? null,
-        metadata.utm_medium ?? null,
-        metadata.utm_campaign ?? null,
-      ],
-    }),
+  const fbc = metadata.fbc || undefined;
+  const fbp = metadata.fbp || undefined;
+  const clientIp = metadata.client_ip || undefined;
+  const clientUa = metadata.client_ua || undefined;
 
-    // 2. Loops: add contact, trigger event, send purchase confirmation email
+  // 1. Atomic dedup via INSERT ... ON CONFLICT DO NOTHING
+  const insertResult = await db.execute({
+    sql: `INSERT INTO purchases
+          (stripe_session_id, stripe_customer_id, email, name, phone,
+           amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign,
+           tier, stripe_subscription_id, recurring)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(stripe_session_id) DO NOTHING`,
+    args: [
+      paymentIntent.id,
+      customerId,
+      email,
+      name,
+      phone,
+      paymentIntent.amount,
+      paymentIntent.currency,
+      metadata.visitor_id ?? null,
+      metadata.utm_source ?? null,
+      metadata.utm_medium ?? null,
+      metadata.utm_campaign ?? null,
+      "trial",
+      null,
+      0,
+    ],
+  });
+
+  if (insertResult.rowsAffected === 0) {
+    console.log(`[onboarding] Duplicate webhook for PI ${paymentIntent.id}, skipping`);
+    return;
+  }
+
+  console.log(`[onboarding:pi] Turso succeeded`);
+
+  // 2. Side effects (only reached if INSERT succeeded)
+  const results = await Promise.allSettled([
+    // Loops: add contact, trigger event, send purchase confirmation email
     (async () => {
       await addContact({
         email,
@@ -190,23 +219,23 @@ export async function handlePaymentIntentPurchase(
       await triggerEvent(email, "purchase_completed", {
         amount: 497,
         currency: "GBP",
-        product: "AI Ad Engine Pilot",
+        product: "AI Ad Engine Trial",
       });
       // Transactional purchase confirmation email
       const txnId = process.env.LOOPS_PURCHASE_CONFIRMATION_ID;
       if (txnId) {
         await sendTransactional(email, txnId, {
           firstName: name?.split(" ")[0] ?? "there",
-          product: "AI Ad Engine Pilot",
+          product: "AI Ad Engine Trial",
           amount: "£497",
         });
       }
     })(),
 
-    // 3. Notion: create task for Akmal
-    createPurchaseTask({ email, name }),
+    // Notion: create task for Akmal
+    createPurchaseTask({ email, name, tier: "trial" }),
 
-    // 4. Meta CAPI: Purchase event (event_id matches browser pixel for dedup)
+    // Meta CAPI: Purchase event (event_id matches browser pixel for dedup)
     sendConversionEvent({
       eventName: "Purchase",
       eventId: `stripe_${paymentIntent.id}`,
@@ -215,10 +244,14 @@ export async function handlePaymentIntentPurchase(
       value: 497,
       currency: "GBP",
       eventSourceUrl: "https://start.huddleduck.co.uk",
+      fbc,
+      fbp,
+      ipAddress: clientIp,
+      userAgent: clientUa,
     }),
   ]);
 
-  const labels = ["Turso", "Loops", "Notion", "Meta CAPI"];
+  const labels = ["Loops", "Notion", "Meta CAPI"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding:pi] ${labels[i]} failed:`, result.reason);

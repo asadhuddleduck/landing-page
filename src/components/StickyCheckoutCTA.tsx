@@ -37,11 +37,13 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
 
   // Smart CTA copy based on conversation outcome
   const getCtaText = () => {
-    if (chatOutcome?.includes("FRANCHISE")) return "Start Your Franchise Pilot for £497";
-    return "Start Your Pilot for £497";
+    if (chatOutcome?.includes("FRANCHISE")) return "Start Your Franchise Trial for £497";
+    return "Get Started - from £497";
   };
 
   function handleClick() {
+    // Value reflects the minimum tier (Trial £497). The sticky CTA scrolls to
+    // the checkout section where the user's actual tier selection is preserved.
     trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
     track("sticky_cta_click");
 
@@ -61,7 +63,7 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
       >
         {getCtaText()}
       </button>
-      <p className="sticky-cta-credit">£497 credited if you upgrade within 30 days</p>
+      <p className="sticky-cta-credit">£497 Trial fee fully credited if you upgrade within 30 days</p>
     </div>
   );
 }

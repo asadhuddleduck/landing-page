@@ -30,17 +30,24 @@ export async function POST(request: NextRequest) {
     try {
       await handlePurchase(session);
     } catch (err) {
+      // Return 200 to prevent Stripe retry storms. Errors are logged for investigation.
       console.error("[webhook] Onboarding error (session):", err);
-      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+      return NextResponse.json({ received: true });
     }
   } else if (event.type === "payment_intent.succeeded") {
-    // New flow (inline Payment Element)
+    // Inline Payment Element flow only — skip PIs from Checkout Sessions/subscriptions
+    // Our create-payment-intent route always sets metadata.tier; subscription PIs don't have it
     const paymentIntent = event.data.object;
+    if (!paymentIntent.metadata?.tier) {
+      console.log(`[webhook] Skipping PI ${paymentIntent.id} — no tier metadata (likely from Checkout Session)`);
+      return NextResponse.json({ received: true });
+    }
     try {
       await handlePaymentIntentPurchase(paymentIntent);
     } catch (err) {
+      // Return 200 to prevent Stripe retry storms. Errors are logged for investigation.
       console.error("[webhook] Onboarding error (payment_intent):", err);
-      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+      return NextResponse.json({ received: true });
     }
   }
 

@@ -10,12 +10,18 @@ const AKMAL_USER_ID = "ac601ede-0d62-4107-b59e-21c0530b5348";
 export async function createPurchaseTask(params: {
   email: string;
   name?: string | null;
+  tier?: "trial" | "unlimited";
 }): Promise<string> {
   const notion = new Client({ auth: process.env.NOTION_TOKEN?.trim() });
 
-  const taskTitle = params.name
-    ? `New purchase: ${params.name}`
-    : `New purchase: ${params.email}`;
+  const tier = params.tier ?? "trial";
+  const displayName = params.name ?? params.email;
+  const taskTitle = tier === "unlimited"
+    ? `New Unlimited subscription: ${displayName}`
+    : `New Trial purchase: ${displayName}`;
+  const taskDescription = tier === "unlimited"
+    ? "Follow up with new AI Ad Engine Unlimited subscriber. Send welcome message, schedule onboarding call."
+    : "Follow up with new AI Ad Engine Trial customer. Send welcome message, schedule onboarding call.";
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -34,12 +40,14 @@ export async function createPurchaseTask(params: {
       Driver: {
         people: [{ object: "user", id: AKMAL_USER_ID }],
       },
+      "Client/Projects": {
+        relation: [{ id: "2c384fd7bc4e81e9b06ae98eac3cd14e" }],
+      },
       Outcome: {
         rich_text: [
           {
             text: {
-              content:
-                "Follow up with new AI Ad Engine Pilot customer. Send welcome message, schedule onboarding call.",
+              content: taskDescription,
             },
           },
         ],

@@ -7,6 +7,7 @@ import { track } from "@vercel/analytics";
 // Scroll to #checkout section instead of redirecting to Stripe
 function scrollToCheckout(setLoading: (v: boolean) => void) {
   setLoading(true);
+  // Value reflects minimum tier. User selects actual tier at checkout.
   trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
   track("card_cta_click");
 
@@ -35,7 +36,7 @@ export function PricingCard({ onShow }: PricingCardProps) {
   return (
     <div className="chat-card chat-card-pricing">
       <div className="chat-card-header">
-        <span className="chat-card-label">AI Ad Engine Pilot</span>
+        <span className="chat-card-label">AI Ad Engine Trial</span>
         <div className="chat-card-price">
           <span className="chat-card-currency">£</span>
           <span className="chat-card-amount">497</span>
@@ -73,9 +74,17 @@ export function PricingCard({ onShow }: PricingCardProps) {
         onClick={() => scrollToCheckout(setLoading)}
         disabled={loading}
       >
-        Start Your Pilot
+        Start Your Trial
       </button>
-      <p className="chat-card-fine">Credited if you upgrade within 30 days</p>
+      <p className="chat-card-fine">£497 Trial fee fully credited if you upgrade within 30 days</p>
+      <p className="chat-card-unlimited-link" style={{
+        fontSize: "0.8rem",
+        color: "var(--text-muted)",
+        marginTop: "8px",
+        cursor: "pointer"
+      }} onClick={() => scrollToCheckout(setLoading)}>
+        Or go unlimited - £1,300/mo
+      </p>
     </div>
   );
 }
@@ -90,7 +99,7 @@ interface TestimonialMeta {
 
 const TESTIMONIALS: Record<string, TestimonialMeta> = {
   phat_buns: {
-    quote: "Rated us 10 out of 10. Stayed on after the Pilot.",
+    quote: "Rated us 10 out of 10. Stayed on after the Trial.",
     brand: "Phat Buns",
     detail: "15+ locations",
   },
@@ -163,7 +172,7 @@ export function CTACard({ onShow }: CTACardProps) {
         onClick={() => scrollToCheckout(setLoading)}
         disabled={loading}
       >
-        Start Your Pilot
+        Start Your Trial
       </button>
       <p className="chat-card-fine">Takes about 2 minutes</p>
     </div>

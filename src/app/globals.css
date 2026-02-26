@@ -634,6 +634,9 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
   transition:transform 0.3s var(--ease-premium)
 }
 .faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-highlight{
+  color:var(--viridian);font-weight:700
+}
 .faq-answer{
   color:var(--text-secondary);padding-bottom:1.25rem;
   line-height:1.7;font-size:0.95rem
@@ -841,8 +844,8 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
   padding: 48px 24px;
 }
 .social-proof-strip {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  max-width: 640px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  max-width: 540px; margin: 0 auto;
 }
 .social-proof-item {
   display: flex; flex-direction: column; align-items: center;
@@ -869,12 +872,12 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 
 @media (max-width: 767px) {
   .social-proof-strip {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 24px 0;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0;
   }
-  .social-proof-item { padding: 0 16px; }
-  .social-proof-item:nth-child(2) .social-proof-divider,
-  .social-proof-item:nth-child(4) .social-proof-divider { display: none; }
+  .social-proof-item { padding: 0 8px; }
+  .social-proof-number { font-size: 22px; }
+  .social-proof-label { font-size: 9px; letter-spacing: 0.8px; }
 }
 
 /* ========== CASE STUDIES ========== */
@@ -1041,6 +1044,124 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .sticky-cta-credit {
   font-size: 11px; font-weight: 400;
   color: var(--text-muted);
+}
+
+/* ─── Pricing Tier Selector ─── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 480px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+
+.pricing-tier {
+  padding: 20px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  text-align: center;
+}
+
+.pricing-tier:hover { border-color: rgba(255,255,255,0.15); }
+
+.pricing-tier--selected {
+  border-color: #1EBA8F;
+  box-shadow: 0 0 0 1px #1EBA8F;
+  background: rgba(30,186,143,0.05);
+}
+
+.pricing-tier-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1EBA8F, #16a37d);
+  color: white;
+  white-space: nowrap;
+}
+
+.pricing-tier-badge--new {
+  background: linear-gradient(135deg, #F7CE46, #e6b800);
+  color: #050505;
+  overflow: hidden;
+}
+
+.pricing-tier-badge--new::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.1) 35%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.1) 65%,
+    transparent 80%
+  );
+  animation: badgeShineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 20px;
+}
+
+@keyframes badgeShineSweep {
+  0% { left: -100%; }
+  40%, 100% { left: 200%; }
+}
+
+.pricing-tier-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #E8E8E8;
+  margin-bottom: 8px;
+}
+
+.pricing-tier-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+
+.pricing-tier-currency {
+  font-size: 20px;
+  color: #1EBA8F;
+  font-weight: 700;
+}
+
+.pricing-tier-amount {
+  font-size: 36px;
+  font-weight: 900;
+  color: #E8E8E8;
+  line-height: 1;
+}
+
+.pricing-tier-period {
+  font-size: 13px;
+  color: #888888;
+  margin-top: 4px;
+}
+
+.pricing-tier-detail {
+  font-size: 12px;
+  color: #1EBA8F;
+  margin-top: 8px;
+  font-weight: 600;
 }
 
 /* end */

@@ -21,6 +21,7 @@ KEY FACTS
 - The dashboard shows campaign performance: health scores, cost metrics, location-level breakdowns.
 - Existing content is repurposed, not AI-generated content from scratch. Their food, their brand, their voice.
 - AI handles the research, targeting, and optimisation. Humans handle editing, strategy decisions, and client relationships.
+- Multi-location support: same price covers up to 50 locations. Each location gets its own targeting and campaigns. For 50+ locations, enterprise pricing is available.
 
 WHAT THE AI AD ENGINE DOES NOT DO
 

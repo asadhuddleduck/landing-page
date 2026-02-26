@@ -35,18 +35,31 @@ export async function POST(request: NextRequest) {
       utm_source,
       utm_medium,
       utm_campaign,
+      fbc,
+      fbp,
     } = body;
 
     if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
     }
 
-    // Create a Stripe Customer so we capture contact details
-    const customer = await stripe.customers.create({
-      email,
-      name: name || undefined,
-      phone: phone || undefined,
-    });
+    const ua = request.headers.get("user-agent") ?? "";
+
+    // Find existing customer by email, or create a new one
+    const existing = await stripe.customers.list({ email, limit: 1 });
+    let customer;
+    if (existing.data.length > 0) {
+      customer = await stripe.customers.update(existing.data[0].id, {
+        name: name || undefined,
+        phone: phone || undefined,
+      });
+    } else {
+      customer = await stripe.customers.create({
+        email,
+        name: name || undefined,
+        phone: phone || undefined,
+      });
+    }
 
     // Create PaymentIntent attached to the customer
     const paymentIntent = await stripe.paymentIntents.create({
@@ -56,10 +69,15 @@ export async function POST(request: NextRequest) {
       receipt_email: email,
       automatic_payment_methods: { enabled: true },
       metadata: {
+        tier: "trial",
         visitor_id: visitor_id ?? "",
         utm_source: utm_source ?? "",
         utm_medium: utm_medium ?? "",
         utm_campaign: utm_campaign ?? "",
+        fbc: fbc ?? "",
+        fbp: fbp ?? "",
+        client_ip: ip,
+        client_ua: ua.slice(0, 500),
       },
     });
 
@@ -77,7 +95,7 @@ export async function POST(request: NextRequest) {
       .then(() => triggerEvent(email, "checkout_started", {
         amount: 497,
         currency: "GBP",
-        product: "AI Ad Engine Pilot",
+        product: "AI Ad Engine Trial",
         payment_intent_id: paymentIntent.id,
       }))
       .catch((err) => console.error("[create-payment-intent] Loops error:", err));

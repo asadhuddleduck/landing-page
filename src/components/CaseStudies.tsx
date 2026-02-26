@@ -5,7 +5,7 @@ const caseStudies = [
     method: "AI campaigns launched across 15+ locations for a multi-location burger brand.",
     outcome: "Within days, their Uber Eats account manager called, stunned by the performance spike across every location.",
     quote: "\"What the hell have you guys done?\"",
-    cite: "— Uber Eats rep to Phat Buns",
+    cite: "Uber Eats rep to Phat Buns",
   },
   {
     brand: "Shakedown",
@@ -13,7 +13,7 @@ const caseStudies = [
     method: "AI ad campaigns built and launched for a growing milkshake and burger brand.",
     outcome: "Demand outpaced what the kitchen could handle. Sam called and asked us to pause.",
     quote: "\"It was mental. We want to do more of this.\"",
-    cite: "— Sam, Shakedown",
+    cite: "Sam, Shakedown",
   },
   {
     brand: "Burger & Sauce",
@@ -42,10 +42,10 @@ const caseStudies = [
   {
     brand: "Burger & Sauce",
     logo: "/logos/burger-and-sauce.png",
-    method: "Full AI Ad Engine Pilot delivered. Client asked to rate the experience.",
+    method: "Full AI Ad Engine Trial delivered. Client asked to rate the experience.",
     outcome: "Perfect 10/10 NPS score. Praised communication, results, and accountability.",
     quote: "\"Is 20 an option?\"",
-    cite: "— Adam, Marketing Manager",
+    cite: "Adam, Marketing Manager",
   },
   {
     brand: "Boo Burger",

@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Your food looks incredible. Your ads don't. | Huddle Duck",
   description:
-    "AI-powered advertising built for restaurant chains. 3-week managed pilot for £497.",
+    "AI-powered advertising built for restaurant chains. AI Ad Engine from £497.",
   metadataBase: new URL("https://start.huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Your food looks incredible. Your ads don't.",
     description:
-      "AI-powered advertising built for restaurant chains. 3-week managed pilot for £497.",
+      "AI-powered advertising built for restaurant chains. AI Ad Engine from £497.",
     url: "https://start.huddleduck.co.uk",
     images: [
       {
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Your food looks incredible. Your ads don't.",
     description:
-      "AI-powered advertising built for restaurant chains. 3-week managed pilot for £497.",
+      "AI-powered advertising built for restaurant chains. AI Ad Engine from £497.",
     images: ["/og-image.jpg"],
   },
 };
@@ -87,13 +87,15 @@ export default function RootLayout({
                 },
                 {
                   "@type": "Product",
-                  name: "AI Ad Engine Pilot",
+                  name: "AI Ad Engine",
                   description:
-                    "AI that makes sure everyone near your restaurant knows about you. Deep audience research, real content remade into ads, 3-week managed pilot.",
+                    "AI that makes sure everyone near your restaurant knows about you. Deep audience research, real content remade into ads, managed campaigns.",
                   offers: {
-                    "@type": "Offer",
-                    price: "497",
+                    "@type": "AggregateOffer",
+                    lowPrice: "497",
+                    highPrice: "1300",
                     priceCurrency: "GBP",
+                    offerCount: 2,
                     availability: "https://schema.org/InStock",
                   },
                 },

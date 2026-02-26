@@ -3,41 +3,42 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const faqs = [
+const faqs: { question: string; highlight: string; answer: string }[] = [
   {
-    question: "What is the AI Ad Engine Pilot?",
+    question: "What do I get for £497?",
+    highlight: "£497",
     answer:
-      "A 3-week managed advertising engagement. The AI researches your customer avatar, produces ad creative (copy, voiceover, video), builds and launches campaigns, optimises weekly, and delivers a tracking report with a strategy review. Think of it as a mutual trial. You see what I can do, and I learn whether your business is a fit for ongoing management.",
+      "A fully managed 3-week advertising campaign. The AI researches your audience, produces ad creative from your existing content, builds and launches your campaigns, and optimises them weekly. At the end, you get a full tracking report and a strategy review call. Think of it as a mutual trial. You see real results, and we both decide if ongoing management is the right fit.",
   },
   {
-    question: "How long does the pilot run?",
+    question: "Is ad spend included in the price?",
+    highlight: "ad spend included",
     answer:
-      "The managed campaign runs for 3 weeks from launch day. Before that, there is a research and creative production phase where the AI builds your avatar and assets. After the 3-week run, you receive a full tracking report and strategy review call.",
+      "The £497 covers strategy, creative production, and campaign management. Ad spend is separate. You pay Meta directly. We recommend a minimum of £10 per location per day. So for a single location, your total investment is £497 plus roughly £210 in ad spend over the 3 weeks.",
   },
   {
-    question: "What platforms do you advertise on?",
+    question: "How is this different from a marketing agency?",
+    highlight: "different from a marketing agency",
     answer:
-      "Meta (Facebook and Instagram), but not the way most agencies use it. Most agencies run standard Meta ads, which rarely work for food businesses. The AI uses Meta\u2019s API as a delivery vehicle to reach a specific customer avatar at scale. The strategy is the avatar research and targeting. Meta is just how it gets delivered.",
+      "A traditional agency charges £2,000 to £5,000 per month, takes weeks to onboard, and runs the same playbook for every client. The AI deep-researches your specific audience, competitors, and local market before a single ad goes live. You get a strategy built on data, not guesswork. The Trial is £497 for 3 weeks of fully managed campaigns. Compare that to a single month with a traditional agency.",
   },
   {
-    question: "Do I need to provide ad creative or a budget?",
+    question: "What happens when the trial ends?",
+    highlight: "when the trial ends",
     answer:
-      "All creative (ad copy, voiceover scripts, and video assets) is produced as part of the Pilot. The AI repurposes your existing content into conversion-focused ad variations. You do need to cover your own ad spend separately, with a minimum of £10 per location per day to Meta. The £497 Pilot fee covers strategy, production, and management.",
+      "Two options. You can upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing AI-managed campaigns, monthly reports, and strategy calls. Month-to-month, cancel any time. Or you take the insights from your tracking report and run things yourself. Either way, your £497 Trial fee is fully credited if you upgrade within 30 days.",
   },
   {
-    question: "Will my ads look like they were made by AI?",
+    question: "Is there a long-term contract?",
+    highlight: "long-term contract",
     answer:
-      "No. The AI never generates content from scratch. Your customers can spot that instantly and it erodes trust. Instead, it takes your existing social media content and remakes it into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.",
+      "No. The Trial is a one-time payment. If you upgrade to Unlimited, it's month-to-month. No lock-in, no cancellation fees, no notice period. You stay because the results make sense, not because of a contract.",
   },
   {
-    question: "How is this different from hiring a marketing agency?",
+    question: "We have multiple locations. Does the price change?",
+    highlight: "multiple locations",
     answer:
-      "A traditional agency charges £2,000 to 5,000 per month, takes weeks to onboard, and runs generic playbooks. The AI deep-researches your specific audience, competitors, and market before a single ad goes live. You get a strategy built on data, not guesswork, at a fraction of the cost. The Pilot is £497 for 3 weeks of fully managed campaigns. Compare that to a single billboard, a TV commercial, or a month with a traditional agency.",
-  },
-  {
-    question: "What happens after the pilot ends?",
-    answer:
-      "You can upgrade to ongoing management. Month-to-month, no long-term contracts. Your £497 Pilot fee is fully credited when you upgrade within 30 days. Or you can take the insights from your tracking report and run campaigns yourself.",
+      "Same price, whether you have 2 locations or 200. Each location gets its own targeting and campaigns tailored to its local audience. Start with a Trial or Unlimited plan and we scale from there.",
   },
 ];
 
@@ -58,7 +59,21 @@ export default function FAQ() {
                   className="faq-question"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                 >
-                  <span>{faq.question}</span>
+                  <span>
+                    {(() => {
+                      const idx = faq.question.indexOf(faq.highlight);
+                      if (idx === -1) return faq.question;
+                      const before = faq.question.slice(0, idx);
+                      const after = faq.question.slice(idx + faq.highlight.length);
+                      return (
+                        <>
+                          {before}
+                          <strong className="faq-highlight">{faq.highlight}</strong>
+                          {after}
+                        </>
+                      );
+                    })()}
+                  </span>
                   <svg
                     className="faq-chevron"
                     fill="none"
