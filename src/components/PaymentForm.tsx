@@ -67,20 +67,15 @@ const appearance: Appearance = {
 
 function PaymentFormInner({
   paymentIntentId,
-  amount, // --- DISCOUNT CODE ---
 }: {
   paymentIntentId: string;
-  amount?: number | null; // --- DISCOUNT CODE ---
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const { convert } = useCurrency();
-  // --- START DISCOUNT CODE ---
-  const displayAmount = amount ? amount / 100 : 497;
-  // --- END DISCOUNT CODE ---
-  const converted = convert(displayAmount);
+  const converted = convert(497);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -114,7 +109,7 @@ function PaymentFormInner({
         className="checkout-btn"
         style={{ marginTop: "20px" }}
       >
-        {processing ? "Processing..." : `Pay £${displayAmount.toLocaleString("en-GB")}${converted ? ` (${converted})` : ""}`}
+        {processing ? "Processing..." : `Pay £497${converted ? ` (${converted})` : ""}`}
       </button>
       <div className="checkout-trust">
         <span>Powered by</span>
@@ -129,13 +124,11 @@ function PaymentFormInner({
 interface PaymentFormProps {
   clientSecret: string;
   paymentIntentId: string;
-  amount?: number | null; // --- DISCOUNT CODE ---
 }
 
 export default function PaymentForm({
   clientSecret,
   paymentIntentId,
-  amount, // --- DISCOUNT CODE ---
 }: PaymentFormProps) {
   return (
     <Elements
@@ -145,7 +138,7 @@ export default function PaymentForm({
         appearance,
       }}
     >
-      <PaymentFormInner paymentIntentId={paymentIntentId} amount={amount} /> {/* --- DISCOUNT CODE --- */}
+      <PaymentFormInner paymentIntentId={paymentIntentId} />
     </Elements>
   );
 }

@@ -22,7 +22,7 @@ Decisions made for the landing-page project that should NOT be revisited without
 
 ### Webhook always returns 200 (even on errors)
 **Decision:** The Stripe webhook handler at `/api/webhook/stripe` catches all errors from `handlePurchase` / `handlePaymentIntentPurchase` and still returns `{ received: true }` with status 200.
-**Rationale:** If we return 4xx/5xx, Stripe retries the webhook exponentially for up to 3 days. This creates "retry storms" that re-trigger downstream side effects (duplicate Notion tasks, duplicate Loops emails, duplicate CAPI events). Errors are logged to Vercel for manual investigation. The atomic dedup in Turso (see below) is the safety net for any edge case where the webhook does get replayed.
+**Rationale:** If we return 4xx/5xx, Stripe retries the webhook exponentially for up to 3 days. This creates "retry storms" that re-trigger downstream side effects (duplicate Notion tasks, duplicate Resend emails, duplicate CAPI events). Errors are logged to Vercel for manual investigation. The atomic dedup in Turso (see below) is the safety net for any edge case where the webhook does get replayed.
 
 ### payment_intent.succeeded skips PIs without metadata.tier
 **Decision:** When the webhook receives a `payment_intent.succeeded` event, it checks `paymentIntent.metadata?.tier`. If missing, it logs and skips the event.
@@ -30,41 +30,59 @@ Decisions made for the landing-page project that should NOT be revisited without
 
 ### Atomic dedup: INSERT ON CONFLICT DO NOTHING + rowsAffected check
 **Decision:** Both `handlePurchase` and `handlePaymentIntentPurchase` use `INSERT INTO purchases (...) ON CONFLICT(stripe_session_id) DO NOTHING` followed by checking `insertResult.rowsAffected === 0`.
-**Rationale:** This is an atomic dedup gate — a single SQL statement that either inserts (first time) or silently no-ops (duplicate). It is NOT a SELECT-then-INSERT pattern, which would have a race condition if two webhook deliveries arrive simultaneously. If `rowsAffected === 0`, the function returns early and none of the downstream side effects (Loops, Notion, CAPI) fire. This means webhook replays are completely safe.
+**Rationale:** This is an atomic dedup gate — a single SQL statement that either inserts (first time) or silently no-ops (duplicate). It is NOT a SELECT-then-INSERT pattern, which would have a race condition if two webhook deliveries arrive simultaneously. If `rowsAffected === 0`, the function returns early and none of the downstream side effects (Resend, Notion, CAPI) fire. This means webhook replays are completely safe.
 
 
 ## Post-Purchase Orchestration
 
 ### Promise.allSettled (not Promise.all) for downstream services
-**Decision:** After the Turso INSERT succeeds, the webhook calls Loops, Notion, and Meta CAPI via `Promise.allSettled([...])`.
-**Rationale:** `Promise.all` would reject the entire batch if any single service fails. If Notion is down, we would lose the Loops email AND the CAPI event. `Promise.allSettled` runs all three independently — each can fail without affecting the others. Results are logged individually for observability.
+**Decision:** After the Turso INSERT succeeds, the webhook calls Resend, Notion, and Meta CAPI via `Promise.allSettled([...])`.
+**Rationale:** `Promise.all` would reject the entire batch if any single service fails. If Notion is down, we would lose the Resend email AND the CAPI event. `Promise.allSettled` runs all three independently — each can fail without affecting the others. Results are logged individually for observability.
 
 ### Turso INSERT happens BEFORE the allSettled block
 **Decision:** The Turso `INSERT ... ON CONFLICT DO NOTHING` runs first, as a standalone `await`. Only if it succeeds (and `rowsAffected > 0`) do the downstream services fire.
-**Rationale:** Turso serves as the atomic dedup gate. If it's inside the `allSettled` block, a Turso failure would not prevent Loops/Notion/CAPI from firing, which breaks the "only fire side effects once" guarantee. By running Turso first and early-returning on duplicates, the downstream services are protected from both replays and partial failures.
+**Rationale:** Turso serves as the atomic dedup gate. If it's inside the `allSettled` block, a Turso failure would not prevent Resend/Notion/CAPI from firing, which breaks the "only fire side effects once" guarantee. By running Turso first and early-returning on duplicates, the downstream services are protected from both replays and partial failures.
 
-### Downstream services: Turso, Loops, Notion, Meta CAPI — none blocks the others
+### Downstream services: Turso, Resend, Notion, Meta CAPI — none blocks the others
 **Decision:** The four downstream services are independent:
 1. **Turso** — purchase record (dedup gate, runs first)
-2. **Loops** — addContact + triggerEvent("purchase_completed") + sendTransactional (purchase confirmation email)
+2. **Resend** — branded purchase confirmation email
 3. **Notion** — create task in Actions DB for Akmal
 4. **Meta CAPI** — Purchase conversion event
 **Rationale:** Each service has its own error handling and logging. A Notion outage should never delay or prevent the customer's purchase confirmation email. A CAPI failure should never prevent the Notion task from being created.
 
 
+## Email Provider
+
+### Resend replaces Loops for transactional email
+**Decision:** All transactional email (purchase confirmations, abandoned cart nudges) is sent via Resend. Loops has been fully removed.
+**Rationale:** Loops was unreliable — email delivery failures were silent and unrecoverable. Resend provides a simpler API, branded HTML templates controlled in code, and clear error reporting. Turso + Notion already handle contact/purchase tracking, so Loops' CRM features were redundant.
+
+### Abandoned cart recovery via Turso + Resend cron
+**Decision:** When a PaymentIntent is created, the checkout is recorded in a `checkouts` Turso table. An hourly cron queries for checkouts older than 1 hour with no matching purchase record, verifies the PaymentIntent is truly unpaid via `stripe.paymentIntents.retrieve()`, sends a branded nudge email via Resend, and marks them as nudged to prevent re-sending. Stale rows older than 30 days are cleaned up each run.
+**Rationale:** Replaces the previous Loops `checkout_started` event + automation. Self-hosted approach: no external dependency for abandoned cart logic, full control over timing and content, and the data lives in Turso alongside purchases for easy querying. The Stripe PI status check prevents a race condition where a customer who just paid (but whose webhook hasn't completed yet) receives an abandoned cart nudge. The 30-day cleanup prevents unbounded table growth.
+
+
+## Webhook Reconciliation
+
+### Stripe event reconciliation cron every 6 hours
+**Decision:** A cron job at `/api/cron/reconcile` fetches the last 24 hours of Stripe `checkout.session.completed` and `payment_intent.succeeded` events, cross-references them with the Turso `purchases` table, and re-runs `handlePurchase`/`handlePaymentIntentPurchase` for any missing records.
+**Rationale:** Webhook delivery can fail silently (network issues, cold start timeouts, Vercel function errors). The reconciliation cron is a safety net that catches any purchases that fell through. The onboarding functions are idempotent (INSERT ON CONFLICT DO NOTHING), so re-running them for existing purchases is a no-op.
+
+
 ## Pricing
 
 ### Hardcoded amounts: 497/1300 in onboarding.ts, 49700 in create-payment-intent
-**Decision:** The prices £497 (trial) and £1,300 (unlimited) are hardcoded in the source code. The PaymentIntent amount is 49700 (pence). The Loops/CAPI events use pounds (497/1300).
+**Decision:** The prices £497 (trial) and £1,300 (unlimited) are hardcoded in the source code. The PaymentIntent amount is 49700 (pence). The Resend emails and CAPI events use pounds (497/1300).
 **Rationale:** Prices change extremely rarely (business decision, not a config thing). Hardcoding avoids an extra Stripe API call to look up the Price object's amount. If prices change, you update the code AND the Stripe Price — they must stay in sync regardless.
 
 ### Stripe Price IDs in env vars (not hardcoded)
 **Decision:** `STRIPE_PRICE_ID` (trial) and `STRIPE_UNLIMITED_PRICE_ID` (unlimited) are stored as environment variables. The actual Price ID strings are NOT in the source code.
 **Rationale:** Price IDs differ between Stripe test mode and live mode. Env vars let us use test prices locally and live prices in production without code changes.
 
-### Turso stores pence (raw Stripe amounts); Loops/CAPI use pounds
-**Decision:** `purchases.amount_total` stores the value exactly as Stripe returns it (e.g. 49700 for £497). Loops and CAPI events use human-readable pounds (497, 1300).
-**Rationale:** Turso stores the source-of-truth value from Stripe (useful for reconciliation). Loops event properties and CAPI custom_data need human-readable values because they show up in email templates and Meta's Events Manager.
+### Turso stores pence (raw Stripe amounts); Resend/CAPI use pounds
+**Decision:** `purchases.amount_total` stores the value exactly as Stripe returns it (e.g. 49700 for £497). Resend emails and CAPI events use human-readable pounds (497, 1300).
+**Rationale:** Turso stores the source-of-truth value from Stripe (useful for reconciliation). Resend email templates and CAPI custom_data need human-readable values because they show up in emails and Meta's Events Manager.
 
 
 ## Meta Tracking
@@ -161,7 +179,7 @@ Decisions made for the landing-page project that should NOT be revisited without
 2. **Documentation** (`docs/kb-*.txt`, `docs/agent-prompts/*.md`)
 3. **ElevenLabs agent** — system prompt via API + re-upload KB docs
 4. **Stripe Dashboard** — product names, price amounts
-5. **Loops** — transactional email templates
+5. **Resend** — email templates in `src/lib/email.ts`
 6. **CLAUDE.md** and **README.md**
 7. **Vercel env vars** — if new ones added
 8. **~/.claude/CLAUDE.md** — global project registry
@@ -232,9 +250,9 @@ Decisions made for the landing-page project that should NOT be revisited without
 
 ## Checkout Flow (Abandoned Cart Recovery)
 
-### checkout_started event fires from create-payment-intent (not from checkout route)
-**Decision:** The `/api/create-payment-intent` endpoint (Trial flow) fires a non-blocking `addContact` + `triggerEvent("checkout_started")` to Loops after creating the PaymentIntent.
-**Rationale:** This captures the user's email at the moment they enter payment details, enabling abandoned cart recovery emails via Loops automations. It is fire-and-forget (`.catch()` only logs) so Loops failures never break the checkout flow. The Checkout Session flow (Unlimited) does not fire this event because the user is about to be redirected to Stripe's hosted page — the email is already captured.
+### Checkout start recorded in Turso for abandoned cart recovery
+**Decision:** The `/api/create-payment-intent` endpoint (Trial flow) records the checkout in a Turso `checkouts` table after creating the PaymentIntent. An hourly cron checks for abandoned checkouts (older than 1 hour with no matching purchase) and sends a nudge email via Resend.
+**Rationale:** This captures the user's email at the moment they enter payment details, enabling abandoned cart recovery. The checkout record is fire-and-forget (`.catch()` only logs) so DB failures never break the checkout flow. The hourly cron handles the nudge logic — no external automation dependency.
 
 
 ## Visitor Tracking

@@ -155,7 +155,7 @@ export async function sendPurchaseConfirmation(params: {
   });
 
   const { error } = await resend.emails.send({
-    from: "Huddle Duck <hello@huddleduck.co.uk>",
+    from: "Huddle Duck <asad@huddleduck.co.uk>",
     to: params.email,
     subject: `You're in! Here's what happens next`,
     html,
@@ -166,4 +166,102 @@ export async function sendPurchaseConfirmation(params: {
   }
 
   console.log(`[email] Purchase confirmation sent to ${params.email}`);
+}
+
+// --- Abandoned cart HTML template ---
+
+function abandonedCartHtml(vars: {
+  firstName: string;
+  amount: string;
+}): string {
+  const { firstName, amount } = vars;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Still thinking it over?</title>
+</head>
+<body style="margin:0;padding:0;background:#000000;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#000000;min-height:100vh;">
+<tr><td align="center" style="padding:40px 16px 60px;">
+
+<!-- Main card -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#0D0D0D;border:1px solid rgba(255,255,255,0.08);border-radius:16px;">
+
+<!-- Logo -->
+<tr><td align="center" style="padding:40px 32px 0;">
+  <img src="https://start.huddleduck.co.uk/duck-logo.png" width="48" height="48" alt="Huddle Duck" style="display:block;border-radius:12px;" />
+</td></tr>
+
+<!-- Heading -->
+<tr><td align="center" style="padding:24px 32px 0;">
+  <h1 style="margin:0;font-size:28px;font-weight:800;color:#FFFFFF;line-height:1.3;">
+    Still thinking it over, ${firstName}?
+  </h1>
+</td></tr>
+
+<!-- Body -->
+<tr><td align="center" style="padding:16px 32px 0;">
+  <p style="margin:0;font-size:16px;color:#999999;line-height:1.6;">
+    You were so close to getting your AI ad engine up and running. Your setup is saved &mdash; just pick up where you left off.
+  </p>
+</td></tr>
+
+<!-- CTA Button -->
+<tr><td align="center" style="padding:28px 32px 0;">
+  <a href="https://start.huddleduck.co.uk/#checkout" style="display:inline-block;padding:12px 28px;background:#1EBA8F;color:#000000;font-size:16px;font-weight:700;text-decoration:none;border-radius:8px;">Complete Your Purchase &rarr;</a>
+</td></tr>
+
+<!-- Divider -->
+<tr><td style="padding:28px 32px 0;">
+  <div style="height:1px;background:rgba(255,255,255,0.08);"></div>
+</td></tr>
+
+<!-- Footer -->
+<tr><td align="center" style="padding:24px 32px 40px;">
+  <p style="margin:0;font-size:14px;color:#555555;line-height:1.5;">
+    Questions? Just reply to this email.
+  </p>
+  <p style="margin:12px 0 0;font-size:13px;color:#333333;">
+    Huddle Duck Ltd &middot; London, UK
+  </p>
+</td></tr>
+
+</table>
+<!-- End main card -->
+
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+// --- Abandoned cart email ---
+
+export async function sendAbandonedCartEmail(params: {
+  email: string;
+  firstName: string;
+  amount: string;
+}): Promise<void> {
+  const resend = getResend();
+
+  const html = abandonedCartHtml({
+    firstName: params.firstName,
+    amount: params.amount,
+  });
+
+  const { error } = await resend.emails.send({
+    from: "Huddle Duck <asad@huddleduck.co.uk>",
+    to: params.email,
+    subject: "You were so close...",
+    html,
+  });
+
+  if (error) {
+    throw new Error(`Resend error: ${error.message}`);
+  }
+
+  console.log(`[email] Abandoned cart nudge sent to ${params.email}`);
 }

@@ -14,7 +14,7 @@ Hosted at `start.huddleduck.co.uk`. Uses an ElevenLabs AI chat agent as the prim
 - Stripe (PaymentIntent for Trial, Checkout Session for Unlimited subscriptions)
 - ElevenLabs React SDK (`@elevenlabs/react` useConversation hook, text-only chat)
 - Turso/LibSQL (purchase records, lazy proxy pattern)
-- Loops.so (email automation via API)
+- Resend (transactional email: purchase confirmations, abandoned cart nudges)
 - Notion API (task creation in Actions DB)
 - Meta Conversions API (server-side purchase events via `facebook-nodejs-business-sdk`)
 - Meta Pixel (client-side pixel events via `fbevents.js`, deduplicated with CAPI)
@@ -48,6 +48,8 @@ src/
       create-payment-intent/route.ts  # POST: creates PaymentIntent for Trial inline payment
       webhook/stripe/route.ts         # POST: handles checkout.session.completed + payment_intent.succeeded
       webhook/elevenlabs/route.ts     # POST: ElevenLabs conversation webhook
+      cron/abandoned-cart/route.ts    # GET: nudge abandoned checkouts via Resend (hourly cron)
+      cron/reconcile/route.ts         # GET: cross-ref Stripe events with Turso, re-run missing (every 6h)
   components/
     Header.tsx               # Minimal header with logo + brand text (server)
     HeroChatSection.tsx      # Hero section with ElevenLabs chat integration (client)
@@ -70,7 +72,7 @@ src/
   lib/
     db.ts                    # Turso lazy proxy (from client-dashboards)
     stripe.ts                # Stripe client (fetchHttpClient for Vercel compat)
-    loops.ts                 # Loops.so API wrapper (from attribution-tracker)
+    email.ts                 # Resend transactional email (purchase confirmation, abandoned cart)
     meta-capi.ts             # Meta Conversions API (from attribution-tracker)
     notion.ts                # Notion task creation in Actions DB
     onboarding.ts            # Post-purchase orchestrator (Promise.allSettled, atomic dedup)
@@ -102,7 +104,8 @@ Header -> HeroChatSection (with ElevenLabsChat + LogoStrip) -> SocialProof -> Ca
 | `STRIPE_PRICE_ID` | Stripe Price ID for £497 Trial product |
 | `STRIPE_UNLIMITED_PRICE_ID` | Stripe Price ID for £1,300/mo Unlimited subscription |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signature verification (whsec_...) |
-| `LOOPS_API_KEY` | Loops.so email automation |
+| `RESEND_API_KEY` | Resend transactional email |
+| `CRON_SECRET` | Vercel cron authentication |
 | `NOTION_TOKEN` | Notion API for task creation |
 | `META_ACCESS_TOKEN` | Meta CAPI for purchase events |
 | `META_PIXEL_ID` | Meta Pixel ID (1780686211962897) |
@@ -148,13 +151,14 @@ Button click -> POST `/api/checkout` -> Checkout Session created (subscription m
 
 **Post-purchase orchestration** (both flows, via `Promise.allSettled`):
 1. Turso: Atomic `INSERT ... ON CONFLICT(stripe_session_id) DO NOTHING` (dedup)
-2. Loops: `addContact` + `triggerEvent("purchase_completed")` + `sendTransactional`
+2. Resend: branded purchase confirmation email
 3. Notion: Create task for Akmal in Actions DB
 4. Meta CAPI: `Purchase` event with `stripe_{id}` for pixel dedup
 
 ## Turso Database
 - DB name: `landing-page`
 - Table: `purchases` (stripe_session_id UNIQUE, stripe_customer_id, email, name, phone, amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign, tier, stripe_subscription_id, recurring, created_at)
+- Table: `checkouts` (email, name, payment_intent_id UNIQUE, amount, created_at, nudged_at) — tracks checkout starts for abandoned cart recovery
 - Query: `turso db shell landing-page "SELECT * FROM purchases"`
 
 ## Attribution & Tracking

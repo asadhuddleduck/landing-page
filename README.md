@@ -8,7 +8,7 @@ Conversion-focused sales page for Huddle Duck's AI Ad Engine Trial (£497 one-ti
 - **Styling:** Tailwind CSS v4
 - **Payments:** Stripe (inline PaymentElement + webhooks)
 - **AI Chat:** ElevenLabs Conversational AI (WebSocket, CLOSER workflow)
-- **Email:** Loops.so (contact upsert + purchase_completed event)
+- **Email:** Resend (purchase confirmations, abandoned cart nudges)
 - **CRM:** Notion API (purchase task creation in Actions DB)
 - **Attribution:** Meta Conversions API (server) + Meta Pixel (browser, deduplicated)
 - **Database:** Turso (LibSQL/SQLite)
@@ -32,7 +32,7 @@ Visitor lands
        └─ /success redirect
             └─ Stripe webhook: payment_intent.succeeded → Promise.allSettled:
                  ├─ Turso: INSERT OR REPLACE purchase record
-                 ├─ Loops: addContact + triggerEvent("purchase_completed")
+                 ├─ Resend: branded purchase confirmation email
                  ├─ Notion: create task in Actions DB for Akmal
                  └─ Meta CAPI: Purchase event (deduped via shared event_id with SuccessPixel)
 ```
@@ -54,6 +54,8 @@ src/
       create-payment-intent/route.ts # POST — creates Stripe Customer + PaymentIntent
       webhook/stripe/route.ts       # POST — handles payment_intent.succeeded
       webhook/elevenlabs/route.ts   # POST — stores conversation data (HMAC verified)
+      cron/abandoned-cart/route.ts  # GET — hourly: nudge abandoned checkouts via Resend
+      cron/reconcile/route.ts       # GET — every 6h: cross-ref Stripe events with Turso purchases
   components/
     ConvergenceBackground.tsx       # Canvas particle animation (streaks + motes)
     HeroChatSection.tsx             # Hero headline + mounts ElevenLabsChat
@@ -70,7 +72,7 @@ src/
   lib/
     db.ts                           # Turso lazy proxy
     stripe.ts                       # Stripe client (createFetchHttpClient for Vercel compat)
-    loops.ts                        # Loops.so: addContact, triggerEvent, sendTransactional
+    email.ts                        # Resend transactional email
     meta-capi.ts                    # Meta CAPI: hashed PII, never throws
     notion.ts                       # Creates purchase task in Notion Actions DB
     onboarding.ts                   # Post-purchase orchestrator (4 services via Promise.allSettled)
@@ -90,9 +92,11 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_PRICE_ID=price_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Loops
-LOOPS_API_KEY=...
-LOOPS_PURCHASE_CONFIRMATION_ID=...   # optional
+# Resend
+RESEND_API_KEY=...
+
+# Cron
+CRON_SECRET=...
 
 # Notion
 NOTION_TOKEN=secret_...
@@ -134,6 +138,8 @@ Open http://localhost:3000. Requires a `.env.local` file with the variables abov
 | `/api/create-payment-intent` | POST | Create Stripe Customer + PaymentIntent, return clientSecret |
 | `/api/webhook/stripe` | POST | Handle `payment_intent.succeeded` — trigger 4 downstream services |
 | `/api/webhook/elevenlabs` | POST | Store ElevenLabs conversation data (HMAC-SHA256 verified) |
+| `/api/cron/abandoned-cart` | GET | Hourly: nudge abandoned checkouts via Resend |
+| `/api/cron/reconcile` | GET | Every 6h: cross-ref Stripe events with Turso purchases |
 
 ## Deployment
 
@@ -156,13 +162,16 @@ DNS: `start.huddleduck.co.uk` CNAME → `cname.vercel-dns.com` (Cloudflare, DNS-
 - First-touch UTM attribution via cookies, forwarded to attribution-tracker
 - Soft cookie notice (no consent gating — standard UK small business approach)
 - JSON-LD structured data (Organization + Product schemas) for SEO
+- Abandoned cart recovery: hourly cron nudges incomplete checkouts via Resend
+- Webhook reconciliation: 6-hourly cron cross-refs Stripe events with Turso
 - Design: near-black (#050505) background, viridian (#1EBA8F) primary, sandstorm (#F7CE46) accent
 
 ## Database
 
-Turso DB `landing-page` — two tables:
+Turso DB `landing-page` — three tables:
 - `purchases` — Stripe payment records (keyed on `stripe_session_id`, includes UTMs + visitor_id)
 - `conversations` — ElevenLabs chat transcripts and qualification data
+- `checkouts` — Tracks checkout starts for abandoned cart recovery (payment_intent_id, email, nudged_at)
 
 ## Legacy Components
 

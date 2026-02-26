@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { addContact, triggerEvent } from "@/lib/loops";
+import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -37,42 +37,11 @@ export async function POST(request: NextRequest) {
       utm_campaign,
       fbc,
       fbp,
-      promoCode, // --- DISCOUNT CODE ---
     } = body;
 
     if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
     }
-
-    // --- START DISCOUNT CODE ---
-    let finalAmount = 49700;
-    let appliedPromoCode: string | null = null;
-
-    if (promoCode && typeof promoCode === "string") {
-      const promos = await stripe.promotionCodes.list({
-        code: promoCode.trim().toUpperCase(),
-        active: true,
-        limit: 1,
-      });
-
-      if (promos.data.length > 0) {
-        const promo = promos.data[0];
-        const promoCoupon = promo.promotion.coupon;
-        const coupon = typeof promoCoupon === "string"
-          ? await stripe.coupons.retrieve(promoCoupon)
-          : promoCoupon;
-        if (coupon && coupon.amount_off && coupon.currency === "gbp") {
-          finalAmount = Math.max(49700 - coupon.amount_off, 100);
-          appliedPromoCode = promo.code ?? null;
-        }
-      } else {
-        return NextResponse.json(
-          { error: "Invalid discount code" },
-          { status: 400 }
-        );
-      }
-    }
-    // --- END DISCOUNT CODE ---
 
     const ua = request.headers.get("user-agent") ?? "";
 
@@ -94,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     // Create PaymentIntent attached to the customer
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: finalAmount, // --- DISCOUNT CODE ---
+      amount: 49700,
       currency: "gbp",
       customer: customer.id,
       receipt_email: email,
@@ -112,30 +81,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Fire checkout_started event to Loops (enables abandoned cart recovery).
-    // Non-blocking: don't let Loops failures break the checkout flow.
-    addContact({
-      email,
-      firstName: name?.split(" ")[0] ?? null,
-      lastName: name?.split(" ").slice(1).join(" ") || null,
-      source: "checkout_started",
-      utmSource: utm_source ?? null,
-      utmMedium: utm_medium ?? null,
-      utmCampaign: utm_campaign ?? null,
-    })
-      .then(() => triggerEvent(email, "checkout_started", {
-        amount: finalAmount / 100, // --- DISCOUNT CODE ---
-        currency: "GBP",
-        product: "AI Ad Engine Trial",
-        payment_intent_id: paymentIntent.id,
-      }))
-      .catch((err) => console.error("[create-payment-intent] Loops error:", err));
+    // Track checkout start for abandoned cart recovery (non-blocking)
+    db.execute({
+      sql: `INSERT OR IGNORE INTO checkouts (email, name, payment_intent_id, amount, created_at)
+            VALUES (?, ?, ?, ?, datetime('now'))`,
+      args: [email.trim(), name || null, paymentIntent.id, 49700],
+    }).catch((err) => console.error("[create-payment-intent] Checkout tracking error:", err));
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      amount: finalAmount, // --- DISCOUNT CODE ---
-      appliedPromoCode, // --- DISCOUNT CODE ---
     });
   } catch (err) {
     console.error("[create-payment-intent] Error:", err);

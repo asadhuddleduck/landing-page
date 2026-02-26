@@ -19,13 +19,9 @@ export default function CheckoutSection() {
   const [clientSecret, setClientSecret] = useState("");
   const [paymentIntentId, setPaymentIntentId] = useState("");
   const [error, setError] = useState("");
-  // --- START DISCOUNT CODE ---
-  const [promoCode, setPromoCode] = useState("");
-  const [promoExpanded, setPromoExpanded] = useState(false);
-  const [discountedAmount, setDiscountedAmount] = useState<number | null>(null);
-  // --- END DISCOUNT CODE ---
   const formRef = useRef<HTMLDivElement>(null);
   const submitting = useRef(false);
+  const redirecting = useRef(false);
 
   const steps = selectedTier === "unlimited"
     ? [
@@ -112,15 +108,17 @@ export default function CheckoutSection() {
             fbc,
             fbp,
             ...utms,
-            promoCode: promoCode || undefined, // --- DISCOUNT CODE ---
           }),
         });
 
         const data = await res.json();
 
         if (data.url) {
+          redirecting.current = true;
           window.location.href = data.url;
-          return; // Keep loading state while redirecting
+          return;
+        } else if (data.error) {
+          setError(data.error);
         } else {
           console.error("[checkout] No redirect URL returned:", data);
           setError("Something went wrong. Please try again.");
@@ -138,22 +136,13 @@ export default function CheckoutSection() {
             fbc,
             fbp,
             ...utms,
-            promoCode: promoCode || undefined, // --- DISCOUNT CODE ---
           }),
         });
 
         const data = await res.json();
 
-        // --- START DISCOUNT CODE ---
-        if (data.amount) {
-          setDiscountedAmount(data.amount);
-        }
-        // --- END DISCOUNT CODE ---
-
-        // --- START DISCOUNT CODE ---
         if (data.error) {
           setError(data.error);
-        // --- END DISCOUNT CODE ---
         } else if (data.clientSecret) {
           setClientSecret(data.clientSecret);
           setPaymentIntentId(data.paymentIntentId);
@@ -173,8 +162,10 @@ export default function CheckoutSection() {
       console.error("[checkout] Error:", err);
       setError("Something went wrong. Please try again.");
     } finally {
-      submitting.current = false;
-      setLoading(false);
+      if (!redirecting.current) {
+        submitting.current = false;
+        setLoading(false);
+      }
     }
   }
 
@@ -358,58 +349,6 @@ export default function CheckoutSection() {
                     autoComplete="tel"
                   />
                 </div>
-                {/* --- START DISCOUNT CODE --- */}
-                {(
-                  <div style={{ marginTop: "4px", marginBottom: "14px" }}>
-                    {!promoExpanded ? (
-                      <button
-                        type="button"
-                        onClick={() => setPromoExpanded(true)}
-                        style={{
-                          display: "inline-block",
-                          padding: 0,
-                          border: "none",
-                          background: "none",
-                          fontFamily: "var(--font-primary)",
-                          fontSize: "12px",
-                          fontWeight: 500,
-                          color: "var(--text-muted)",
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          textUnderlineOffset: "2px",
-                        }}
-                      >
-                        Have a discount code?
-                      </button>
-                    ) : (
-                      <div style={{ marginTop: "4px" }}>
-                        <label
-                          htmlFor="checkout-promo"
-                          className="checkout-form-label"
-                        >
-                          Discount code
-                        </label>
-                        <input
-                          id="checkout-promo"
-                          type="text"
-                          value={promoCode}
-                          onChange={(e) =>
-                            setPromoCode(e.target.value.toUpperCase())
-                          }
-                          placeholder="Enter code"
-                          className="checkout-input"
-                          autoComplete="off"
-                          style={{
-                            textTransform: "uppercase",
-                            letterSpacing: "1px",
-                            fontSize: "14px",
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-                {/* --- END DISCOUNT CODE --- */}
                 {error && <p className="checkout-error">{error}</p>}
                 <button
                   type="submit"
@@ -455,7 +394,6 @@ export default function CheckoutSection() {
                   <PaymentForm
                     clientSecret={clientSecret}
                     paymentIntentId={paymentIntentId}
-                    amount={discountedAmount} /* --- DISCOUNT CODE --- */
                   />
                 </div>
               </>

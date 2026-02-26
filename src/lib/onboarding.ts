@@ -1,7 +1,6 @@
 import type Stripe from "stripe";
 import { stripe } from "./stripe";
 import { db } from "./db";
-import { addContact, triggerEvent } from "./loops";
 import { sendPurchaseConfirmation } from "./email";
 import { createPurchaseTask } from "./notion";
 import { sendConversionEvent } from "./meta-capi";
@@ -69,30 +68,12 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
 
   // 2. Side effects (only reached if INSERT succeeded)
   const results = await Promise.allSettled([
-    // Loops: add contact, trigger event, send purchase confirmation email
-    (async () => {
-      await addContact({
-        email,
-        firstName: name?.split(" ")[0] ?? null,
-        lastName: name?.split(" ").slice(1).join(" ") || null,
-        source: "landing_page_purchase",
-        utmSource: metadata.utm_source ?? null,
-        utmMedium: metadata.utm_medium ?? null,
-        utmCampaign: metadata.utm_campaign ?? null,
-      });
-      await triggerEvent(email, "purchase_completed", {
-        amount,
-        currency: "GBP",
-        product: productName,
-      });
-    })(),
-
     // Purchase confirmation email via Resend
     sendPurchaseConfirmation({
       email,
       firstName: name?.split(" ")[0] ?? "there",
       product: productName,
-      amount: `£${amount.toLocaleString("en-GB")}`,
+      amount: tier === "unlimited" ? `£${amount.toLocaleString("en-GB")}/month` : `£${amount.toLocaleString("en-GB")}`,
     }),
 
     // Notion: create task for Akmal
@@ -115,7 +96,7 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
   ]);
 
   // Log results for observability
-  const labels = ["Loops", "Email", "Notion", "Meta CAPI"];
+  const labels = ["Email", "Notion", "Meta CAPI"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding] ${labels[i]} failed:`, result.reason);
@@ -205,24 +186,6 @@ export async function handlePaymentIntentPurchase(
 
   // 2. Side effects (only reached if INSERT succeeded)
   const results = await Promise.allSettled([
-    // Loops: add contact + trigger event
-    (async () => {
-      await addContact({
-        email,
-        firstName: name?.split(" ")[0] ?? null,
-        lastName: name?.split(" ").slice(1).join(" ") || null,
-        source: "landing_page_purchase",
-        utmSource: metadata.utm_source ?? null,
-        utmMedium: metadata.utm_medium ?? null,
-        utmCampaign: metadata.utm_campaign ?? null,
-      });
-      await triggerEvent(email, "purchase_completed", {
-        amount: 497,
-        currency: "GBP",
-        product: "AI Ad Engine Trial",
-      });
-    })(),
-
     // Purchase confirmation email via Resend
     sendPurchaseConfirmation({
       email,
@@ -250,7 +213,7 @@ export async function handlePaymentIntentPurchase(
     }),
   ]);
 
-  const labels = ["Loops", "Email", "Notion", "Meta CAPI"];
+  const labels = ["Email", "Notion", "Meta CAPI"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding:pi] ${labels[i]} failed:`, result.reason);
