@@ -1,7 +1,8 @@
 import type Stripe from "stripe";
 import { stripe } from "./stripe";
 import { db } from "./db";
-import { addContact, triggerEvent, sendTransactional } from "./loops";
+import { addContact, triggerEvent } from "./loops";
+import { sendPurchaseConfirmation } from "./email";
 import { createPurchaseTask } from "./notion";
 import { sendConversionEvent } from "./meta-capi";
 
@@ -84,16 +85,15 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
         currency: "GBP",
         product: productName,
       });
-      // Transactional purchase confirmation email
-      const txnId = process.env.LOOPS_PURCHASE_CONFIRMATION_ID;
-      if (txnId) {
-        await sendTransactional(email, txnId, {
-          firstName: name?.split(" ")[0] ?? "there",
-          product: productName,
-          amount: `£${amount.toLocaleString("en-GB")}`,
-        });
-      }
     })(),
+
+    // Purchase confirmation email via Resend
+    sendPurchaseConfirmation({
+      email,
+      firstName: name?.split(" ")[0] ?? "there",
+      product: productName,
+      amount: `£${amount.toLocaleString("en-GB")}`,
+    }),
 
     // Notion: create task for Akmal
     createPurchaseTask({ email, name, tier }),
@@ -115,7 +115,7 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
   ]);
 
   // Log results for observability
-  const labels = ["Loops", "Notion", "Meta CAPI"];
+  const labels = ["Loops", "Email", "Notion", "Meta CAPI"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding] ${labels[i]} failed:`, result.reason);
@@ -205,7 +205,7 @@ export async function handlePaymentIntentPurchase(
 
   // 2. Side effects (only reached if INSERT succeeded)
   const results = await Promise.allSettled([
-    // Loops: add contact, trigger event, send purchase confirmation email
+    // Loops: add contact + trigger event
     (async () => {
       await addContact({
         email,
@@ -221,16 +221,15 @@ export async function handlePaymentIntentPurchase(
         currency: "GBP",
         product: "AI Ad Engine Trial",
       });
-      // Transactional purchase confirmation email
-      const txnId = process.env.LOOPS_PURCHASE_CONFIRMATION_ID;
-      if (txnId) {
-        await sendTransactional(email, txnId, {
-          firstName: name?.split(" ")[0] ?? "there",
-          product: "AI Ad Engine Trial",
-          amount: "£497",
-        });
-      }
     })(),
+
+    // Purchase confirmation email via Resend
+    sendPurchaseConfirmation({
+      email,
+      firstName: name?.split(" ")[0] ?? "there",
+      product: "AI Ad Engine Trial",
+      amount: "£497",
+    }),
 
     // Notion: create task for Akmal
     createPurchaseTask({ email, name, tier: "trial" }),
@@ -251,7 +250,7 @@ export async function handlePaymentIntentPurchase(
     }),
   ]);
 
-  const labels = ["Loops", "Notion", "Meta CAPI"];
+  const labels = ["Loops", "Email", "Notion", "Meta CAPI"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding:pi] ${labels[i]} failed:`, result.reason);
