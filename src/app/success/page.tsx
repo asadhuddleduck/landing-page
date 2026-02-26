@@ -86,19 +86,34 @@ export default async function SuccessPage({
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center px-6 py-20"
-      style={{ background: "var(--black)" }}
+      style={{
+        background: "var(--black)",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "80px 24px",
+      }}
     >
-      <div className="max-w-lg w-full text-center">
+      <div style={{ maxWidth: 520, width: "100%", textAlign: "center" }}>
         {hasValidOrder ? (
           <>
             {/* Success icon */}
             <div
-              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8"
-              style={{ background: "rgba(30, 186, 143, 0.15)" }}
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 32px",
+                background: "var(--viridian-glow)",
+              }}
             >
               <svg
-                className="w-10 h-10"
+                width={40}
+                height={40}
                 style={{ color: "var(--viridian)" }}
                 fill="none"
                 viewBox="0 0 24 24"
@@ -114,23 +129,34 @@ export default async function SuccessPage({
             </div>
 
             <h1
-              className="text-4xl font-black mb-3"
-              style={{ color: "var(--text-primary)" }}
+              style={{
+                color: "var(--text-primary)",
+                fontSize: "clamp(28px, 5vw, 40px)",
+                fontWeight: 900,
+                fontFamily: "var(--font-heading)",
+                margin: "0 0 12px",
+              }}
             >
               Welcome aboard, {customerName}!
             </h1>
 
             <p
-              className="text-lg mb-2"
-              style={{ color: "var(--text-secondary)" }}
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: 18,
+                margin: "0 0 8px",
+              }}
             >
               Your {productName}{isSubscription ? " subscription" : ""} is confirmed.
             </p>
 
             {sessionRef && (
               <p
-                className="text-sm mb-10"
-                style={{ color: "var(--text-muted)" }}
+                style={{
+                  color: "var(--text-muted)",
+                  fontSize: 14,
+                  margin: "0 0 40px",
+                }}
               >
                 Order ref: {sessionRef}
               </p>
@@ -138,23 +164,41 @@ export default async function SuccessPage({
 
             {/* What happens next */}
             <div
-              className="rounded-2xl p-8 text-left mb-10"
-              style={{ background: "var(--black-card)" }}
+              style={{
+                background: "var(--black-card)",
+                border: "1px solid var(--border)",
+                borderRadius: 16,
+                padding: "32px",
+                textAlign: "left",
+                margin: "0 0 40px",
+              }}
             >
               <h2
-                className="text-lg font-bold mb-6"
-                style={{ color: "var(--text-primary)" }}
+                style={{
+                  color: "var(--text-primary)",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  margin: "0 0 24px",
+                }}
               >
                 What happens next
               </h2>
 
-              <div className="space-y-6">
+              <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
                 {steps.map((step) => (
-                  <div key={step.number} className="flex gap-4">
+                  <div key={step.number} style={{ display: "flex", gap: 16 }}>
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
                       style={{
-                        background: "rgba(30, 186, 143, 0.15)",
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        background: "var(--viridian-glow)",
                         color: "var(--viridian)",
                       }}
                     >
@@ -162,14 +206,22 @@ export default async function SuccessPage({
                     </div>
                     <div>
                       <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text-primary)" }}
+                        style={{
+                          color: "var(--text-primary)",
+                          fontSize: 14,
+                          fontWeight: 600,
+                          margin: 0,
+                        }}
                       >
                         {step.title}
                       </p>
                       <p
-                        className="text-sm mt-0.5"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{
+                          color: "var(--text-muted)",
+                          fontSize: 14,
+                          margin: "4px 0 0",
+                          lineHeight: 1.5,
+                        }}
                       >
                         {step.description}
                       </p>
@@ -181,10 +233,16 @@ export default async function SuccessPage({
 
             <Link
               href="/"
-              className="inline-block px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300"
               style={{
+                display: "inline-block",
+                padding: "12px 28px",
+                borderRadius: 12,
+                fontSize: 14,
+                fontWeight: 600,
                 color: "var(--viridian)",
                 border: "1px solid var(--viridian)",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
               }}
             >
               Back to home
@@ -193,17 +251,40 @@ export default async function SuccessPage({
             <SuccessPixel eventId={eventId} value={purchaseValue} />
           </>
         ) : (
-          <div className="text-center">
-            <h1 className="text-4xl font-black mb-3" style={{ color: "var(--text-primary)" }}>
+          <div style={{ textAlign: "center" }}>
+            <h1
+              style={{
+                color: "var(--text-primary)",
+                fontSize: "clamp(28px, 5vw, 40px)",
+                fontWeight: 900,
+                fontFamily: "var(--font-heading)",
+                margin: "0 0 12px",
+              }}
+            >
               No order found
             </h1>
-            <p className="text-lg mb-8" style={{ color: "var(--text-secondary)" }}>
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: 18,
+                margin: "0 0 32px",
+              }}
+            >
               If you completed a purchase, check your email for confirmation.
             </p>
             <Link
               href="/"
-              className="inline-block px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300"
-              style={{ color: "var(--viridian)", border: "1px solid var(--viridian)" }}
+              style={{
+                display: "inline-block",
+                padding: "12px 28px",
+                borderRadius: 12,
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--viridian)",
+                border: "1px solid var(--viridian)",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
+              }}
             >
               Back to home
             </Link>
