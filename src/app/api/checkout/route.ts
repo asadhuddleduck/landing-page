@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     if (typeof body !== "object" || body === null) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
-    const { visitor_id, utm_source, utm_medium, utm_campaign, tier, email, name, phone, fbc, fbp } = body;
+    const { visitor_id, utm_source, utm_medium, utm_campaign, tier, email, name, phone, fbc, fbp, promoCode } = body; // --- DISCOUNT CODE ---
 
     if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
@@ -66,6 +66,22 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // --- START DISCOUNT CODE ---
+    let discounts: { promotion_code: string }[] | undefined;
+    if (promoCode && typeof promoCode === "string") {
+      const promos = await stripe.promotionCodes.list({
+        code: promoCode.trim().toUpperCase(),
+        active: true,
+        limit: 1,
+      });
+      if (promos.data.length > 0) {
+        discounts = [{ promotion_code: promos.data[0].id }];
+      } else {
+        return NextResponse.json({ error: "Invalid discount code" }, { status: 400 });
+      }
+    }
+    // --- END DISCOUNT CODE ---
+
     const session = await stripe.checkout.sessions.create({
       mode: resolvedTier === "unlimited" ? "subscription" : "payment",
       line_items: [{ price: getPriceId(resolvedTier), quantity: 1 }],
@@ -73,6 +89,7 @@ export async function POST(request: NextRequest) {
       billing_address_collection: "required",
       phone_number_collection: { enabled: true },
       customer: customer.id,
+      ...(discounts ? { discounts } : {}), // --- DISCOUNT CODE ---
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/#checkout`,
       metadata: {

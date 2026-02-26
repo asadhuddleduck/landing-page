@@ -112,6 +112,7 @@ export default function CheckoutSection() {
             fbc,
             fbp,
             ...utms,
+            promoCode: promoCode || undefined, // --- DISCOUNT CODE ---
           }),
         });
 
@@ -358,7 +359,7 @@ export default function CheckoutSection() {
                   />
                 </div>
                 {/* --- START DISCOUNT CODE --- */}
-                {selectedTier === "trial" && (
+                {(
                   <div style={{ marginTop: "4px", marginBottom: "14px" }}>
                     {!promoExpanded ? (
                       <button
