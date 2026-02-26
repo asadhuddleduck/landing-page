@@ -9,6 +9,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import type { Appearance } from "@stripe/stripe-js";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -66,13 +67,20 @@ const appearance: Appearance = {
 
 function PaymentFormInner({
   paymentIntentId,
+  amount, // --- DISCOUNT CODE ---
 }: {
   paymentIntentId: string;
+  amount?: number | null; // --- DISCOUNT CODE ---
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const { convert } = useCurrency();
+  // --- START DISCOUNT CODE ---
+  const displayAmount = amount ? amount / 100 : 497;
+  // --- END DISCOUNT CODE ---
+  const converted = convert(displayAmount);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -106,7 +114,7 @@ function PaymentFormInner({
         className="checkout-btn"
         style={{ marginTop: "20px" }}
       >
-        {processing ? "Processing..." : "Pay £497"}
+        {processing ? "Processing..." : `Pay £${displayAmount.toLocaleString("en-GB")}${converted ? ` (${converted})` : ""}`}
       </button>
       <div className="checkout-trust">
         <span>Powered by</span>
@@ -121,11 +129,13 @@ function PaymentFormInner({
 interface PaymentFormProps {
   clientSecret: string;
   paymentIntentId: string;
+  amount?: number | null; // --- DISCOUNT CODE ---
 }
 
 export default function PaymentForm({
   clientSecret,
   paymentIntentId,
+  amount, // --- DISCOUNT CODE ---
 }: PaymentFormProps) {
   return (
     <Elements
@@ -135,7 +145,7 @@ export default function PaymentForm({
         appearance,
       }}
     >
-      <PaymentFormInner paymentIntentId={paymentIntentId} />
+      <PaymentFormInner paymentIntentId={paymentIntentId} amount={amount} /> {/* --- DISCOUNT CODE --- */}
     </Elements>
   );
 }

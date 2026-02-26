@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface StickyCheckoutCTAProps {
   chatOutcome?: string;
@@ -11,6 +12,7 @@ interface StickyCheckoutCTAProps {
 export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProps) {
   const [visible, setVisible] = useState(false);
   const hasSeenCheckout = useRef(false);
+  const { convert } = useCurrency();
 
   useEffect(() => {
     const checkoutEl = document.getElementById("checkout");
@@ -36,9 +38,11 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
   }, []);
 
   // Smart CTA copy based on conversation outcome
+  const converted497 = convert(497);
   const getCtaText = () => {
-    if (chatOutcome?.includes("FRANCHISE")) return "Start Your Franchise Trial for £497";
-    return "Get Started - from £497";
+    const suffix = converted497 ? ` (${converted497})` : "";
+    if (chatOutcome?.includes("FRANCHISE")) return `Start Your Franchise Trial for £497${suffix}`;
+    return `Get Started - from £497${suffix}`;
   };
 
   function handleClick() {
@@ -63,7 +67,7 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
       >
         {getCtaText()}
       </button>
-      <p className="sticky-cta-credit">£497 Trial fee fully credited if you upgrade within 30 days</p>
+      <p className="sticky-cta-credit">£497{converted497 ? ` (${converted497})` : ""} Trial fee fully credited if you upgrade within 30 days</p>
     </div>
   );
 }

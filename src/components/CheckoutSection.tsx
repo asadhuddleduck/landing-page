@@ -5,6 +5,7 @@ import { getVisitorId, getStoredUtms, getFbCookies } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 import PaymentForm from "./PaymentForm";
+import ConvertedPrice from "./ConvertedPrice";
 
 type CheckoutStep = "idle" | "details" | "paying" | "success";
 
@@ -18,6 +19,11 @@ export default function CheckoutSection() {
   const [clientSecret, setClientSecret] = useState("");
   const [paymentIntentId, setPaymentIntentId] = useState("");
   const [error, setError] = useState("");
+  // --- START DISCOUNT CODE ---
+  const [promoCode, setPromoCode] = useState("");
+  const [promoExpanded, setPromoExpanded] = useState(false);
+  const [discountedAmount, setDiscountedAmount] = useState<number | null>(null);
+  // --- END DISCOUNT CODE ---
   const formRef = useRef<HTMLDivElement>(null);
   const submitting = useRef(false);
 
@@ -131,12 +137,23 @@ export default function CheckoutSection() {
             fbc,
             fbp,
             ...utms,
+            promoCode: promoCode || undefined, // --- DISCOUNT CODE ---
           }),
         });
 
         const data = await res.json();
 
-        if (data.clientSecret) {
+        // --- START DISCOUNT CODE ---
+        if (data.amount) {
+          setDiscountedAmount(data.amount);
+        }
+        // --- END DISCOUNT CODE ---
+
+        // --- START DISCOUNT CODE ---
+        if (data.error) {
+          setError(data.error);
+        // --- END DISCOUNT CODE ---
+        } else if (data.clientSecret) {
           setClientSecret(data.clientSecret);
           setPaymentIntentId(data.paymentIntentId);
           setStep("paying");
@@ -198,6 +215,7 @@ export default function CheckoutSection() {
               <span className="pricing-tier-amount">497</span>
             </div>
             <p className="pricing-tier-period">one-time</p>
+            <ConvertedPrice amountGBP={497} />
             <p className="pricing-tier-detail">1 campaign</p>
           </div>
 
@@ -233,6 +251,7 @@ export default function CheckoutSection() {
               <span className="pricing-tier-amount">1,300</span>
             </div>
             <p className="pricing-tier-period">per month</p>
+            <ConvertedPrice amountGBP={1300} />
             <p className="pricing-tier-detail">Unlimited campaigns</p>
           </div>
         </div>
@@ -338,6 +357,58 @@ export default function CheckoutSection() {
                     autoComplete="tel"
                   />
                 </div>
+                {/* --- START DISCOUNT CODE --- */}
+                {selectedTier === "trial" && (
+                  <div style={{ marginTop: "4px", marginBottom: "14px" }}>
+                    {!promoExpanded ? (
+                      <button
+                        type="button"
+                        onClick={() => setPromoExpanded(true)}
+                        style={{
+                          display: "inline-block",
+                          padding: 0,
+                          border: "none",
+                          background: "none",
+                          fontFamily: "var(--font-primary)",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          color: "var(--text-muted)",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          textUnderlineOffset: "2px",
+                        }}
+                      >
+                        Have a discount code?
+                      </button>
+                    ) : (
+                      <div style={{ marginTop: "4px" }}>
+                        <label
+                          htmlFor="checkout-promo"
+                          className="checkout-form-label"
+                        >
+                          Discount code
+                        </label>
+                        <input
+                          id="checkout-promo"
+                          type="text"
+                          value={promoCode}
+                          onChange={(e) =>
+                            setPromoCode(e.target.value.toUpperCase())
+                          }
+                          placeholder="Enter code"
+                          className="checkout-input"
+                          autoComplete="off"
+                          style={{
+                            textTransform: "uppercase",
+                            letterSpacing: "1px",
+                            fontSize: "14px",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* --- END DISCOUNT CODE --- */}
                 {error && <p className="checkout-error">{error}</p>}
                 <button
                   type="submit"
@@ -383,6 +454,7 @@ export default function CheckoutSection() {
                   <PaymentForm
                     clientSecret={clientSecret}
                     paymentIntentId={paymentIntentId}
+                    amount={discountedAmount} /* --- DISCOUNT CODE --- */
                   />
                 </div>
               </>
@@ -426,7 +498,7 @@ export default function CheckoutSection() {
           </div>
           <div className="guarantee-badge-content">
             <p className="guarantee-badge-label">CREDIT GUARANTEE</p>
-            <p className="guarantee-badge-text">£497 Trial fee fully credited if you upgrade within 30 days.</p>
+            <p className="guarantee-badge-text">£497 Trial fee fully credited if you upgrade within 30 days. <ConvertedPrice amountGBP={497} inline /></p>
           </div>
         </div>
       )}

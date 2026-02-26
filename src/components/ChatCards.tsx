@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
+import ConvertedPrice from "./ConvertedPrice";
+import { useCurrency } from "@/hooks/useCurrency";
 
 // Scroll to #checkout section instead of redirecting to Stripe
 function scrollToCheckout(setLoading: (v: boolean) => void) {
@@ -27,6 +29,7 @@ interface PricingCardProps {
 
 export function PricingCard({ onShow }: PricingCardProps) {
   const [loading, setLoading] = useState(false);
+  const { convert } = useCurrency();
 
   useEffect(() => {
     onShow();
@@ -42,6 +45,7 @@ export function PricingCard({ onShow }: PricingCardProps) {
           <span className="chat-card-amount">497</span>
           <span className="chat-card-period">one-time</span>
         </div>
+        <ConvertedPrice amountGBP={497} />
       </div>
       <div className="chat-card-features">
         <div className="chat-card-feature">
@@ -83,7 +87,7 @@ export function PricingCard({ onShow }: PricingCardProps) {
         marginTop: "8px",
         cursor: "pointer"
       }} onClick={() => scrollToCheckout(setLoading)}>
-        Or go unlimited - £1,300/mo
+        Or go unlimited - £1,300/mo{convert(1300) ? ` (${convert(1300)})` : ""}
       </p>
     </div>
   );

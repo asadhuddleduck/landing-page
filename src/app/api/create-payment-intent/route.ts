@@ -37,11 +37,42 @@ export async function POST(request: NextRequest) {
       utm_campaign,
       fbc,
       fbp,
+      promoCode, // --- DISCOUNT CODE ---
     } = body;
 
     if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
     }
+
+    // --- START DISCOUNT CODE ---
+    let finalAmount = 49700;
+    let appliedPromoCode: string | null = null;
+
+    if (promoCode && typeof promoCode === "string") {
+      const promos = await stripe.promotionCodes.list({
+        code: promoCode.trim().toUpperCase(),
+        active: true,
+        limit: 1,
+      });
+
+      if (promos.data.length > 0) {
+        const promo = promos.data[0];
+        const promoCoupon = promo.promotion.coupon;
+        const coupon = typeof promoCoupon === "string"
+          ? await stripe.coupons.retrieve(promoCoupon)
+          : promoCoupon;
+        if (coupon && coupon.amount_off && coupon.currency === "gbp") {
+          finalAmount = Math.max(49700 - coupon.amount_off, 100);
+          appliedPromoCode = promo.code ?? null;
+        }
+      } else {
+        return NextResponse.json(
+          { error: "Invalid discount code" },
+          { status: 400 }
+        );
+      }
+    }
+    // --- END DISCOUNT CODE ---
 
     const ua = request.headers.get("user-agent") ?? "";
 
@@ -63,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     // Create PaymentIntent attached to the customer
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 49700,
+      amount: finalAmount, // --- DISCOUNT CODE ---
       currency: "gbp",
       customer: customer.id,
       receipt_email: email,
@@ -93,7 +124,7 @@ export async function POST(request: NextRequest) {
       utmCampaign: utm_campaign ?? null,
     })
       .then(() => triggerEvent(email, "checkout_started", {
-        amount: 497,
+        amount: finalAmount / 100, // --- DISCOUNT CODE ---
         currency: "GBP",
         product: "AI Ad Engine Trial",
         payment_intent_id: paymentIntent.id,
@@ -103,6 +134,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
+      amount: finalAmount, // --- DISCOUNT CODE ---
+      appliedPromoCode, // --- DISCOUNT CODE ---
     });
   } catch (err) {
     console.error("[create-payment-intent] Error:", err);
