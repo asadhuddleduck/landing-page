@@ -75,7 +75,8 @@ function getDynamicVariables(): Record<string, string> {
 // Clean agent text: strip emotion tags (TTS-only) and em/en dashes (brand rule)
 function cleanAgentText(text: string): string {
   return text
-    .replace(/\[(calm|casual|excited|empathetic|confident|warm|genuine|understanding)\]\s*/gi, "")
+    .replace(/\[[a-z]+\]/gi, " ")
+    .replace(/\s{2,}/g, " ")
     .replace(/\u2014/g, " - ")
     .replace(/\u2013/g, "-")
     .trim();
