@@ -387,9 +387,9 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
 
     navigator.sendBeacon("/api/chat/save", payload);
 
-    localStorage.setItem("hd_has_chatted", "true");
     track("conversation_ended");
     try {
+      localStorage.setItem("hd_has_chatted", "true");
       const existing = localStorage.getItem("hd_prev_conversation");
       if (!existing) {
         localStorage.setItem(
@@ -398,7 +398,7 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
         );
       }
     } catch {
-      /* non-critical */
+      /* non-critical — localStorage may be blocked (Safari private) */
     }
     onConversationEnd?.("COMPLETED");
   }, [aiMessages, onConversationEnd]);
@@ -551,7 +551,7 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
 
   // Detect card for the last agent message
   const lastAgentMsg = agentMessages.length > 0 ? agentMessages[agentMessages.length - 1] : null;
-  const cardType = lastAgentMsg ? detectCard(lastAgentMsg.text) : null;
+  const cardType = (lastAgentMsg && !isStreaming) ? detectCard(lastAgentMsg.text) : null;
   const shouldShowCard = cardType && !shownCards.has(cardType);
 
   // Are we waiting for the first agent response after user sent?

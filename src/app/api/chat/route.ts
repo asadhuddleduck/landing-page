@@ -5,7 +5,38 @@ import { join } from "path";
 
 export const runtime = "nodejs";
 
+// ---------------------------------------------------------------------------
+// Rate limiting: per visitor_id, shared in-memory Map
+// ---------------------------------------------------------------------------
+const chatRateMap = new Map<string, { count: number; windowStart: number }>();
+const CHAT_RATE_MAX = 60; // max messages per window
+const CHAT_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function isChatRateLimited(visitorId: string): boolean {
+  if (!visitorId) return false;
+  const now = Date.now();
+  const entry = chatRateMap.get(visitorId);
+  if (!entry || now - entry.windowStart > CHAT_RATE_WINDOW_MS) {
+    chatRateMap.set(visitorId, { count: 1, windowStart: now });
+    return false;
+  }
+  entry.count++;
+  return entry.count > CHAT_RATE_MAX;
+}
+
+// Cleanup stale entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of chatRateMap) {
+    if (now - entry.windowStart > CHAT_RATE_WINDOW_MS) {
+      chatRateMap.delete(key);
+    }
+  }
+}, 10 * 60 * 1000).unref();
+
+// ---------------------------------------------------------------------------
 // Load system prompt and KB docs once at module scope (cached on cold start)
+// ---------------------------------------------------------------------------
 const docsDir = join(process.cwd(), "docs");
 
 const basePrompt = readFileSync(
@@ -44,7 +75,24 @@ function interpolate(
 }
 
 export async function POST(request: Request) {
-  const { messages, dynamicVariables } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response("Invalid JSON", { status: 400 });
+  }
+
+  const { messages, dynamicVariables } = body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return new Response("Missing messages", { status: 400 });
+  }
+
+  // Rate limit by visitor_id
+  const visitorId = dynamicVariables?.visitor_id ?? "";
+  if (isChatRateLimited(visitorId)) {
+    return new Response("Rate limit exceeded", { status: 429 });
+  }
 
   const vars = dynamicVariables ?? {};
   const systemPrompt =

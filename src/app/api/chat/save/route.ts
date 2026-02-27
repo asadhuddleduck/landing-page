@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
+export const maxDuration = 30;
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiting: per visitor_id
@@ -119,16 +120,16 @@ export async function POST(request: NextRequest) {
         conversationId,
         "diy-sonnet-4.6",
         visitorId,
-        "", // visitor_name — extracted later
-        "", // visitor_email — extracted later
-        "", // visitor_phone — extracted later
-        "", // visitor_role — extracted later
-        "", // business_name — extracted later
-        "", // location_count — extracted later
-        "", // main_challenge — extracted later
-        0,  // is_fb — extracted later
-        "", // objections_raised — extracted later
-        0,  // reached_checkout — extracted later
+        "", // visitor_name
+        "", // visitor_email
+        "", // visitor_phone
+        "", // visitor_role (updated by Haiku extraction below)
+        "", // business_name (updated by Haiku extraction below)
+        "", // location_count (updated by Haiku extraction below)
+        "", // main_challenge (updated by Haiku extraction below)
+        0,  // is_fb (updated by Haiku extraction below)
+        "", // objections_raised (updated by Haiku extraction below)
+        0,  // reached_checkout (updated by Haiku extraction below)
         "", // conversation_outcome — extracted later
         transcript,
         durationSecs,
