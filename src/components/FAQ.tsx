@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrency } from "@/hooks/useCurrency";
+import { EXCHANGE_RATES, getCurrencySymbol } from "@/lib/currency";
 
 const faqs: { question: string; highlight: string; answer: string }[] = [
   {
@@ -52,9 +53,24 @@ export default function FAQ() {
     if (!currency || currency === "GBP") return text;
     const trial = getDisplayPrice(497, "trial");
     const unlimited = getDisplayPrice(1300, "unlimited");
+    const rate = EXCHANGE_RATES[currency] ?? 1;
+    const sym = getCurrencySymbol(currency);
+    // Round reference amounts to clean numbers
+    const round = (gbp: number) => {
+      const raw = gbp * rate;
+      let rounded: number;
+      if (raw < 100) rounded = Math.round(raw / 5) * 5;
+      else if (raw < 1000) rounded = Math.round(raw / 50) * 50;
+      else rounded = Math.round(raw / 500) * 500;
+      return `${sym}${rounded.toLocaleString("en-US")}`;
+    };
     let result = text;
     result = result.replace(/£497/g, trial.formatted);
-    result = result.replace(/£1,300/g, `${unlimited.formatted}`);
+    result = result.replace(/£1,300/g, unlimited.formatted);
+    result = result.replace(/£2,000/g, round(2000));
+    result = result.replace(/£5,000/g, round(5000));
+    result = result.replace(/£210/g, round(210));
+    result = result.replace(/£10/g, round(10));
     return result;
   }
 

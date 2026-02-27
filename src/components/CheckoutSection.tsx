@@ -6,6 +6,7 @@ import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 import { gtagEvent } from "@/lib/ga";
 import { useCurrency } from "@/hooks/useCurrency";
+import { EXCHANGE_RATES, getCurrencySymbol } from "@/lib/currency";
 
 type CheckoutStep = "idle" | "details" | "success";
 
@@ -26,6 +27,16 @@ export default function CheckoutSection() {
 
   const trialPrice = getDisplayPrice(497, "trial");
   const unlimitedPrice = getDisplayPrice(1300, "unlimited");
+
+  // Convert £10 ad spend minimum to local currency (clean round number)
+  const adSpendMin = (() => {
+    if (!currency || currency === "GBP") return "£10";
+    const rate = EXCHANGE_RATES[currency];
+    if (!rate) return "£10";
+    const raw = 10 * rate;
+    const rounded = raw < 100 ? Math.round(raw / 5) * 5 : Math.round(raw / 50) * 50;
+    return `${getCurrencySymbol(currency)}${rounded.toLocaleString("en-US")}`;
+  })();
 
   // Fire view_item when checkout section scrolls into viewport
   useEffect(() => {
@@ -72,7 +83,7 @@ export default function CheckoutSection() {
         "First campaign assets within 72 hours",
         "Live performance dashboard included",
         "Monthly performance reports & strategy calls",
-        "Ad spend not included. Minimum £10/location/day recommended",
+        `Ad spend not included. Minimum ${adSpendMin}/location/day recommended`,
       ]
     : [
         "Deep audience research from social data & competitor analysis",
@@ -81,7 +92,7 @@ export default function CheckoutSection() {
         "First campaign assets within 72 hours",
         "Live performance dashboard included",
         "Performance report & strategy review call",
-        "Ad spend not included. Minimum £10/location/day recommended",
+        `Ad spend not included. Minimum ${adSpendMin}/location/day recommended`,
       ];
 
   function handleStartCheckout() {

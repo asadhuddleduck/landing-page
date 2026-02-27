@@ -152,7 +152,7 @@ function detectCard(text: string): "pricing" | "testimonial" | "cta" | "comparis
   if (lower.includes("checkout") || lower.includes("right below") || lower.includes("go ahead")) {
     return "cta";
   }
-  if (lower.includes("497") || (lower.includes("trial") && lower.includes("£"))) {
+  if (lower.includes("497") || (lower.includes("trial") && /[£$€¥₹]|one.time/.test(lower))) {
     return "pricing";
   }
   if (
@@ -163,7 +163,7 @@ function detectCard(text: string): "pricing" | "testimonial" | "cta" | "comparis
   ) {
     return "testimonial";
   }
-  if (lower.includes("agency") && /£|cost|expensive|cheaper|charge|paying|price|spend/.test(lower)) {
+  if (lower.includes("agency") && /[£$€¥₹]|cost|expensive|cheaper|charge|paying|price|spend/.test(lower)) {
     return "comparison";
   }
   if (lower.includes("72 hours") && (/3 week/.test(lower) || /three week/.test(lower))) {

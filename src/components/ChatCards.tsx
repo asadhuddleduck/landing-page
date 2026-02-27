@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 import { useCurrency } from "@/hooks/useCurrency";
+import { EXCHANGE_RATES, getCurrencySymbol } from "@/lib/currency";
 
 // Scroll to #checkout section instead of redirecting to Stripe
-function scrollToCheckout(setLoading: (v: boolean) => void) {
+function scrollToCheckout(setLoading: (v: boolean) => void, trialAmount: number, currencyCode: string) {
   setLoading(true);
   // Value reflects minimum tier. User selects actual tier at checkout.
-  trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
+  trackPixelEvent("InitiateCheckout", { value: trialAmount, currency: currencyCode });
   track("card_cta_click");
 
   const el = document.getElementById("checkout");
@@ -76,7 +77,7 @@ export function PricingCard({ onShow }: PricingCardProps) {
       </div>
       <button
         className="chat-card-btn"
-        onClick={() => scrollToCheckout(setLoading)}
+        onClick={() => scrollToCheckout(setLoading, trialPrice.amount, currency || "GBP")}
         disabled={loading}
       >
         Start Your Trial
@@ -87,7 +88,7 @@ export function PricingCard({ onShow }: PricingCardProps) {
         color: "var(--text-muted)",
         marginTop: "8px",
         cursor: "pointer"
-      }} onClick={() => scrollToCheckout(setLoading)}>
+      }} onClick={() => scrollToCheckout(setLoading, trialPrice.amount, currency || "GBP")}>
         Or go unlimited - {unlimitedPrice.formatted}/mo
       </p>
     </div>
@@ -184,21 +185,54 @@ interface ComparisonCardProps {
 }
 
 export function ComparisonCard({ onShow, locationCount = 5 }: ComparisonCardProps) {
+  const { currency, getDisplayPrice } = useCurrency();
+
   useEffect(() => {
     onShow();
     track("card_shown", { card: "comparison" });
   }, [onShow]);
 
+  // Convert agency and trial prices for non-GBP visitors
+  const trialPrice = getDisplayPrice(497, "trial");
+  const isGBP = !currency || currency === "GBP";
+  const rate = currency ? (EXCHANGE_RATES[currency] ?? 0) : 0;
+  const sym = currency ? getCurrencySymbol(currency) : "£";
+
+  // Round reference amounts to clean shorthand numbers
+  const round = (gbp: number) => {
+    if (!rate) return "";
+    const raw = gbp * rate;
+    if (raw < 1000) return `${sym}${Math.round(raw / 50) * 50}`;
+    if (raw < 10000) return `${sym}${(Math.round(raw / 500) * 500).toLocaleString("en-US")}`;
+    return `${sym}${(Math.round(raw / 5000) * 5000).toLocaleString("en-US")}`;
+  };
+
+  // Shorthand for thousands (e.g. $3k-6k)
+  const shortK = (gbp: number) => {
+    if (!rate) return "";
+    const raw = gbp * rate;
+    const rounded = raw < 5000 ? Math.round(raw / 500) * 500 : Math.round(raw / 1000) * 1000;
+    return rounded >= 1000 ? `${sym}${Math.round(rounded / 1000)}k` : `${sym}${rounded}`;
+  };
+
+  const agencyPriceYear = isGBP
+    ? "\u00A310,000-25,000/year"
+    : `${round(10000)}-${round(25000).replace(sym, "")}/year`;
+  const agencyPriceMo = isGBP
+    ? "\u00A32k-5k/mo"
+    : `${shortK(2000)}-${shortK(5000).replace(sym, "")}/mo`;
+  const trialPriceText = `${trialPrice.formatted} one-time Trial`;
+
   return (
     <div className="chat-card chat-card-comparison">
       <div className="chat-card-comparison-col chat-card-comparison-col--agency">
         <div className="chat-card-comparison-label">Typical Agency</div>
-        <div className="chat-card-comparison-price">&pound;10,000-25,000/year</div>
-        <div className="chat-card-comparison-period">&pound;2k-5k/mo &times; 12</div>
+        <div className="chat-card-comparison-price">{agencyPriceYear}</div>
+        <div className="chat-card-comparison-period">{agencyPriceMo} &times; 12</div>
       </div>
       <div className="chat-card-comparison-col chat-card-comparison-col--hd">
         <div className="chat-card-comparison-label">AI Ad Engine</div>
-        <div className="chat-card-comparison-price">&pound;497 one-time Trial</div>
+        <div className="chat-card-comparison-price">{trialPriceText}</div>
         <div className="chat-card-comparison-period">Full setup included</div>
       </div>
       <div className="chat-card-comparison-note">
@@ -249,6 +283,8 @@ interface CTACardProps {
 
 export function CTACard({ onShow }: CTACardProps) {
   const [loading, setLoading] = useState(false);
+  const { currency, getDisplayPrice } = useCurrency();
+  const trialPrice = getDisplayPrice(497, "trial");
 
   useEffect(() => {
     onShow();
@@ -260,7 +296,7 @@ export function CTACard({ onShow }: CTACardProps) {
       <p className="chat-card-cta-text">Ready to start?</p>
       <button
         className="chat-card-btn"
-        onClick={() => scrollToCheckout(setLoading)}
+        onClick={() => scrollToCheckout(setLoading, trialPrice.amount, currency || "GBP")}
         disabled={loading}
       >
         Start Your Trial

@@ -1,3 +1,8 @@
+"use client";
+
+import { useCurrency } from "@/hooks/useCurrency";
+import { EXCHANGE_RATES, getCurrencySymbol } from "@/lib/currency";
+
 const caseStudies = [
   {
     brand: "Phat Buns",
@@ -63,6 +68,22 @@ const caseStudies = [
 ];
 
 export default function CaseStudies() {
+  const { currency } = useCurrency();
+
+  // Convert £ amounts in case study text for non-GBP visitors
+  function convertText(text: string): string {
+    if (!currency || currency === "GBP") return text;
+    const rate = EXCHANGE_RATES[currency];
+    if (!rate) return text;
+    const sym = getCurrencySymbol(currency);
+    // £100 → clean round number in local currency
+    return text.replace(/£100/g, () => {
+      const raw = 100 * rate;
+      const rounded = raw < 1000 ? Math.round(raw / 10) * 10 : Math.round(raw / 100) * 100;
+      return `${sym}${rounded.toLocaleString("en-US")}`;
+    });
+  }
+
   return (
     <section className="section case-studies">
       <h2 className="case-studies-title">What clients reported</h2>
@@ -72,7 +93,7 @@ export default function CaseStudies() {
       <div className="case-studies-grid">
         {caseStudies.map((cs, i) => (
           <div key={i} className="case-study-card">
-            <p className="case-study-method">{cs.method}</p>
+            <p className="case-study-method">{convertText(cs.method)}</p>
             <p className="case-study-outcome">{cs.outcome}</p>
             {cs.quote && <p className="case-study-quote">{cs.quote}</p>}
             {cs.cite && <p className="case-study-cite">{cs.cite}</p>}
