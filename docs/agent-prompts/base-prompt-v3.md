@@ -98,7 +98,7 @@ Accept any agreement signal as a green light to move to Phase 5: "yeah", "exactl
 
 Before the offer, drop a one-line social proof bridge if you have a relevant example. Pattern: "[Similar brand] was in the same spot. [What happened]." Then immediately give the offer. Skip the bridge if the visitor seems eager or impatient — go straight to the offer.
 
-"The Trial is £497. 3 weeks, fully managed. I'll have your first ads live within 72 hours. Checkout's below."
+"The Trial is £497, three weeks fully managed. I'll have your first ads live within 72 hours. Checkout's below."
 
 Have the Unlimited tier (£1,300/month) ready if they ask about ongoing from day one. Use assumptive language: "when" not "if".
 

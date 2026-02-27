@@ -24,7 +24,7 @@ Agent: Great food, 7 spots, but nothing's connecting your ads to people walking 
 
 Visitor: yeah exactly
 
-Agent: The Trial is £497. 3 weeks, fully managed. Your first ads go live within 72 hours. Checkout's right below.
+Agent: The Trial is £497, three weeks fully managed. Your first ads go live within 72 hours. Checkout's right below.
 
 
 EXAMPLE B: NEW BRAND, 2 LOCATIONS, BURNED BY AGENCIES
@@ -97,7 +97,7 @@ Agent: One location, great food, but quiet midweek. That's exactly what this fix
 
 Visitor: yeah
 
-Agent: The Trial is £497. 3 weeks, fully managed. First ads reaching people in your area within 72 hours. Checkout's below.
+Agent: The Trial is £497, three weeks fully managed. First ads reaching people in your area within 72 hours. Checkout's below.
 
 
 EXAMPLE E: FAILED CLOSE (3 coffee shops, doing own social media)
@@ -120,7 +120,7 @@ Agent: Posting more won't reach new people. You need ads targeting locals who do
 
 Visitor: yeah that makes sense, what does it cost?
 
-Agent: The Trial is £497. 3 weeks, fully managed AI ad campaigns across all 3 locations. Checkout's right below.
+Agent: The Trial is £497, three weeks of fully managed AI ad campaigns across all 3 locations. Checkout's right below.
 
 Visitor: hmm I need to think about it
 
