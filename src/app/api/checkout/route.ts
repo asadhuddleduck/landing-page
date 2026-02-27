@@ -106,6 +106,8 @@ export async function POST(request: NextRequest) {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode,
       line_items: lineItems,
+      automatic_tax: { enabled: true },
+      tax_id_collection: { enabled: true },
       billing_address_collection: "required",
       phone_number_collection: { enabled: true },
       customer: customer.id,
