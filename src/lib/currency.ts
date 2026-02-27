@@ -30,6 +30,7 @@ export const EXCHANGE_RATES: Record<string, number> = {
   PLN: 5.11,
   BRL: 7.35,
   MXN: 21.8,
+  PKR: 377,
 };
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -53,6 +54,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   PLN: "z\u0142",
   BRL: "R$",
   MXN: "MX$",
+  PKR: "Rs",
 };
 
 // Maps navigator.language locale to currency code
@@ -104,6 +106,8 @@ const LOCALE_TO_CURRENCY: Record<string, string> = {
   "fr-CH": "CHF",
   "it-CH": "CHF",
   "pl-PL": "PLN",
+  "ur-PK": "PKR",
+  "en-PK": "PKR",
 };
 
 /**
@@ -141,6 +145,7 @@ export function detectCurrency(): string | null {
   if (lang === "da") return "DKK";
   if (lang === "pl") return "PLN";
   if (lang === "ms") return "MYR";
+  if (lang === "ur") return "PKR";
 
   return null;
 }
