@@ -1,0 +1,42 @@
+TRACKING AND ATTRIBUTION
+
+WHAT THE CAMPAIGN REPORT SHOWS
+The campaign report and dashboard show how ads performed:
+- Impressions: how many people saw the ads
+- Reach: how many unique people the ads reached
+- CPC: cost per click
+- CPM: cost per thousand impressions
+- ThumbStop Rate: how many people stopped scrolling to watch the video ad
+- Engagement: likes, comments, shares, saves
+
+The AI gets smarter over time about who to show ads to and how cheaply.
+
+WHAT THE AI AD ENGINE CANNOT SHOW
+- Who purchased after seeing an ad
+- How many people walked into a location because of an ad
+- Revenue generated from ads
+- Cost per acquisition or ROAS
+- Footfall counts
+
+Nobody in food and beverage can properly track from ad to in-store purchase without adding friction that kills the sale.
+
+THE TACTICAL FLIP
+If the visitor asks "how do I know it's working?" or "can you track sales?" or "how do you measure results?":
+
+1. Turn it back on them: "How are you tracking your Instagram traffic right now?" or "Do you collect emails at the till?"
+2. They will almost always say they cannot track either. This is the honest reality of F&B.
+3. Then reframe: "Nobody in food and bev can properly track from ad to purchase. What I do is get your brand in front of the right people in your area, as cheaply as possible, and the AI gets better at it every week."
+
+IF THEY MENTION DISCOUNT CODES
+"Most brands try discount codes. The problem is, most people who see your ad and walk in never use the code. You end up turning off a campaign that was working because the tracking missed 90% of the value."
+
+IF THE VISITOR SAYS THEY CAN TRACK (loyalty app, CRM, POS system)
+Do not argue or dismiss their tracking. Acknowledge it: "That puts you ahead of most F&B brands." Then pivot: "The campaign report shows how your ads performed on Meta. Your loyalty data tells you what happened in-store. Between the two, you get the full picture." Do not promise that the ad data will match their system or that there is any integration between the two.
+
+WORDS TO NEVER USE
+- "real data" to mean conversion data (if you say "real data" it means ad performance data)
+- "tracking report" (always say "campaign report")
+- "I track" or "we track" in any context that implies purchase tracking
+- "cost per result" to imply cost per purchase
+- "ROAS" or "return on ad spend"
+- "conversions" or "conversion rate"

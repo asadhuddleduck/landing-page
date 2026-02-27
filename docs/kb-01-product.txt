@@ -1,30 +1,42 @@
 WHAT THE AI AD ENGINE DOES
 
-The AI Ad Engine builds and manages AI-accelerated advertising systems exclusively for multi-location food and beverage brands. It goes beyond media buying, offering strategy, creative, launch, testing, and optimisation under one roof, delivered at a speed that would be physically impossible without AI.
+The AI Ad Engine builds and runs AI ad campaigns for multi-location food and beverage brands. It handles audience research, creative, launch, testing, and optimisation. All of it is faster than any traditional agency could do alone.
 
-The AI Ad Engine is a specialist tool for marketing directors and managers at F&B chains. It does not replace their marketing function; it accelerates it.
+It is a specialist tool for marketing directors and managers at F&B chains. It does not replace their marketing team. It makes their marketing faster.
 
 HOW IT WORKS
 
-1. Intake: Client fills a standard form covering their brand, objective, offer, and assets.
-2. AI Research and Strategy: AI builds the audience profile, generates ad angles, and produces the strategy document.
-3. Creative Production: AI-accelerated content creation. Existing content is repurposed into conversion-focused ad variations using the Frankenstein method. New hooks, voiceovers, and angles are added by the human editing team.
-4. Campaign Build and Launch: Campaign build, targeting configuration, and ads go live.
-5. Data, Optimisation and Recycling: AI analyses performance data weekly. The human team creates more creative based on what the data says. Steps 3, 4, and 5 recycle indefinitely; every cycle gets more efficient.
+1. Intake: You fill in a form about your brand, goal, offer, and content.
+2. AI Research: The AI researches your audience, finds the best angles, and builds a strategy.
+3. Creative: Your existing content is remixed into ads. New hooks, voiceovers, and angles are added. Nothing is made from scratch. It is your food, your brand, your voice.
+4. Campaign Build and Launch: Campaigns are built, targeting is set, and ads go live.
+5. Optimisation: The AI reviews performance data every week. More creative is produced based on what is working. Steps 3, 4, and 5 repeat. Each round gets better.
 
 KEY FACTS
 
-- First campaign assets ready within 72 hours of onboarding
-- Every client gets a live performance dashboard showing exactly what their AI Ad Engine is doing
-- Real campaign data, health scores, cost metrics, and location-level breakdowns
-- Full transparency, updated daily. No hiding behind vanity metrics.
-- The dashboard shows campaign performance: health scores, cost metrics, location-level breakdowns.
-- Existing content is repurposed, not AI-generated content from scratch. Their food, their brand, their voice.
-- AI handles the research, targeting, and optimisation. Humans handle editing, strategy decisions, and client relationships.
-- Multi-location support: same price covers up to 50 locations. Each location gets its own targeting and campaigns. For 50+ locations, enterprise pricing is available.
+- First campaign assets ready within 72 hours of onboarding.
+- Trial clients get a campaign report at the end of 3 weeks showing how their ads performed: impressions, reach, CPC (cost per click), CPM (cost per thousand impressions), ThumbStop Rate, and engagement (likes, comments, shares, saves).
+- Unlimited clients get a live dashboard showing campaign health, cost efficiency, and location-level breakdowns. Updated daily.
+- I use your existing content. Content is not generated from scratch by AI.
+- The AI handles research, targeting, and optimisation. Editing, strategy decisions, and client relationships are handled separately.
+- The longer the AI runs, the smarter it gets about your audience. It learns who responds and what works.
+- Multi-location support: the same price covers up to 50 locations. Each location gets its own targeting and campaigns. For 50+ locations, enterprise pricing is available.
 
 WHAT THE AI AD ENGINE DOES NOT DO
 
-- It does not run social media feeds or manage daily posting
-- It does not sell content days as the core service
-- It does not guarantee specific revenue outcomes. The system controls the advertising; it does not control food, service, pricing, staff, or operations.
+- It does not run social media feeds or manage daily posting.
+- It does not sell content days as the core service.
+- It does not guarantee specific revenue outcomes. The system controls the advertising. It does not control food, service, pricing, staff, or operations.
+- It does not track purchases, conversions, revenue, footfall, or cost per acquisition. It shows how ads performed: reach, cost, and engagement.
+
+THE AI DOES NOT TELL YOU WHAT TO PROMOTE
+
+The AI Ad Engine runs what you decide. You bring the campaign direction: what you want to promote, what offer you want to push, what your goal is. The audience research and strategy happen after payment, during intake. The AI can ask what you are trying to achieve. But it never tells you what campaign to run. That is your decision.
+
+VOCABULARY RULES
+
+- Say "AI ad campaigns" not "ads" or "Facebook ads"
+- Say "audience research" not "market research"
+- Say "campaign build" not "setup"
+- Say "Trial" (capitalised) when referring to the £497 offer
+- Say "ad budget" not "ad spend" when talking to prospects

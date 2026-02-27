@@ -104,46 +104,35 @@ Decisions made for the landing-page project that should NOT be revisited without
 **Rationale:** Same reason as fbc/fbp — the webhook has no access to the original browser's IP or user-agent. These improve CAPI's Event Match Quality score, which directly affects how well Meta can attribute conversions to ad clicks. `client_ua` is sliced to 500 chars to stay within Stripe's 500-char metadata value limit.
 
 
-## ElevenLabs Agent
+## AI Sales Chat (Vercel AI SDK + Anthropic)
 
-### Agent ID: agent_4501khrpmw5ceq8v78xbwzjjjh58
-**Decision:** The ElevenLabs conversational AI agent is the primary sales interaction on the landing page. It runs in text-only mode via WebSocket.
-**Rationale:** A conversational agent qualifies prospects better than a static form. It can adapt to the visitor's business, handle objections, and guide them to checkout. Text-only mode avoids audio permission prompts and works in all environments.
+### Replaced ElevenLabs with direct Anthropic API (Feb 2026)
+**Decision:** The landing page chat was migrated from ElevenLabs Conversational AI (WebSocket, $0.32/conversation) to direct Anthropic API calls via Vercel AI SDK (HTTP streaming, ~$0.05-0.10/conversation).
+**Rationale:** ElevenLabs cost ~£112/month for a text-only chat — the platform fee added zero value since voice/TTS features weren't used. Direct API calls with prompt caching reduce costs by 75-85%. The prompt, KB docs, and all UX logic stayed the same.
 
-### System prompt managed via API (PATCH /v1/convai/agents/{id})
-**Decision:** The agent's system prompt is updated programmatically via the ElevenLabs API, not through their dashboard.
-**Rationale:** Keeps the prompt version-controlled locally (in `docs/agent-prompts/base-prompt.md`), enables CI/CD-style updates, and avoids manual dashboard edits that are hard to track or revert.
+### System prompt + 9 KB docs stuffed into system message (no RAG)
+**Decision:** The system prompt (`docs/agent-prompts/base-prompt-v3.md`) and all 9 KB docs (`docs/kb-01` through `kb-09`) are concatenated into a single system message (~10k tokens).
+**Rationale:** 10k tokens is well within the 200k context window. Stuffing everything into the system message with Anthropic's prompt caching is cheaper and more reliable than RAG. Every KB doc is always available to the agent — no retrieval misses.
 
-### 6 KB docs: product, pricing, differentiation, ideal-client, case-studies, faq
-**Decision:** Knowledge base documents are uploaded separately and attached to the agent via API.
-**Rationale:** KB docs let the agent answer detailed questions without bloating the system prompt. They are separate files because ElevenLabs retrieves them via RAG — the agent only pulls relevant chunks, not the entire corpus.
+### Prompt caching via Anthropic ephemeral cache control
+**Decision:** The system message (prompt + KB) has `providerOptions.anthropic.cacheControl: { type: "ephemeral" }`, enabling Anthropic's automatic prompt caching.
+**Rationale:** The system message is identical across all conversations. Caching reduces input token costs by ~90% after the first message in a 5-minute window. At 333 conversations/month, this saves ~$80-100/month vs uncached.
 
-### ElevenLabs variables use {{_var_}} format (underscores); local files use {{ var }}
-**Decision:** When sending prompts to ElevenLabs API, variables must be in `{{_variable_name_}}` format. Local markdown files use `{{ variable_name }}` for readability.
-**Rationale:** ElevenLabs requires the underscore-wrapped format for dynamic variable interpolation. The local files use a cleaner format that gets transformed before upload.
+### Dynamic variables interpolated server-side via regex
+**Decision:** `{{ variable_name }}` placeholders in the prompt are replaced via simple regex before sending to Anthropic. Variables (visitor_id, UTMs, returning visitor context) are sent from the client in `dynamicVariables`.
+**Rationale:** Simple, no dependencies, no format conversion. The client sends variables on every request; the server interpolates before building the system message.
 
-### Single consolidated prompt + opener override node (not 8 subagent nodes)
-**Decision:** The agent uses one monolithic system prompt with an opener override node, not the original 8-node CLOSER workflow.
-**Rationale:** The 8-node workflow was fragile — edge transitions broke conversations, and maintaining 8 separate prompts was error-prone. A single prompt with clear behavioral sections (open, clarify, label, overview, sell, explain, reinforce, warm exit) achieves the same flow without the complexity of node transitions.
+### Conversation persistence via client-side triggers + server extraction
+**Decision:** Conversations are saved to Turso via `POST /api/chat/save` triggered by: 5-min inactivity timeout, page leave (`sendBeacon`), or warm exit keyword detection. A follow-up Haiku call extracts structured fields (business_name, location_count, is_fb, etc.).
+**Rationale:** Client-side triggers ensure conversations are saved even on tab close. `sendBeacon` is fire-and-forget and reliable. Haiku extraction (~$0.003/conversation) gives structured data for funnel analysis without complicating the chat flow.
 
-### When updating: MUST re-upload KB docs AND update system prompt
-**Decision:** KB doc uploads and system prompt updates are separate API operations. Both must be done when making content changes.
-**Rationale:** ElevenLabs does not have a "sync all" endpoint. If you update the system prompt but forget to re-upload changed KB docs (or vice versa), the agent will have inconsistent knowledge.
+### Model configurable via ANTHROPIC_MODEL env var
+**Decision:** The chat model is set via `ANTHROPIC_MODEL` env var (default: `claude-sonnet-4-6`). Extraction uses `claude-haiku-4-5`.
+**Rationale:** When a new Sonnet drops, change the env var in Vercel — no code changes, no redeploy needed.
 
-
-## ElevenLabs Webhook
-
-### Conversation data stored in Turso `conversations` table
-**Decision:** The `/api/webhook/elevenlabs` endpoint receives conversation-end webhooks and stores them in Turso with data collection fields, dynamic variables, and transcript.
-**Rationale:** Conversation data (visitor name, email, phone, business details, objections raised, conversation outcome) is valuable for sales follow-up and funnel analysis. Storing in Turso makes it queryable alongside purchase data.
-
-### HMAC-SHA256 signature verification with 5-minute timestamp tolerance
-**Decision:** Webhook payloads are verified using the `ElevenLabs-Signature` header (format: `t=<timestamp>,v0=<signature>`). Timestamps older than 5 minutes are rejected.
-**Rationale:** Prevents replay attacks and ensures webhook payloads are authentic. The 5-minute window accounts for network latency while limiting the replay window.
-
-### Always returns 200 (even on DB errors)
-**Decision:** Like the Stripe webhook, the ElevenLabs webhook always returns 200.
-**Rationale:** Same reasoning — prevents retry storms. A failed DB insert is logged for investigation but should not cause ElevenLabs to re-deliver the webhook repeatedly.
+### Max 150 output tokens per response
+**Decision:** `maxOutputTokens: 150` in the streaming endpoint.
+**Rationale:** The prompt already enforces <25 words per message. The token limit is a safety net against runaway responses. 150 tokens is generous for 25 words but prevents the model from ignoring the instruction.
 
 
 ## Notion Tasks
@@ -176,13 +165,12 @@ Decisions made for the landing-page project that should NOT be revisited without
 
 ### When making product/pricing/terminology changes, update ALL of these:
 1. **Source code** (`src/`) — components, API routes, lib files
-2. **Documentation** (`docs/kb-*.txt`, `docs/agent-prompts/*.md`)
-3. **ElevenLabs agent** — system prompt via API + re-upload KB docs
-4. **Stripe Dashboard** — product names, price amounts
-5. **Resend** — email templates in `src/lib/email.ts`
-6. **CLAUDE.md** and **README.md**
-7. **Vercel env vars** — if new ones added
-8. **~/.claude/CLAUDE.md** — global project registry
+2. **Documentation** (`docs/kb-*.txt`, `docs/agent-prompts/*.md`) — changes take effect on next deploy
+3. **Stripe Dashboard** — product names, price amounts
+4. **Resend** — email templates in `src/lib/email.ts`
+5. **CLAUDE.md** and **README.md**
+6. **Vercel env vars** — if new ones added
+7. **~/.claude/CLAUDE.md** — global project registry
 
 
 ## CSS / Design

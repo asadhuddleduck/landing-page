@@ -5,15 +5,15 @@ Self-serve landing page for Huddle Duck's AI Ad Engine. Two tiers:
 - **Trial**: £497 one-time (3-week managed campaign)
 - **Unlimited**: £1,300/month (ongoing management, month-to-month)
 
-Hosted at `start.huddleduck.co.uk`. Uses an ElevenLabs AI chat agent as the primary sales interaction.
+Hosted at `start.huddleduck.co.uk`. Uses a DIY AI sales chat (Vercel AI SDK + Anthropic Claude Sonnet) as the primary sales interaction.
 
 ## Tech Stack
 - Next.js 16 (App Router, TypeScript, React 19)
 - Tailwind CSS v4 (`@tailwindcss/postcss`)
 - `@vercel/analytics`
 - Stripe (PaymentIntent for Trial, Checkout Session for Unlimited subscriptions)
-- ElevenLabs React SDK (`@elevenlabs/react` useConversation hook, text-only chat)
-- Turso/LibSQL (purchase records, lazy proxy pattern)
+- Vercel AI SDK v6 (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/react`) — streaming chat with Anthropic Claude Sonnet
+- Turso/LibSQL (purchase records + conversation transcripts, lazy proxy pattern)
 - Resend (transactional email: purchase confirmations, abandoned cart nudges)
 - Notion API (task creation in Actions DB)
 - Meta Conversions API (server-side purchase events via `facebook-nodejs-business-sdk`)
@@ -47,13 +47,14 @@ src/
       checkout/route.ts      # POST: creates Stripe Checkout Session (Unlimited subscription or Trial payment)
       create-payment-intent/route.ts  # POST: creates PaymentIntent for Trial inline payment
       webhook/stripe/route.ts         # POST: handles checkout.session.completed + payment_intent.succeeded
-      webhook/elevenlabs/route.ts     # POST: ElevenLabs conversation webhook
+      chat/route.ts                   # POST: AI chat streaming endpoint (Anthropic Claude via Vercel AI SDK)
+      chat/save/route.ts              # POST: saves conversation transcript to Turso + Haiku extraction
       cron/abandoned-cart/route.ts    # GET: nudge abandoned checkouts via Resend (hourly cron)
       cron/reconcile/route.ts         # GET: cross-ref Stripe events with Turso, re-run missing (every 6h)
   components/
     Header.tsx               # Minimal header with logo + brand text (server)
-    HeroChatSection.tsx      # Hero section with ElevenLabs chat integration (client)
-    ElevenLabsChat.tsx       # ElevenLabs React SDK chat interface (client, text-only mode)
+    HeroChatSection.tsx      # Hero section with AI chat integration (client)
+    ElevenLabsChat.tsx       # AI sales chat interface — Vercel AI SDK useChat + streaming (client)
     ChatCards.tsx             # Pricing card, testimonial cards, CTA card shown during/after chat (client)
     LogoStrip.tsx             # Client brand logo carousel (server)
     ConvergenceBackground.tsx # Animated background canvas (client)
@@ -87,12 +88,18 @@ public/
 ## Page Order
 Header -> HeroChatSection (with ElevenLabsChat + LogoStrip) -> SocialProof -> CaseStudies -> FounderSection -> CheckoutSection -> FAQ -> Footer
 
-## ElevenLabs Integration
-- Agent ID: `agent_4501khrpmw5ceq8v78xbwzjjjh58`
-- Uses `@elevenlabs/react` SDK (`useConversation` hook) in text-only mode
-- CLOSER workflow: 8 subagent nodes (Opener -> Clarify -> Label -> Overview -> Sell -> Explain -> Reinforce -> Warm Exit)
-- 6 KB docs uploaded (IDs: A6zbmWoH0y6afhA9OTaf, IAPmRpv5R5mV8NhUjyvS, afXEPDvJU6eCWDJJ2Ok9, s5JhwFnGk0IG4wARaaaV, cJcA31AaMZy8QWulhJ4V, 7XpfPdnaX7z00TAylTMX)
-- Dynamic variables: visitor_id, UTMs, returning_visitor context
+## AI Chat Integration
+- **Model:** Claude Sonnet (`claude-sonnet-4-6`) via Anthropic API, configurable via `ANTHROPIC_MODEL` env var
+- **SDK:** Vercel AI SDK v6 — `useChat` hook on client, `streamText` on server
+- **Prompt:** `docs/agent-prompts/base-prompt-v3.md` — 6-phase sales flow (Hook, Qualify, Discovery, Reflection, Offer, Soft Close)
+- **Knowledge base:** 9 text files in `docs/` (kb-01 through kb-09) — loaded into system message at module scope, ~10k tokens
+- **Prompt caching:** System prompt + KB docs cached via Anthropic ephemeral caching (90% cost reduction after first message)
+- **Extraction:** Claude Haiku (`claude-haiku-4-5`) extracts business_name, location_count, etc. from transcripts on save
+- **Dynamic variables:** visitor_id, UTMs, returning_visitor context — interpolated server-side via `{{ variable }}` placeholders
+- **Card detection:** PricingCard, TestimonialCard, CTACard triggered by keywords in agent responses (see `ChatCards.tsx`)
+- **Conversation persistence:** Transcript saved to Turso `conversations` table on 5-min inactivity, page leave, or warm exit
+- **Cost:** ~$0.05-0.10/conversation with prompt caching
+- **Handoff doc:** `docs/handoff-chat-closing.md` — comprehensive guide for teams optimizing chat closing rates
 
 ## Environment Variables
 
@@ -112,8 +119,8 @@ Header -> HeroChatSection (with ElevenLabsChat + LogoStrip) -> SocialProof -> Ca
 | `TURSO_DATABASE_URL` | Turso DB for purchase records |
 | `TURSO_AUTH_TOKEN` | Turso auth |
 | `NEXT_PUBLIC_TRACKING_URL` | Attribution tracker Vercel URL |
-| `ELEVENLABS_API_KEY` | ElevenLabs API for agent management |
-| `ELEVENLABS_WEBHOOK_SECRET` | ElevenLabs conversation webhook verification |
+| `ANTHROPIC_API_KEY` | Anthropic API for AI chat |
+| `ANTHROPIC_MODEL` | Model ID (default: `claude-sonnet-4-6`) |
 | `CLOUDFLARE_API_KEY` | Cloudflare Global API Key (DNS management) |
 | `CLOUDFLARE_EMAIL` | Cloudflare account email |
 | `CLOUDFLARE_ZONE_ID` | Zone ID for huddleduck.co.uk |
@@ -124,7 +131,6 @@ Header -> HeroChatSection (with ElevenLabsChat + LogoStrip) -> SocialProof -> Ca
 - Stripe Product ID (Trial): `prod_U062C0TCKDiq7U` ("AI Ad Engine Trial")
 - Stripe Webhook ID: `we_1T25xGEMAaEi0IogUV98EJTE` (subscribed to: checkout.session.completed, payment_intent.succeeded)
 - `META_PIXEL_ID`: `1780686211962897`
-- ElevenLabs Agent ID: `agent_4501khrpmw5ceq8v78xbwzjjjh58`
 - Akmal's Notion User ID: `ac601ede-0d62-4107-b59e-21c0530b5348`
 - Notion Actions DB ID: `2c384fd7-bc4e-81a1-b469-e33afbf19157`
 - Notion Actions DB data source: `collection://2c384fd7-bc4e-813d-99c4-000b9a6385c8`

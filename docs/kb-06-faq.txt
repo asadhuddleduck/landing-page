@@ -1,39 +1,43 @@
 FREQUENTLY ASKED QUESTIONS
 
-WHAT DO I GET FOR £497?
-A fully managed 3-week advertising campaign. The AI researches your audience, produces ad creative from your existing content, builds and launches your campaigns, and optimises them weekly. At the end, you get a full tracking report and a strategy review call. Think of it as a mutual trial. You see real results, and we both decide if ongoing management is the right fit.
+Q: WHAT DO I GET FOR £497?
+A: A fully managed 3-week AI ad campaign. The AI researches your audience. I remix your existing content into ads. Campaigns are built, launched, and optimised weekly. At the end, you get a campaign report showing how your ads performed and a strategy review.
 
-IS AD SPEND INCLUDED IN THE PRICE?
-The £497 covers strategy, creative production, and campaign management. Ad spend is separate. You pay Meta directly. We recommend a minimum of £10 per location per day. So for a single location, your total investment is £497 plus roughly £210 in ad spend over the 3 weeks.
+Q: IS AD BUDGET INCLUDED IN THE PRICE?
+A: No. The £497 covers strategy, creative, and campaign management. You pay your ad budget separately, direct to Meta. Minimum is £10 per location per day. For a single location, your total cost is £497 plus roughly £210 in ad budget over 3 weeks.
 
-HOW IS THIS DIFFERENT FROM A MARKETING AGENCY?
-A traditional agency charges £2,000 to £5,000 per month, takes weeks to onboard, and runs the same playbook for every client. The AI deep-researches your specific audience, competitors, and local market before a single ad goes live. You get a strategy built on data, not guesswork. The Trial is £497 for 3 weeks of fully managed campaigns. Compare that to a single month with a traditional agency.
+Q: HOW IS THIS DIFFERENT FROM A MARKETING AGENCY?
+A: A typical agency charges £2,000 to £5,000 per month, takes weeks to onboard, and runs the same approach for every client. The AI Ad Engine researches your specific audience and local market before a single ad goes live. First assets are ready within 72 hours. The Trial is £497 for 3 weeks of fully managed AI ad campaigns.
 
-WHAT HAPPENS WHEN THE TRIAL ENDS?
-Two options. You can upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing AI-managed campaigns, monthly reports, and strategy calls. Month-to-month, cancel any time. Or you take the insights from your tracking report and run things yourself. Either way, your £497 Trial fee is fully credited if you upgrade within 30 days.
+Q: WHAT HAPPENS WHEN THE TRIAL ENDS?
+A: You have two options. Upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing campaigns, a live campaign dashboard, and monthly reviews. Month-to-month, cancel any time. Or take what you learned from the campaign report and run things yourself. Your £497 Trial fee is credited if you upgrade within 30 days.
 
-IS THERE A LONG-TERM CONTRACT?
-No. The Trial is a one-time payment. If you upgrade to Unlimited, it is month-to-month. No lock-in, no cancellation fees, no notice period. You stay because the results make sense, not because of a contract.
+Q: IS THERE A LONG-TERM CONTRACT?
+A: No. The Trial is a one-time payment. Unlimited is month-to-month. No lock-in, no cancellation fees, no notice period.
 
-DOES THE PRICE CHANGE IF I HAVE MULTIPLE LOCATIONS?
-Same price, whether you have 2 locations or 200. Each location gets its own targeting and campaigns tailored to its local audience. Start with a Trial or Unlimited plan and we scale from there.
+Q: DOES THE PRICE CHANGE IF I HAVE MULTIPLE LOCATIONS?
+A: No. Same price whether you have 2 locations or 50. Each location gets its own targeting and campaigns tailored to its local area. For 50+ locations, enterprise pricing is available.
 
-ADDITIONAL CONTEXT FOR THE AI AGENT (not shown on the landing page):
+Q: IS THIS AVAILABLE OUTSIDE THE UK?
+A: Yes. The AI Ad Engine works globally. UK is the primary market. UAE and Dubai are secondary markets. The system works anywhere AI ad campaigns can run on Meta.
 
-IS THIS AVAILABLE OUTSIDE THE UK?
-Yes. The AI Ad Engine works globally. UK is the primary market, with UAE and Dubai as secondary markets. The system works anywhere AI ad campaigns can run.
+Q: WHAT IF I DO NOT HAVE MUCH CONTENT?
+A: You need some existing content — photos or videos of your food, your locations, or your team. Even a handful of images from your social media can work. If you have nothing at all, the creative step cannot happen.
 
-WHAT IF YOU DO NOT HAVE MUCH SOCIAL MEDIA CONTENT TO REPURPOSE?
-The system can work with minimal content, but it helps to have some. During the Trial intake, available content is assessed. Even a handful of food photos or short clips from social media can be repurposed into effective ad variations.
+Q: HOW QUICKLY CAN I START?
+A: First campaign assets are ready within 72 hours of onboarding. The Trial runs for 3 weeks once campaigns go live.
 
-HOW QUICKLY CAN YOU START?
-First campaign assets are ready within 72 hours of onboarding. The Trial itself runs for 3 weeks once campaigns go live.
+Q: WHAT PLATFORMS DO THE ADS RUN ON?
+A: Meta — Facebook and Instagram. I use Meta's tools to reach your specific audience in each location.
 
-WHAT PLATFORMS DO YOU ADVERTISE ON?
-Meta (Facebook and Instagram), but not the way most agencies use it. The AI uses Meta's API as a delivery vehicle to reach a specific audience at scale. The strategy is the audience research and targeting. Meta is just how it gets delivered.
+Q: WILL MY ADS LOOK LIKE THEY WERE MADE BY AI?
+A: No. Content is not generated from scratch. I remix your existing content into ads. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from your real content.
 
-WILL MY ADS LOOK LIKE THEY WERE MADE BY AI?
-No. AI content is never generated from scratch. Existing social media content is remade into conversion-focused ad variations. Your food, your brand, your voice. The AI handles the research, targeting, and optimisation. The creative is always built from real content.
+Q: WHAT IF IT DOES NOT WORK?
+A: The Trial is a 3-week test. You see exactly how your ads performed. If it does not work, you have spent £497 and you know. No contracts, no ongoing commitment. That is why the process starts with a Trial.
 
-WHAT IF IT DOES NOT WORK?
-The Trial is a 3-week test. You will see real data within that time. If it is not working, you have spent £497 and you know. No contracts, no ongoing commitment. That is exactly why the process starts with a Trial instead of asking for a monthly commitment upfront.
+Q: WHO RUNS THE CAMPAIGNS DAY-TO-DAY?
+A: The AI handles research, targeting, and optimisation. Editing, strategy decisions, and client relationships are handled separately. You do not need to manage anything yourself.
+
+Q: WHAT DO I NEED TO GET STARTED?
+A: Pay the £497 Trial fee on the website. Then fill in the intake form and share your existing content. That is it. No call needed.

@@ -1,16 +1,73 @@
 "use client";
 
-import { useConversation } from "@elevenlabs/react";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import type { UIMessage } from "ai";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { track } from "@vercel/analytics";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
 
-const AGENT_ID = "agent_4501khrpmw5ceq8v78xbwzjjjh58";
+function StreamingText({ text, isStreaming }: { text: string; isStreaming: boolean }) {
+  const prevLenRef = useRef(0);
+  const [settledLen, setSettledLen] = useState(0);
 
-const GREETING_MESSAGE = "Tell me about your restaurants. I'll show you exactly how the trial would work for your brand.";
+  useEffect(() => {
+    if (!isStreaming) {
+      setSettledLen(text.length);
+      prevLenRef.current = text.length;
+    }
+  }, [isStreaming, text.length]);
 
-// Animated placeholder phrases — randomly assembled from parts
+  useEffect(() => {
+    if (isStreaming && text.length > prevLenRef.current) {
+      const prev = prevLenRef.current;
+      prevLenRef.current = text.length;
+      const timer = setTimeout(() => setSettledLen(prev), 350);
+      return () => clearTimeout(timer);
+    }
+  }, [text, isStreaming]);
+
+  if (!isStreaming) {
+    return <span>{text}</span>;
+  }
+
+  const settled = text.slice(0, settledLen);
+  const fresh = text.slice(settledLen);
+
+  return (
+    <>
+      <span>{settled}</span>
+      {fresh && <span className="streaming-fade-in">{fresh}</span>}
+      <span className="streaming-cursor" />
+    </>
+  );
+}
+
+/** Extract concatenated text from a UIMessage's parts array. */
+function getMessageText(msg: UIMessage): string {
+  return msg.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
+
+// Animated placeholder phrases — two pools that alternate:
+// 1. Frustration-style answers (match the greeting question about ad frustrations)
+// 2. Business-description answers (show the AI what kind of context is helpful)
+// This gives visitors two mental models for how to respond.
+const PLACEHOLDER_FRUSTRATIONS = [
+  "We spend a lot but foot traffic hasn't changed...",
+  "I don't know if our ads actually bring people in...",
+  "We tried boosting posts but nothing happened...",
+  "Our agency just sends reports, no real results...",
+  "We get likes but nobody actually visits...",
+  "Ads feel like throwing money into a black hole...",
+  "I don't even know who's seeing our ads...",
+  "We stopped ads because they weren't working...",
+  "Competitors seem to be everywhere, we're invisible...",
+  "Every platform wants more money but can't show results...",
+];
 const PLACEHOLDER_CUISINES = [
   "burger restaurants", "sushi restaurants", "pizza places", "cafes",
   "fine dining restaurants", "bakeries", "steakhouses", "noodle bars",
@@ -26,7 +83,12 @@ const PLACEHOLDER_COUNTRIES = [
   "Italy", "the Netherlands", "Sweden", "Japan", "South Korea",
 ];
 
+let placeholderFlip = false;
 function buildPlaceholder(): string {
+  placeholderFlip = !placeholderFlip;
+  if (placeholderFlip) {
+    return PLACEHOLDER_FRUSTRATIONS[Math.floor(Math.random() * PLACEHOLDER_FRUSTRATIONS.length)];
+  }
   const count = Math.floor(Math.random() * 19) + 2;
   const cuisine = PLACEHOLDER_CUISINES[Math.floor(Math.random() * PLACEHOLDER_CUISINES.length)];
   const country = PLACEHOLDER_COUNTRIES[Math.floor(Math.random() * PLACEHOLDER_COUNTRIES.length)];
@@ -143,6 +205,7 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
+  const [nonFnb, setNonFnb] = useState(false);
   const [shownCards, setShownCards] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -274,108 +337,147 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
     return () => window.removeEventListener("scroll", onScroll);
   }, [hideHeadline, showHeadline]);
 
-  const conversation = useConversation({
-    onMessage: useCallback(
-      ({ message, role }: { message: string; role: "user" | "agent"; source: string }) => {
-        const cleanText = role === "agent" ? cleanAgentText(message) : message;
-        setMessages((prev) => {
-          // Skip SDK echo of user messages we already added locally
-          if (role === "user") {
-            const last = prev[prev.length - 1];
-            if (last && last.role === "user" && last.text === cleanText) {
-              return prev;
-            }
-          }
-          // Agent messages: the SDK fires onMessage twice for the same turn
-          // (exact duplicate). Skip if identical to the last agent message.
-          if (role === "agent" && prev.length > 0) {
-            const last = prev[prev.length - 1];
-            if (last.role === "agent" && last.text === cleanText) {
-              return prev; // exact duplicate, skip
-            }
-          }
-          return [...prev, { role, text: cleanText, id: msgIdCounter++ }];
-        });
-      },
-      []
-    ),
-    onConnect: useCallback(() => {
-      track("conversation_started");
-    }, []),
-    onDisconnect: useCallback(() => {
-      localStorage.setItem("hd_has_chatted", "true");
-      track("conversation_ended");
-      try {
-        const existing = localStorage.getItem("hd_prev_conversation");
-        if (!existing) {
-          localStorage.setItem(
-            "hd_prev_conversation",
-            JSON.stringify({ prev_outcome: "COMPLETED" })
-          );
-        }
-      } catch {
-        /* non-critical */
-      }
-      onConversationEnd?.("COMPLETED");
-    }, [onConversationEnd]),
-    onError: useCallback((message: string) => {
-      track("widget_error", { reason: message });
-    }, []),
+  // --- Vercel AI SDK transport ---
+  const conversationIdRef = useRef<string | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const savedRef = useRef(false);
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const transport = useMemo(
+    () => new DefaultChatTransport({
+      api: "/api/chat",
+      body: () => ({ dynamicVariables: getDynamicVariables() }),
+    }),
+    []
+  );
+
+  const { messages: aiMessages, sendMessage, status } = useChat({
+    transport,
+    onError: (err: Error) => {
+      track("widget_error", { reason: err.message });
+    },
   });
 
+  const isStreaming = status === "submitted" || status === "streaming";
+
+  // Map AI SDK UIMessages to existing ChatMessage format — derived on every render
+  // so streaming token updates are reflected immediately (no stale useEffect).
+  // When nonFnb, we use the locally-set messages state instead.
+  const displayMessages: ChatMessage[] = nonFnb
+    ? messages
+    : aiMessages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m, i) => ({
+          role: m.role === "assistant" ? ("agent" as const) : ("user" as const),
+          text: m.role === "assistant" ? cleanAgentText(getMessageText(m)) : getMessageText(m),
+          id: i,
+        }));
+
+  // --- Conversation save logic ---
+  const saveConversation = useCallback(() => {
+    if (savedRef.current || !conversationIdRef.current || aiMessages.length === 0) return;
+    savedRef.current = true;
+
+    const payload = JSON.stringify({
+      conversationId: conversationIdRef.current,
+      messages: aiMessages.map((m) => ({ role: m.role, content: getMessageText(m) })),
+      dynamicVariables: getDynamicVariables(),
+      durationSecs: startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0,
+    });
+
+    navigator.sendBeacon("/api/chat/save", payload);
+
+    localStorage.setItem("hd_has_chatted", "true");
+    track("conversation_ended");
+    try {
+      const existing = localStorage.getItem("hd_prev_conversation");
+      if (!existing) {
+        localStorage.setItem(
+          "hd_prev_conversation",
+          JSON.stringify({ prev_outcome: "COMPLETED" })
+        );
+      }
+    } catch {
+      /* non-critical */
+    }
+    onConversationEnd?.("COMPLETED");
+  }, [aiMessages, onConversationEnd]);
+
+  // Reset inactivity timer on each new message
+  useEffect(() => {
+    if (aiMessages.length === 0 || savedRef.current) return;
+
+    // Clear previous timer
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+
+    // Warm exit detection: if agent says goodbye, save immediately
+    const lastMsg = aiMessages[aiMessages.length - 1];
+    if (lastMsg.role === "assistant" && getMessageText(lastMsg).includes("Good luck with everything")) {
+      saveConversation();
+      return;
+    }
+
+    // 5-minute inactivity timeout
+    inactivityTimerRef.current = setTimeout(() => {
+      saveConversation();
+    }, 5 * 60 * 1000);
+
+    return () => {
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    };
+  }, [aiMessages.length, saveConversation]);
+
+  // beforeunload + visibilitychange save triggers
+  useEffect(() => {
+    const handleBeforeUnload = () => saveConversation();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") saveConversation();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [saveConversation]);
+
   const startConversation = useCallback(
-    async (firstMessage?: string) => {
+    (firstMessage?: string) => {
       if (hasStarted) return;
       setHasStarted(true);
-      try {
-        await conversation.startSession({
-          agentId: AGENT_ID,
-          connectionType: "websocket",
-          dynamicVariables: getDynamicVariables(),
-          overrides: {
-            conversation: { textOnly: true },
-          },
-        });
-        if (firstMessage) {
-          conversation.sendUserMessage(firstMessage);
-        }
-      } catch {
-        setHasStarted(false);
-        track("widget_error", { reason: "start_failed" });
+      conversationIdRef.current = crypto.randomUUID();
+      startTimeRef.current = Date.now();
+      track("conversation_started");
+      if (firstMessage) {
+        sendMessage({ text: firstMessage });
       }
     },
-    [conversation, hasStarted]
+    [hasStarted, sendMessage]
   );
 
   const handleSend = useCallback(() => {
     const text = input.trim();
-    if (!text) return;
+    if (!text || nonFnb) return;
     setInput("");
 
     // Dismiss the greeting with exit animation
     if (showGreeting) {
       setGreetingExiting(true);
-      // After exit animation, hide greeting and add user message
+      // After exit animation, hide greeting and send message
       setTimeout(() => {
         setShowGreeting(false);
         setGreetingExiting(false);
-        setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
         // Re-focus after greeting exit re-render to keep mobile keyboard open
         requestAnimationFrame(() => inputRef.current?.focus());
       }, 300);
-    } else {
-      // Already in conversation - just add user message (it enters with animation)
-      setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
     }
 
-    if (conversation.status !== "connected") {
-      startConversation(text).then(() => {
-        // Re-focus input after first message — the hasStarted transition
-        // can cause mobile keyboards to dismiss during re-render
-        requestAnimationFrame(() => inputRef.current?.focus());
-      });
+    if (!hasStarted) {
+      startConversation(text);
+      requestAnimationFrame(() => inputRef.current?.focus());
     } else {
-      conversation.sendUserMessage(text);
+      sendMessage({ text });
     }
 
     // Keep keyboard open on iOS: refocus immediately + after React re-render
@@ -383,23 +485,21 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
-  }, [input, conversation, startConversation, showGreeting]);
+  }, [input, hasStarted, startConversation, sendMessage, showGreeting, nonFnb]);
 
   // Send a preset message from qualifier buttons
   const sendPreset = useCallback((text: string) => {
     setInput("");
     onTypingChange?.(false);
-    setMessages((prev) => [...prev, { role: "user", text, id: msgIdCounter++ }]);
 
-    if (conversation.status !== "connected") {
-      startConversation(text).then(() => {
-        requestAnimationFrame(() => inputRef.current?.focus());
-      });
+    if (!hasStarted) {
+      startConversation(text);
+      requestAnimationFrame(() => inputRef.current?.focus());
     } else {
-      conversation.sendUserMessage(text);
+      sendMessage({ text });
     }
     inputRef.current?.focus();
-  }, [conversation, startConversation, onTypingChange]);
+  }, [hasStarted, startConversation, sendMessage, onTypingChange]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -416,38 +516,35 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
       const val = e.target.value;
       setInput(val);
       onTypingChange?.(val.length > 0);
-      if (conversation.status === "connected") {
-        conversation.sendUserActivity();
-      }
     },
-    [conversation, onTypingChange]
+    [onTypingChange]
   );
 
   const markCardShown = useCallback((cardType: string) => {
     setShownCards((prev) => new Set(prev).add(cardType));
   }, []);
 
-  const isConnecting = conversation.status === "connecting";
-  const isConnected = conversation.status === "connected";
+  const isConnecting = isStreaming && aiMessages.length <= 1;
+  const isConnected = hasStarted;
 
   // Derive what to show:
   // - Find the last user message (always visible at top once it exists)
   // - All agent messages after the last user message (stack below)
   const lastUserIdx = (() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === "user") return i;
+    for (let i = displayMessages.length - 1; i >= 0; i--) {
+      if (displayMessages[i].role === "user") return i;
     }
     return -1;
   })();
 
-  const lastUserMsg = lastUserIdx >= 0 ? messages[lastUserIdx] : null;
+  const lastUserMsg = lastUserIdx >= 0 ? displayMessages[lastUserIdx] : null;
 
   // Agent messages: everything after the last user message
   const agentMessages: ChatMessage[] = [];
   if (lastUserIdx >= 0) {
-    for (let i = lastUserIdx + 1; i < messages.length; i++) {
-      if (messages[i].role === "agent") {
-        agentMessages.push(messages[i]);
+    for (let i = lastUserIdx + 1; i < displayMessages.length; i++) {
+      if (displayMessages[i].role === "agent") {
+        agentMessages.push(displayMessages[i]);
       }
     }
   }
@@ -476,8 +573,8 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
       {/* Prominent prompt — shown before conversation starts */}
       {!hasStarted && (
         <div className="chat-prompt">
-          <p className="chat-prompt-text">Tell us about your brand</p>
-          <p className="chat-prompt-payoff">This AI will map out your campaign</p>
+          <p className="chat-prompt-text">See what this AI spots in 30 seconds</p>
+          <p className="chat-prompt-payoff">No signup. Just tell it about your brand.</p>
           <div className="chat-prompt-buttons">
             <button
               className="chat-prompt-btn chat-prompt-btn--yes"
@@ -487,7 +584,15 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
             </button>
             <button
               className="chat-prompt-btn chat-prompt-btn--no"
-              onClick={() => sendPreset("I don't run a food business, but I'm curious how this works")}
+              onClick={() => {
+                setHasStarted(true);
+                setNonFnb(true);
+                setMessages([
+                  { role: "user", text: "No, just looking", id: msgIdCounter++ },
+                  { role: "agent", text: "The AI Ad Engine is built specifically for food and beverage brands. If you know someone who runs a food business, share this page with them.", id: msgIdCounter++ },
+                ]);
+                track("non_fnb_exit");
+              }}
             >
               No, just looking
             </button>
@@ -505,8 +610,8 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
         </div>
       )}
 
-      {/* Typing indicator - waiting for first agent response */}
-      {(isConnecting || (isConnected && waitingForResponse)) && (
+      {/* Typing indicator - waiting for agent response */}
+      {(isStreaming && hasStarted && waitingForResponse) && (
         <div className="two-msg-card two-msg-agent two-msg-typing two-msg-enter">
           <div className="two-msg-agent-indicator">
             <div className="two-msg-agent-dot two-msg-agent-dot-speaking" />
@@ -521,18 +626,24 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
       )}
 
       {/* AI messages (all since last user message - they stack, never disappear each other) */}
-      {!showGreeting && agentMessages.map((msg) => (
-        <div
-          key={`a-${msg.id}`}
-          className="two-msg-card two-msg-agent two-msg-enter"
-        >
-          <div className="two-msg-agent-indicator">
-            <div className="two-msg-agent-dot" />
-            <span className="two-msg-agent-label">Ads AI</span>
+      {!showGreeting && agentMessages.map((msg, idx) => {
+        const isLast = idx === agentMessages.length - 1;
+        const isActivelyStreaming = isLast && isStreaming;
+        return (
+          <div
+            key={`a-${msg.id}`}
+            className={`two-msg-card two-msg-agent two-msg-enter${isActivelyStreaming ? " two-msg-agent--streaming" : ""}`}
+          >
+            <div className="two-msg-agent-indicator">
+              <div className={`two-msg-agent-dot${isActivelyStreaming ? " two-msg-agent-dot--streaming" : ""}`} />
+              <span className="two-msg-agent-label">Ads AI</span>
+            </div>
+            <div className="two-msg-text">
+              <StreamingText text={msg.text} isStreaming={isActivelyStreaming} />
+            </div>
           </div>
-          <div className="two-msg-text">{msg.text}</div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Rich card below the AI message */}
       {shouldShowCard && cardType === "pricing" && (
@@ -564,7 +675,7 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          readOnly={isConnecting}
+          readOnly={isConnecting || nonFnb}
           autoComplete="off"
           enterKeyHint="send"
           data-form-type="other"

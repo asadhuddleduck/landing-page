@@ -149,7 +149,15 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .two-msg-agent{
   background:rgba(30,186,143,0.04);
   border:1px solid rgba(30,186,143,0.08);
-  border-left:3px solid var(--viridian)
+  border-left:3px solid var(--viridian);
+  transition:border-color 0.6s ease,box-shadow 0.6s ease,background 0.6s ease
+}
+
+/* Streaming state — subtle glow while AI is generating */
+.two-msg-agent--streaming{
+  border-color:rgba(30,186,143,0.2);
+  box-shadow:0 0 20px rgba(30,186,143,0.06),0 0 40px rgba(30,186,143,0.03);
+  background:rgba(30,186,143,0.06)
 }
 
 .two-msg-agent-indicator{
@@ -158,9 +166,20 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .two-msg-agent-dot{
   width:8px;height:8px;border-radius:50%;
   background:var(--viridian);
-  box-shadow:0 0 8px rgba(30,186,143,0.5)
+  box-shadow:0 0 8px rgba(30,186,143,0.5);
+  transition:box-shadow 0.4s ease
 }
 .two-msg-agent-dot-speaking{animation:speakingPulse 1.5s ease-in-out infinite}
+
+/* Streaming dot — breathing glow while generating */
+.two-msg-agent-dot--streaming{
+  animation:streamingDotPulse 1.8s ease-in-out infinite
+}
+@keyframes streamingDotPulse{
+  0%,100%{box-shadow:0 0 8px rgba(30,186,143,0.5);transform:scale(1)}
+  50%{box-shadow:0 0 16px rgba(30,186,143,0.8),0 0 30px rgba(30,186,143,0.3);transform:scale(1.3)}
+}
+
 .two-msg-agent-label{
   font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
   color:var(--viridian)
@@ -169,6 +188,28 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .two-msg-text{
   font-size:14px;line-height:1.6;letter-spacing:-0.1px;
   color:var(--text-primary);word-wrap:break-word
+}
+
+/* Streaming text — new tokens fade + blur in */
+.streaming-fade-in{
+  animation:streamFadeIn 0.35s ease-out forwards
+}
+@keyframes streamFadeIn{
+  from{opacity:0;filter:blur(2px);transform:translateY(1px)}
+  to{opacity:1;filter:blur(0);transform:translateY(0)}
+}
+
+/* Streaming cursor — glowing viridian bar */
+.streaming-cursor{
+  display:inline-block;width:2px;height:1.15em;
+  background:var(--viridian);margin-left:1px;
+  vertical-align:text-bottom;border-radius:1px;
+  animation:cursorPulse 1s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(30,186,143,0.6),0 0 20px rgba(30,186,143,0.25)
+}
+@keyframes cursorPulse{
+  0%,100%{opacity:1;box-shadow:0 0 8px rgba(30,186,143,0.6),0 0 20px rgba(30,186,143,0.25)}
+  50%{opacity:0.4;box-shadow:0 0 4px rgba(30,186,143,0.3)}
 }
 
 .two-msg-typing{

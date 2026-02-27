@@ -1,42 +1,43 @@
 WHO THE AI AD ENGINE WORKS WITH
 
-PRIMARY AVATAR: THE MARKETING DIRECTOR OR MARKETING MANAGER
+PRIMARY CLIENT: THE MARKETING DIRECTOR OR MARKETING MANAGER
 
-The AI Ad Engine works with food and beverage businesses (non-alcoholic) that have physical locations. This includes restaurants, cafes, dessert shops, burger brands, QSR chains, delivery kitchens, and similar F&B concepts.
+This person works at an F&B brand with multiple locations. They manage the marketing team and budget. They have tried agencies before or run ads in-house. They want a faster, more reliable way to run AI ad campaigns across all their locations.
 
-The primary buyer is the Marketing Director or Marketing Manager: the person who makes marketing decisions and coordinates day-to-day marketing execution. They report to a CEO or Founder but have autonomy over marketing spend and agency relationships.
+They usually have existing content (photos, videos, brand assets) but need help turning it into ads that get people through the door.
 
-Multi-location brands with 5 or more locations are ideal. Brands with 3 or more locations are considered case by case. Single-location brands can still purchase the Trial.
+Multi-location brands with 5 or more locations are ideal. Brands with 3 or more are considered case by case. Single-location brands can still buy the Trial.
 
-Why the marketing director matters: The best and longest-lasting client relationships are with marketing directors who use the AI Ad Engine as a specialist tool in their arsenal. They send a brief, the system executes. They do not need hand-holding. They need a reliable, specialist instrument that delivers when activated.
+SECONDARY CLIENT: THE FOUNDER-OPERATOR
 
-SECONDARY AVATAR: THE FOUNDER-OPERATOR
+In some markets, the founder or CEO makes the marketing decisions. This works if they have multiple locations, are focused on growth, and have someone who can coordinate day-to-day.
 
-In some markets (especially UAE and newer brands), the founder or CEO is the marketing decision-maker. This can work if they have multiple locations, are growth-focused, and have someone who can coordinate day-to-day.
+They are often stretched thin. They need something that works without taking up their time every week.
 
-THE AI AD ENGINE AS A TOOL FRAMING
+THE AI AD ENGINE IS A TOOL, NOT AN AGENCY
 
-In an ideal engagement, the marketing director sends a brief (for example: launching a new location in March, activate the AI Ad Engine for a launch campaign), and the system executes. The AI Ad Engine is one specialist tool in their marketing arsenal, not a replacement for their marketing function.
+In an ideal setup, the marketing director sends a brief. For example: "We are launching a new location in March. Activate the AI Ad Engine for a launch campaign." The system then executes. The AI Ad Engine is one specialist tool in their marketing toolkit. It does not replace their marketing function.
 
 IDEAL CLIENT EXAMPLES
 
-Phat Buns: 15+ locations. Marketing director with budget authority. Takes ownership. Longest, highest-spending client.
-
-Burger and Sauce: Multiple locations. Marketing manager coordinates directly. Protects the relationship from internal noise.
-
-Chai Green: Franchise brand. Franchise expansion campaign.
-
-Shakedown: Grew from 1 to 5 locations. AI campaigns running before every launch.
+- Phat Buns: 15+ locations. Marketing director with budget authority. Longest, highest-value client.
+- Burger and Sauce: Multiple locations. Marketing manager coordinates directly.
+- Chai Green: Franchise brand. Used the AI Ad Engine for franchise expansion campaigns.
+- Shakedown: Grew from 1 to 5 locations. AI ad campaigns running before every launch.
 
 MARKETS
 
-UK is the primary market. UAE and Dubai are secondary. The system works globally.
+UK is the primary market. UAE and Dubai are secondary. The system works globally. Campaigns run on Meta (Facebook and Instagram).
 
-UAE specifics: Primary buyer is often the founder or CEO. WhatsApp-first communication culture. Key pain points include aggregator dependency (Talabat, Deliveroo commissions), high rent, and staff turnover.
+In the UAE, the primary buyer is often the founder or CEO. Key concerns include aggregator dependency (Talabat, Deliveroo commissions), high rent, and staff turnover.
 
 WHO THE AI AD ENGINE DOES NOT WORK WITH
 
-- Businesses outside food and beverage
-- F&B brands still in the planning phase with no operational location
-- Anyone who wants social media management (posting, stories, community management) rather than AI ad campaigns
-- Marketing budget not yet allocated (dependent on convincing franchisees)
+- Businesses outside food and beverage.
+- F&B brands still in the planning phase with no open location.
+- Anyone who wants social media management (posting, stories, community management) rather than AI ad campaigns.
+- Businesses with no marketing budget allocated yet.
+
+NOTE ON DELIVERY-ONLY AND DARK KITCHEN BRANDS
+
+Delivery-only and dark kitchen brands can use the AI Ad Engine. The campaigns drive orders rather than footfall. The same system applies: audience research, creative, launch, and optimisation. These brands are not excluded.
