@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getVisitorId, getStoredUtms, getFbCookies } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
+import { gtagEvent } from "@/lib/ga";
 import PaymentForm from "./PaymentForm";
 import ConvertedPrice from "./ConvertedPrice";
 
@@ -20,8 +21,35 @@ export default function CheckoutSection() {
   const [paymentIntentId, setPaymentIntentId] = useState("");
   const [error, setError] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const viewItemFired = useRef(false);
   const submitting = useRef(false);
   const redirecting = useRef(false);
+
+  // Fire view_item when checkout section scrolls into viewport
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !viewItemFired.current) {
+          viewItemFired.current = true;
+          gtagEvent("view_item", {
+            currency: "GBP",
+            value: 497,
+            items: [
+              { item_id: "ai-ad-engine-trial", item_name: "AI Ad Engine Trial", price: 497 },
+              { item_id: "ai-ad-engine-unlimited", item_name: "AI Ad Engine Unlimited", price: 1300 },
+            ],
+          });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const steps = selectedTier === "unlimited"
     ? [
@@ -56,9 +84,15 @@ export default function CheckoutSection() {
       ];
 
   function handleStartCheckout() {
-    trackPixelEvent("InitiateCheckout", {
-      value: selectedTier === "unlimited" ? 1300 : 497,
+    const value = selectedTier === "unlimited" ? 1300 : 497;
+    const itemId = selectedTier === "unlimited" ? "ai-ad-engine-unlimited" : "ai-ad-engine-trial";
+    const itemName = selectedTier === "unlimited" ? "AI Ad Engine Unlimited" : "AI Ad Engine Trial";
+
+    trackPixelEvent("InitiateCheckout", { value, currency: "GBP" });
+    gtagEvent("begin_checkout", {
       currency: "GBP",
+      value,
+      items: [{ item_id: itemId, item_name: itemName, price: value, quantity: 1 }],
     });
     track("checkout_click");
     setStep("details");
@@ -146,6 +180,11 @@ export default function CheckoutSection() {
         } else if (data.clientSecret) {
           setClientSecret(data.clientSecret);
           setPaymentIntentId(data.paymentIntentId);
+          gtagEvent("add_payment_info", {
+            currency: "GBP",
+            value: 497,
+            items: [{ item_id: "ai-ad-engine-trial", item_name: "AI Ad Engine Trial", price: 497, quantity: 1 }],
+          });
           setStep("paying");
           setTimeout(() => {
             formRef.current?.scrollIntoView({
@@ -170,7 +209,7 @@ export default function CheckoutSection() {
   }
 
   return (
-    <section id="checkout" className="section">
+    <section ref={sectionRef} id="checkout" className="section">
       <div className="checkout-card">
         {/* Tier selector — two cards side by side */}
         <div className="pricing-grid" role="radiogroup" aria-label="Select pricing tier">

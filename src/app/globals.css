@@ -649,6 +649,16 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 .cookie-notice-btn:hover{
   transform:translateY(-1px);box-shadow:0 4px 14px rgba(30,186,143,0.35)
 }
+.cookie-notice-actions{
+  display:flex;gap:8px;flex-shrink:0
+}
+.cookie-notice-btn--decline{
+  background:transparent;box-shadow:none;color:var(--text-muted);
+  border:1px solid var(--border)
+}
+.cookie-notice-btn--decline:hover{
+  box-shadow:none;color:var(--text-secondary);border-color:var(--text-muted)
+}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
 @media(max-width:767px){

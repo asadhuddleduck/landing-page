@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Lato, Caveat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import TrackingScript from "@/components/TrackingScript";
 import MetaPixel from "@/components/MetaPixel";
 import CookieNotice from "@/components/CookieNotice";
@@ -73,6 +74,25 @@ export default function RootLayout({
         <MetaPixel />
         <CookieNotice />
         <Analytics />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              var c = localStorage.getItem('hd_cookie_consent') || (localStorage.getItem('hd_cookie_notice') ? 'granted' : '');
+              var s = c === 'granted' ? 'granted' : 'denied';
+              gtag('consent', 'default', {
+                analytics_storage: s,
+                ad_storage: s,
+                ad_user_data: s,
+                ad_personalization: s,
+              });
+            `,
+          }}
+        />
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
