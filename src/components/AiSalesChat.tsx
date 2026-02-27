@@ -196,12 +196,12 @@ function getPowerBarLabel(zone: string): string {
   }
 }
 
-interface ElevenLabsChatProps {
+interface AiSalesChatProps {
   onConversationEnd?: (outcome: string) => void;
   onTypingChange?: (isTyping: boolean) => void;
 }
 
-export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: ElevenLabsChatProps) {
+export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSalesChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
@@ -351,10 +351,13 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
     []
   );
 
+  const [chatError, setChatError] = useState(false);
+
   const { messages: aiMessages, sendMessage, status } = useChat({
     transport,
     onError: (err: Error) => {
       track("widget_error", { reason: err.message });
+      setChatError(true);
     },
   });
 
@@ -374,7 +377,8 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
         }));
 
   // --- Conversation save logic ---
-  const saveConversation = useCallback(() => {
+  // useBeacon=true for page unload (fire-and-forget), false for inactivity/warm exit (reads response)
+  const saveConversation = useCallback((useBeacon = false) => {
     if (savedRef.current || !conversationIdRef.current || aiMessages.length === 0) return;
     savedRef.current = true;
 
@@ -385,13 +389,43 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
       durationSecs: startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0,
     });
 
-    navigator.sendBeacon("/api/chat/save", payload);
+    if (useBeacon) {
+      navigator.sendBeacon("/api/chat/save", payload);
+    } else {
+      // Use fetch so we can read extracted data for returning visitor personalization
+      fetch("/api/chat/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.extracted) {
+            try {
+              localStorage.setItem(
+                "hd_prev_conversation",
+                JSON.stringify({
+                  prev_outcome: data.extracted.conversation_outcome || "COMPLETED",
+                  prev_business_name: data.extracted.business_name || "",
+                  prev_challenge: data.extracted.main_challenge || "",
+                  prev_location_count: data.extracted.location_count || "",
+                })
+              );
+            } catch {
+              /* localStorage blocked */
+            }
+          }
+        })
+        .catch(() => {
+          /* non-critical — transcript was still sent */
+        });
+    }
 
     track("conversation_ended");
     try {
       localStorage.setItem("hd_has_chatted", "true");
-      const existing = localStorage.getItem("hd_prev_conversation");
-      if (!existing) {
+      // Set fallback prev_conversation (overwritten by fetch response above when available)
+      if (!localStorage.getItem("hd_prev_conversation")) {
         localStorage.setItem(
           "hd_prev_conversation",
           JSON.stringify({ prev_outcome: "COMPLETED" })
@@ -429,9 +463,9 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
 
   // beforeunload + visibilitychange save triggers
   useEffect(() => {
-    const handleBeforeUnload = () => saveConversation();
+    const handleBeforeUnload = () => saveConversation(true);
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") saveConversation();
+      if (document.visibilityState === "hidden") saveConversation(true);
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -473,6 +507,9 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
       }, 300);
     }
 
+    // Clear any previous error when user sends a new message
+    if (chatError) setChatError(false);
+
     if (!hasStarted) {
       startConversation(text);
       requestAnimationFrame(() => inputRef.current?.focus());
@@ -485,7 +522,7 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
-  }, [input, hasStarted, startConversation, sendMessage, showGreeting, nonFnb]);
+  }, [input, hasStarted, startConversation, sendMessage, showGreeting, nonFnb, chatError]);
 
   // Send a preset message from qualifier buttons
   const sendPreset = useCallback((text: string) => {
@@ -607,6 +644,19 @@ export default function ElevenLabsChat({ onConversationEnd, onTypingChange }: El
           className="two-msg-card two-msg-user two-msg-enter"
         >
           <div className="two-msg-text">{lastUserMsg.text}</div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {chatError && (
+        <div className="two-msg-card two-msg-agent two-msg-enter">
+          <div className="two-msg-agent-indicator">
+            <div className="two-msg-agent-dot" />
+            <span className="two-msg-agent-label">Ads AI</span>
+          </div>
+          <div className="two-msg-text" style={{ color: "var(--text-secondary)" }}>
+            Something went wrong — try sending your message again.
+          </div>
         </div>
       )}
 

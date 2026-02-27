@@ -7,7 +7,7 @@ Conversion-focused sales page for Huddle Duck's AI Ad Engine Trial (£497 one-ti
 - **Framework:** Next.js 16 (App Router, TypeScript, React 19)
 - **Styling:** Tailwind CSS v4
 - **Payments:** Stripe (inline PaymentElement + webhooks)
-- **AI Chat:** ElevenLabs Conversational AI (WebSocket, CLOSER workflow)
+- **AI Chat:** Vercel AI SDK + Anthropic Claude Sonnet (HTTP streaming)
 - **Email:** Resend (purchase confirmations, abandoned cart nudges)
 - **CRM:** Notion API (purchase task creation in Actions DB)
 - **Attribution:** Meta Conversions API (server) + Meta Pixel (browser, deduplicated)
@@ -23,8 +23,8 @@ Conversion-focused sales page for Huddle Duck's AI Ad Engine Trial (£497 one-ti
 Visitor lands
   └─ TrackingScript: capture UTMs + visitor_id cookie → POST /api/track → Meta Pixel PageView
        │
-       ├─ ElevenLabsChat (WebSocket)
-       │    └─ CLOSER workflow qualifies visitor → contextual cards injected inline
+       ├─ AiSalesChat (HTTP streaming)
+       │    └─ 6-phase sales flow qualifies visitor → contextual cards injected inline
        │
        ├─ CheckoutSection: email/name/phone form
        │    └─ POST /api/create-payment-intent → Stripe PaymentElement → confirmPayment
@@ -53,13 +53,14 @@ src/
       checkout/route.ts             # POST — legacy Stripe Checkout Session
       create-payment-intent/route.ts # POST — creates Stripe Customer + PaymentIntent
       webhook/stripe/route.ts       # POST — handles payment_intent.succeeded
-      webhook/elevenlabs/route.ts   # POST — stores conversation data (HMAC verified)
+      chat/route.ts                 # POST — AI chat streaming (Anthropic Claude via Vercel AI SDK)
+      chat/save/route.ts            # POST — saves transcript to Turso + Haiku extraction
       cron/abandoned-cart/route.ts  # GET — hourly: nudge abandoned checkouts via Resend
       cron/reconcile/route.ts       # GET — every 6h: cross-ref Stripe events with Turso purchases
   components/
     ConvergenceBackground.tsx       # Canvas particle animation (streaks + motes)
-    HeroChatSection.tsx             # Hero headline + mounts ElevenLabsChat
-    ElevenLabsChat.tsx              # AI chat widget (text-only, WebSocket, power bar, cards)
+    HeroChatSection.tsx             # Hero headline + mounts AiSalesChat
+    AiSalesChat.tsx                 # AI sales chat (Vercel AI SDK, streaming, power bar, cards)
     ChatCards.tsx                   # Contextual cards: Pricing, Testimonial, CTA
     LogoStrip.tsx                   # 13 client brand logos
     CheckoutSection.tsx             # Multi-step inline checkout (idle → details → paying → done)
@@ -112,8 +113,9 @@ TURSO_AUTH_TOKEN=...
 # Attribution
 NEXT_PUBLIC_TRACKING_URL=https://attribution-tracker.vercel.app
 
-# ElevenLabs
-ELEVENLABS_WEBHOOK_SECRET=...
+# Anthropic (AI Chat)
+ANTHROPIC_API_KEY=sk-ant-api03-...
+ANTHROPIC_MODEL=claude-sonnet-4-6
 
 # Cloudflare (DNS management only)
 CLOUDFLARE_API_KEY=...
@@ -137,7 +139,8 @@ Open http://localhost:3000. Requires a `.env.local` file with the variables abov
 | `/api/checkout` | POST | Legacy: create Stripe Checkout Session, return redirect URL |
 | `/api/create-payment-intent` | POST | Create Stripe Customer + PaymentIntent, return clientSecret |
 | `/api/webhook/stripe` | POST | Handle `payment_intent.succeeded` — trigger 4 downstream services |
-| `/api/webhook/elevenlabs` | POST | Store ElevenLabs conversation data (HMAC-SHA256 verified) |
+| `/api/chat` | POST | AI chat streaming endpoint (Anthropic Claude via Vercel AI SDK) |
+| `/api/chat/save` | POST | Save conversation transcript to Turso + Haiku extraction |
 | `/api/cron/abandoned-cart` | GET | Hourly: nudge abandoned checkouts via Resend |
 | `/api/cron/reconcile` | GET | Every 6h: cross-ref Stripe events with Turso purchases |
 
@@ -155,7 +158,7 @@ DNS: `start.huddleduck.co.uk` CNAME → `cname.vercel-dns.com` (Cloudflare, DNS-
 ## Key Features
 
 - Inline Stripe checkout with PaymentElement — no redirect to Stripe-hosted page
-- ElevenLabs CLOSER workflow: 8-node AI sales agent (Opener → Clarify → Label → Overview → Sell → Explain → Reinforce → Warm Exit)
+- AI sales chat: 6-phase flow (Hook → Qualify → Discovery → Reflection → Offer → Soft Close) via Anthropic Claude Sonnet
 - Contextual chat cards injected by keyword detection during conversation
 - Post-purchase orchestration via `Promise.allSettled` — partial failures never block the success page
 - Meta Pixel + CAPI deduplication using shared `event_id: stripe_{payment_intent_id}`
@@ -170,7 +173,7 @@ DNS: `start.huddleduck.co.uk` CNAME → `cname.vercel-dns.com` (Cloudflare, DNS-
 
 Turso DB `landing-page` — three tables:
 - `purchases` — Stripe payment records (keyed on `stripe_session_id`, includes UTMs + visitor_id)
-- `conversations` — ElevenLabs chat transcripts and qualification data
+- `conversations` — AI chat transcripts and qualification data
 - `checkouts` — Tracks checkout starts for abandoned cart recovery (payment_intent_id, email, nudged_at)
 
 ## Legacy Components

@@ -11,7 +11,7 @@ The chat works. It follows the sales flow, handles objections, and reaches check
 ## Architecture (What You Need to Know)
 
 ```
-Browser (ElevenLabsChat.tsx)              Server (/api/chat/route.ts)
+Browser (AiSalesChat.tsx)              Server (/api/chat/route.ts)
   |                                         |
   |-- useChat() + DefaultChatTransport ---->|
   |   POST /api/chat                        |-- Loads system prompt + 9 KB docs (cached)
@@ -27,7 +27,7 @@ Browser (ElevenLabsChat.tsx)              Server (/api/chat/route.ts)
 
 | File | What It Does |
 |---|---|
-| `src/components/ElevenLabsChat.tsx` | Client-side chat UI — all UX logic, message display, input handling, card detection |
+| `src/components/AiSalesChat.tsx` | Client-side chat UI — all UX logic, message display, input handling, card detection |
 | `src/app/api/chat/route.ts` | Streaming endpoint — loads prompt + KB docs, sends to Anthropic, returns SSE stream |
 | `src/app/api/chat/save/route.ts` | Persistence — saves transcript to Turso, runs Haiku extraction for structured fields |
 | `docs/agent-prompts/base-prompt-v3.md` | **THE PROMPT** — source of truth for the agent's personality, flow, and rules |
@@ -113,7 +113,7 @@ The agent's responses trigger rich cards based on keywords:
 | **TestimonialCard** | "phat buns", "burger & sauce", "676" | Client testimonial |
 | **CTACard** | "checkout", "right below", "go ahead" | CTA button that scrolls to #checkout |
 
-Detection happens in `detectCard()` in `ElevenLabsChat.tsx`. Each card shows once per conversation (tracked in `shownCards` Set).
+Detection happens in `detectCard()` in `AiSalesChat.tsx`. Each card shows once per conversation (tracked in `shownCards` Set).
 
 **Tip for prompt tuning:** If you want the agent to show a card at a specific point in the flow, make sure the response includes the trigger keyword naturally.
 
@@ -220,7 +220,7 @@ Based on test conversations:
 
 ### New card types:
 1. Add component in `ChatCards.tsx`
-2. Add detection keywords in `detectCard()` in `ElevenLabsChat.tsx`
+2. Add detection keywords in `detectCard()` in `AiSalesChat.tsx`
 3. Add rendering in the JSX below the agent messages
 
 ---

@@ -54,7 +54,7 @@ src/
   components/
     Header.tsx               # Minimal header with logo + brand text (server)
     HeroChatSection.tsx      # Hero section with AI chat integration (client)
-    ElevenLabsChat.tsx       # AI sales chat interface — Vercel AI SDK useChat + streaming (client)
+    AiSalesChat.tsx          # AI sales chat interface — Vercel AI SDK useChat + streaming (client)
     ChatCards.tsx             # Pricing card, testimonial cards, CTA card shown during/after chat (client)
     LogoStrip.tsx             # Client brand logo carousel (server)
     ConvergenceBackground.tsx # Animated background canvas (client)
@@ -86,7 +86,7 @@ public/
 ```
 
 ## Page Order
-Header -> HeroChatSection (with ElevenLabsChat + LogoStrip) -> SocialProof -> CaseStudies -> FounderSection -> CheckoutSection -> FAQ -> Footer
+Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseStudies -> FounderSection -> CheckoutSection -> FAQ -> Footer
 
 ## AI Chat Integration
 - **Model:** Claude Sonnet (`claude-sonnet-4-6`) via Anthropic API, configurable via `ANTHROPIC_MODEL` env var

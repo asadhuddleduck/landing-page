@@ -103,16 +103,14 @@ export async function POST(request: Request) {
 
   const result = streamText({
     model: anthropic(process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6"),
-    messages: [
-      {
-        role: "system" as const,
-        content: systemPrompt,
-        providerOptions: {
-          anthropic: { cacheControl: { type: "ephemeral" } },
-        },
+    system: {
+      role: "system",
+      content: systemPrompt,
+      providerOptions: {
+        anthropic: { cacheControl: { type: "ephemeral" } },
       },
-      ...modelMessages,
-    ],
+    },
+    messages: modelMessages,
     maxOutputTokens: 150,
   });
 

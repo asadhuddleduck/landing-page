@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ElevenLabsChat from "./ElevenLabsChat";
+import AiSalesChat from "./AiSalesChat";
 import LogoStrip from "./LogoStrip";
 
 export default function HeroChatSection() {
@@ -12,7 +12,7 @@ export default function HeroChatSection() {
       <h1 className="hero-headline">Your food looks incredible. Your ads don&apos;t.</h1>
 
       <div className="hero-chat">
-        <ElevenLabsChat
+        <AiSalesChat
           onConversationEnd={(outcome) => setChatOutcome(outcome)}
         />
       </div>
