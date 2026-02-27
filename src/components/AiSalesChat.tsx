@@ -6,7 +6,7 @@ import type { UIMessage } from "ai";
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { track } from "@vercel/analytics";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
-import { PricingCard, TestimonialCard, CTACard } from "./ChatCards";
+import { PricingCard, TestimonialCard, CTACard, ComparisonCard, TimelineCard } from "./ChatCards";
 
 function StreamingText({ text, isStreaming }: { text: string; isStreaming: boolean }) {
   const prevLenRef = useRef(0);
@@ -145,7 +145,7 @@ function cleanAgentText(text: string): string {
 }
 
 // Detect which rich card to show for an agent message
-function detectCard(text: string): "pricing" | "testimonial" | "cta" | null {
+function detectCard(text: string): "pricing" | "testimonial" | "cta" | "comparison" | "timeline" | null {
   const lower = text.toLowerCase();
   if (lower.includes("checkout") || lower.includes("right below") || lower.includes("go ahead")) {
     return "cta";
@@ -160,6 +160,12 @@ function detectCard(text: string): "pricing" | "testimonial" | "cta" | null {
     lower.includes("676")
   ) {
     return "testimonial";
+  }
+  if (lower.includes("agency") && /£|cost|expensive|cheaper|charge|paying|price|spend/.test(lower)) {
+    return "comparison";
+  }
+  if (lower.includes("72 hours") && (/3 week/.test(lower) || /three week/.test(lower))) {
+    return "timeline";
   }
   return null;
 }
@@ -209,6 +215,11 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
   const [shownCards, setShownCards] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Post-price silence nudge
+  const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const nudgeFiredRef = useRef(false);
+  const [nudgeMessage, setNudgeMessage] = useState<string | null>(null);
 
   const [showGreeting, setShowGreeting] = useState(false);
   const [greetingExiting, setGreetingExiting] = useState(false);
@@ -476,6 +487,14 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
     };
   }, [saveConversation]);
 
+  // Clear nudge timer on user message
+  const clearNudgeTimer = useCallback(() => {
+    if (nudgeTimerRef.current) {
+      clearTimeout(nudgeTimerRef.current);
+      nudgeTimerRef.current = null;
+    }
+  }, []);
+
   const startConversation = useCallback(
     (firstMessage?: string) => {
       if (hasStarted) return;
@@ -494,6 +513,7 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
     const text = input.trim();
     if (!text || nonFnb) return;
     setInput("");
+    clearNudgeTimer();
 
     // Dismiss the greeting with exit animation
     if (showGreeting) {
@@ -522,12 +542,13 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
-  }, [input, hasStarted, startConversation, sendMessage, showGreeting, nonFnb, chatError]);
+  }, [input, hasStarted, startConversation, sendMessage, showGreeting, nonFnb, chatError, clearNudgeTimer]);
 
   // Send a preset message from qualifier buttons
   const sendPreset = useCallback((text: string) => {
     setInput("");
     onTypingChange?.(false);
+    clearNudgeTimer();
 
     if (!hasStarted) {
       startConversation(text);
@@ -536,7 +557,7 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
       sendMessage({ text });
     }
     inputRef.current?.focus();
-  }, [hasStarted, startConversation, sendMessage, onTypingChange]);
+  }, [hasStarted, startConversation, sendMessage, onTypingChange, clearNudgeTimer]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -560,6 +581,21 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
   const markCardShown = useCallback((cardType: string) => {
     setShownCards((prev) => new Set(prev).add(cardType));
   }, []);
+
+  // Start 60s nudge timer when pricing card shown and streaming stops
+  useEffect(() => {
+    if (shownCards.has("pricing") && !isStreaming && !nudgeFiredRef.current) {
+      nudgeTimerRef.current = setTimeout(() => {
+        if (!nudgeFiredRef.current) {
+          nudgeFiredRef.current = true;
+          setNudgeMessage("Any questions about the Trial? I'm here.");
+        }
+      }, 60000);
+      return () => {
+        if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
+      };
+    }
+  }, [shownCards, isStreaming]);
 
   const isConnecting = isStreaming && aiMessages.length <= 1;
   const isConnected = hasStarted;
@@ -604,6 +640,17 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
   const powerZone: "red" | "mid" | "green" | "gold" | "supernova" =
     charCount <= 12 ? "red" : charCount <= 50 ? "mid" : charCount <= 80 ? "green" : charCount <= 120 ? "gold" : "supernova";
   const charDisplay = String(charCount).padStart(2, "0");
+
+  // Extract location count from conversation for testimonial matching
+  const extractedLocationCount = useMemo(() => {
+    for (const m of aiMessages) {
+      if (m.role !== "user") continue;
+      const text = getMessageText(m);
+      const match = text.match(/(\d+)\s*(?:location|spot|restaurant|place)/i);
+      if (match) return parseInt(match[1], 10);
+    }
+    return undefined;
+  }, [aiMessages]);
 
   return (
     <div className="two-msg" ref={containerRef}>
@@ -703,10 +750,31 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
         <TestimonialCard
           text={lastAgentMsg.text}
           onShow={() => markCardShown("testimonial")}
+          locationCount={extractedLocationCount}
         />
+      )}
+      {shouldShowCard && cardType === "comparison" && (
+        <ComparisonCard
+          onShow={() => markCardShown("comparison")}
+          locationCount={extractedLocationCount}
+        />
+      )}
+      {shouldShowCard && cardType === "timeline" && (
+        <TimelineCard onShow={() => markCardShown("timeline")} />
       )}
       {shouldShowCard && cardType === "cta" && (
         <CTACard onShow={() => markCardShown("cta")} />
+      )}
+
+      {/* Post-price silence nudge */}
+      {nudgeMessage && (
+        <div className="two-msg-card two-msg-agent two-msg-enter">
+          <div className="two-msg-agent-indicator">
+            <div className="two-msg-agent-dot" />
+            <span className="two-msg-agent-label">Ads AI</span>
+          </div>
+          <div className="two-msg-text">{nudgeMessage}</div>
+        </div>
       )}
 
       {/* Input bar */}

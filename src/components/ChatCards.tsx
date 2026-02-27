@@ -117,24 +117,45 @@ const TESTIMONIALS: Record<string, TestimonialMeta> = {
     brand: "Franchise Campaign",
     detail: "F&B brand",
   },
+  shakedown: {
+    quote: "Targeted ads in each area. Completely different from what the agency was doing.",
+    brand: "Shakedown",
+    detail: "Multi-location",
+  },
+  chai_green: {
+    quote: "Each location gets its own targeting. Finally ads that make sense for a franchise.",
+    brand: "Chai Green",
+    detail: "Franchise",
+  },
 };
 
-function pickTestimonial(agentText: string): TestimonialMeta {
+function pickTestimonial(agentText: string, locationCount?: number): TestimonialMeta {
   const lower = agentText.toLowerCase();
+  // Brand keyword match takes priority
   if (lower.includes("phat buns")) return TESTIMONIALS.phat_buns;
   if (lower.includes("burger & sauce") || lower.includes("burger and sauce"))
     return TESTIMONIALS.burger_sauce;
   if (lower.includes("676")) return TESTIMONIALS.franchise;
+
+  // Location count match
+  if (locationCount !== undefined) {
+    if (locationCount === 1) return TESTIMONIALS.burger_sauce;
+    if (locationCount >= 2 && locationCount <= 5) return TESTIMONIALS.shakedown;
+    if (locationCount >= 12) return TESTIMONIALS.chai_green;
+    if (locationCount > 5) return TESTIMONIALS.phat_buns;
+  }
+
   return TESTIMONIALS.phat_buns; // default
 }
 
 interface TestimonialCardProps {
   text: string;
   onShow: () => void;
+  locationCount?: number;
 }
 
-export function TestimonialCard({ text, onShow }: TestimonialCardProps) {
-  const testimonial = pickTestimonial(text);
+export function TestimonialCard({ text, onShow, locationCount }: TestimonialCardProps) {
+  const testimonial = pickTestimonial(text, locationCount);
 
   useEffect(() => {
     onShow();
@@ -150,6 +171,71 @@ export function TestimonialCard({ text, onShow }: TestimonialCardProps) {
       <div className="chat-card-attribution">
         <span className="chat-card-brand">{testimonial.brand}</span>
         <span className="chat-card-detail">{testimonial.detail}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ────────── Comparison Card ────────── */
+interface ComparisonCardProps {
+  onShow: () => void;
+  locationCount?: number;
+}
+
+export function ComparisonCard({ onShow, locationCount = 5 }: ComparisonCardProps) {
+  useEffect(() => {
+    onShow();
+    track("card_shown", { card: "comparison" });
+  }, [onShow]);
+
+  return (
+    <div className="chat-card chat-card-comparison">
+      <div className="chat-card-comparison-col chat-card-comparison-col--agency">
+        <div className="chat-card-comparison-label">Typical Agency</div>
+        <div className="chat-card-comparison-price">&pound;10,000-25,000/year</div>
+        <div className="chat-card-comparison-period">&pound;2k-5k/mo &times; 12</div>
+      </div>
+      <div className="chat-card-comparison-col chat-card-comparison-col--hd">
+        <div className="chat-card-comparison-label">AI Ad Engine</div>
+        <div className="chat-card-comparison-price">&pound;497 one-time Trial</div>
+        <div className="chat-card-comparison-period">Full setup included</div>
+      </div>
+      <div className="chat-card-comparison-note">
+        Same price for {locationCount} location{locationCount !== 1 ? "s" : ""}
+      </div>
+    </div>
+  );
+}
+
+/* ────────── Timeline Card ────────── */
+interface TimelineCardProps {
+  onShow: () => void;
+}
+
+export function TimelineCard({ onShow }: TimelineCardProps) {
+  useEffect(() => {
+    onShow();
+    track("card_shown", { card: "timeline" });
+  }, [onShow]);
+
+  const steps = [
+    { time: "Today", desc: "Start your Trial", active: true },
+    { time: "72 hours", desc: "First ads live", active: false },
+    { time: "3 weeks", desc: "Performance report delivered", active: false },
+  ];
+
+  return (
+    <div className="chat-card chat-card-timeline">
+      <div className="chat-card-timeline-steps">
+        {steps.map((step, i) => (
+          <div key={i} className="chat-card-timeline-step">
+            <div className={`chat-card-timeline-dot ${step.active ? "chat-card-timeline-dot--active" : "chat-card-timeline-dot--future"}`} />
+            <div>
+              <div className="chat-card-timeline-time">{step.time}</div>
+              <div className="chat-card-timeline-desc">{step.desc}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

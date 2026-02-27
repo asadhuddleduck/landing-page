@@ -1224,4 +1224,33 @@ body{font-family:var(--font-primary);background:var(--black);color:var(--text-pr
 }
 
 
+/* Comparison card */
+.chat-card-comparison{padding:18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chat-card-comparison-col{padding:14px 12px;border-radius:10px;text-align:center}
+.chat-card-comparison-col--agency{background:rgba(229,57,53,0.06);border:1px solid rgba(229,57,53,0.15)}
+.chat-card-comparison-col--hd{background:rgba(30,186,143,0.06);border:1px solid rgba(30,186,143,0.2)}
+.chat-card-comparison-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.chat-card-comparison-col--agency .chat-card-comparison-label{color:#E53935}
+.chat-card-comparison-col--hd .chat-card-comparison-label{color:var(--viridian)}
+.chat-card-comparison-price{font-family:var(--font-heading);font-size:20px;font-weight:900;letter-spacing:-0.5px;margin-bottom:2px}
+.chat-card-comparison-col--agency .chat-card-comparison-price{color:var(--text-muted);text-decoration:line-through;text-decoration-color:rgba(229,57,53,0.4)}
+.chat-card-comparison-col--hd .chat-card-comparison-price{color:var(--text-primary)}
+.chat-card-comparison-period{font-size:11px;color:var(--text-muted)}
+.chat-card-comparison-note{grid-column:1/-1;text-align:center;font-size:11px;color:var(--text-secondary);padding-top:4px}
+
+/* Timeline card */
+.chat-card-timeline{padding:18px 16px}
+.chat-card-timeline-steps{display:flex;flex-direction:column;gap:0}
+.chat-card-timeline-step{display:flex;align-items:flex-start;gap:12px;position:relative;padding-bottom:16px}
+.chat-card-timeline-step:last-child{padding-bottom:0}
+.chat-card-timeline-dot{flex-shrink:0;width:10px;height:10px;border-radius:50%;margin-top:4px;position:relative;z-index:1}
+.chat-card-timeline-dot--active{background:var(--viridian);box-shadow:0 0 8px rgba(30,186,143,0.5)}
+.chat-card-timeline-dot--future{background:rgba(255,255,255,0.15)}
+.chat-card-timeline-step:not(:last-child)::after{content:'';position:absolute;left:4px;top:14px;bottom:0;width:2px;background:rgba(255,255,255,0.08)}
+.chat-card-timeline-time{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;min-width:60px}
+.chat-card-timeline-step:first-child .chat-card-timeline-time{color:var(--viridian)}
+.chat-card-timeline-step:not(:first-child) .chat-card-timeline-time{color:var(--text-muted)}
+.chat-card-timeline-desc{font-size:13px;color:var(--text-secondary)}
+.chat-card-timeline-step:first-child .chat-card-timeline-desc{color:var(--text-primary)}
+
 /* end */

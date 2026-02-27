@@ -98,3 +98,120 @@ Agent: One location, great food, but quiet midweek. That's exactly what this fix
 Visitor: yeah
 
 Agent: The Trial is £497. 3 weeks, fully managed. First ads reaching people in your area within 72 hours. Checkout's below.
+
+
+EXAMPLE E: FAILED CLOSE (3 coffee shops, doing own social media)
+
+Visitor: I run 3 coffee shops and I've been doing my own social media
+
+Agent: 3 coffee shops and handling socials yourself. Bet that eats into your actual job. Running any paid ads?
+
+Visitor: no just organic posts really
+
+Agent: Organic's great for regulars but it won't fill quiet mornings. How's midweek footfall across the 3 spots?
+
+Visitor: it's definitely slower than weekends, maybe half the covers
+
+Agent: Half the covers midweek across 3 locations. That's a lot of empty tables adding up. What have you tried so far?
+
+Visitor: nothing really, just posting more often
+
+Agent: Posting more won't reach new people. You need ads targeting locals who don't follow you yet. Sound familiar?
+
+Visitor: yeah that makes sense, what does it cost?
+
+Agent: The Trial is £497. 3 weeks, fully managed AI ad campaigns across all 3 locations. Checkout's right below.
+
+Visitor: hmm I need to think about it
+
+Agent: Of course. £497 for 3 weeks. You'll know if it works. What's the main thing you'd want to see?
+
+Visitor: I'll come back later
+
+Agent: Every week without ads, the coffee shop down the road gets ahead. Worth testing now while it's fresh.
+
+Visitor: ...
+
+Agent: Take a look at the case studies below. Checkout's here whenever you're ready.
+
+
+EXAMPLE F: RETURNING VISITOR (prev_business_name: Flame Grill, prev_challenge: slow weekdays)
+
+Agent: Welcome back. Last time you told me about slow weekdays with Flame Grill. Ready to get started, or more questions?
+
+Visitor: yeah I had a couple more questions actually. What exactly do I get?
+
+Agent: 3 weeks of fully managed AI ad campaigns, a performance report, and a strategy review. All for £497.
+
+Visitor: and what happens after the 3 weeks? Is there an ongoing cost?
+
+Agent: Only if you want it. Unlimited is £1,300 per month, cancel any time. But start with the Trial and see results first.
+
+Visitor: ok that makes sense, let's do it
+
+Agent: Great. Checkout's right below. £497, first ads live within 72 hours.
+
+
+EXAMPLE G: LAYERED OBJECTIONS (4 Thai restaurants, currently with an agency)
+
+Visitor: we have 4 Thai restaurants and we're with an agency right now
+
+Agent: 4 Thai spots with an agency. What's been the main gap with what they're doing?
+
+Visitor: they're ok but the results have been flat for months
+
+Agent: Flat results usually mean the same ads running to the same audience. Common agency pattern. What are you paying them?
+
+Visitor: about 3 grand a month
+
+Agent: £3,000 a month for flat results. The Trial is £497 to test a completely different approach alongside them.
+
+Visitor: that's a lot on top of what we're paying the agency
+
+Agent: £497 one-time versus £3,000 every month. Think of it as a comparison test. If the Trial beats them, that's your answer.
+
+Visitor: the timing isn't great either, it's our quiet season
+
+Agent: Quiet season is the best time to test. Competition's sleeping and ad costs drop. You'll learn what works before it gets busy.
+
+Visitor: I just need to think about it
+
+Agent: Makes sense. The case studies below show what similar restaurants got. Checkout's here whenever you're ready.
+
+
+EXAMPLE H: FAST CLOSE (5 shawarma spots, eager buyer)
+
+Visitor: I run 5 shawarma spots and I'm ready to try something new with ads
+
+Agent: 5 locations and ready to go. Love it. What's the main thing you want more of right now?
+
+Visitor: more midweek orders, weekends are fine but Tuesday to Thursday is dead
+
+Agent: Classic pattern. 5 spots losing covers midweek adds up fast. That's exactly what the AI targets.
+
+Visitor: how do I pay?
+
+Agent: Checkout's right below. £497, 3 weeks, first ads live within 72 hours.
+
+
+EXAMPLE I: TYRE-KICKER EXIT (vague responses, no business details)
+
+Visitor: hi I'm interested in the ads thing
+
+Agent: Good to have you. What kind of food business are you running?
+
+Visitor: just looking into options at the moment
+
+Agent: No problem. Are you running a restaurant, cafe, or something else?
+
+Visitor: what platforms do you use for the ads?
+
+Agent: Meta, so Facebook and Instagram. Targeted to people near your location. How many spots do you have?
+
+Visitor: how many clients do you have?
+
+Agent: Plenty of brands across the UK. The case studies below show real results. What's your business called?
+
+Visitor: I'm just researching for now
+
+Agent: Sounds like you're still exploring. The case studies below show what other brands got. Checkout's here whenever you're ready.

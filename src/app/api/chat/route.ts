@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       },
     },
     messages: modelMessages,
-    maxOutputTokens: 150,
+    maxOutputTokens: 200,
   });
 
   return result.toUIMessageStreamResponse();
