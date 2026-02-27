@@ -29,40 +29,20 @@ const steps = [
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string; payment_intent?: string }>;
+  searchParams: Promise<{ session_id?: string }>;
 }) {
-  const { session_id, payment_intent } = await searchParams;
+  const { session_id } = await searchParams;
 
   let customerName = "there";
   let sessionRef = "";
   let eventId = "";
   let purchaseValue = 497;
+  let purchaseCurrency = "GBP";
   let productName = "AI Ad Engine Trial";
   let isSubscription = false;
   let hasValidOrder = false;
 
-  if (payment_intent) {
-    // New flow: inline Payment Element (always trial)
-    try {
-      const pi = await stripe.paymentIntents.retrieve(payment_intent, {
-        expand: ["customer"],
-      });
-      if (pi.status === "succeeded") {
-        hasValidOrder = true;
-        const customer = pi.customer;
-        if (customer && typeof customer !== "string" && !customer.deleted) {
-          if (customer.name) {
-            customerName = customer.name.split(" ")[0];
-          }
-        }
-        sessionRef = pi.id.slice(-8).toUpperCase();
-        eventId = pi.id;
-      }
-    } catch {
-      // Invalid PI. Show fallback
-    }
-  } else if (session_id) {
-    // Checkout Session flow (trial or unlimited)
+  if (session_id) {
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id);
       if (session.payment_status === "paid") {
@@ -73,8 +53,12 @@ export default async function SuccessPage({
         sessionRef = session.id.slice(-8).toUpperCase();
         eventId = session.id;
 
+        const sessionCurrency = (session.currency ?? "gbp").toUpperCase();
+        purchaseCurrency = sessionCurrency;
+        const rawAmount = session.amount_total ?? 0;
+        purchaseValue = sessionCurrency === "JPY" ? rawAmount : rawAmount / 100;
+
         if (session.mode === "subscription") {
-          purchaseValue = 1300;
           productName = "AI Ad Engine Unlimited";
           isSubscription = true;
         }
@@ -248,7 +232,7 @@ export default async function SuccessPage({
               Back to home
             </Link>
 
-            <SuccessPixel eventId={eventId} value={purchaseValue} />
+            <SuccessPixel eventId={eventId} value={purchaseValue} currency={purchaseCurrency} />
           </>
         ) : (
           <div style={{ textAlign: "center" }}>

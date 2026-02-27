@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
-import ConvertedPrice from "./ConvertedPrice";
 import { useCurrency } from "@/hooks/useCurrency";
 
 // Scroll to #checkout section instead of redirecting to Stripe
@@ -29,7 +28,10 @@ interface PricingCardProps {
 
 export function PricingCard({ onShow }: PricingCardProps) {
   const [loading, setLoading] = useState(false);
-  const { convert } = useCurrency();
+  const { currency, getDisplayPrice } = useCurrency();
+
+  const trialPrice = getDisplayPrice(497, "trial");
+  const unlimitedPrice = getDisplayPrice(1300, "unlimited");
 
   useEffect(() => {
     onShow();
@@ -41,11 +43,10 @@ export function PricingCard({ onShow }: PricingCardProps) {
       <div className="chat-card-header">
         <span className="chat-card-label">AI Ad Engine Trial</span>
         <div className="chat-card-price">
-          <span className="chat-card-currency">£</span>
-          <span className="chat-card-amount">497</span>
+          <span className="chat-card-currency">{trialPrice.symbol}</span>
+          <span className="chat-card-amount">{trialPrice.amount.toLocaleString("en-US")}</span>
           <span className="chat-card-period">one-time</span>
         </div>
-        <ConvertedPrice amountGBP={497} />
       </div>
       <div className="chat-card-features">
         <div className="chat-card-feature">
@@ -80,14 +81,14 @@ export function PricingCard({ onShow }: PricingCardProps) {
       >
         Start Your Trial
       </button>
-      <p className="chat-card-fine">£497 Trial fee fully credited if you upgrade within 30 days</p>
+      <p className="chat-card-fine">{trialPrice.formatted} Trial fee fully credited if you upgrade within 30 days</p>
       <p className="chat-card-unlimited-link" style={{
         fontSize: "0.8rem",
         color: "var(--text-muted)",
         marginTop: "8px",
         cursor: "pointer"
       }} onClick={() => scrollToCheckout(setLoading)}>
-        Or go unlimited - £1,300/mo{convert(1300) ? ` (${convert(1300)})` : ""}
+        Or go unlimited - {unlimitedPrice.formatted}/mo
       </p>
     </div>
   );

@@ -12,7 +12,7 @@ interface StickyCheckoutCTAProps {
 export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProps) {
   const [visible, setVisible] = useState(false);
   const hasSeenCheckout = useRef(false);
-  const { convert } = useCurrency();
+  const { currency, getDisplayPrice } = useCurrency();
 
   useEffect(() => {
     const checkoutEl = document.getElementById("checkout");
@@ -38,17 +38,16 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
   }, []);
 
   // Smart CTA copy based on conversation outcome
-  const converted497 = convert(497);
+  const trialPrice = getDisplayPrice(497, "trial");
   const getCtaText = () => {
-    const suffix = converted497 ? ` (${converted497})` : "";
-    if (chatOutcome?.includes("FRANCHISE")) return `Start Your Franchise Trial for £497${suffix}`;
-    return `Get Started - from £497${suffix}`;
+    if (chatOutcome?.includes("FRANCHISE")) return `Start Your Franchise Trial for ${trialPrice.formatted}`;
+    return `Get Started - from ${trialPrice.formatted}`;
   };
 
   function handleClick() {
-    // Value reflects the minimum tier (Trial £497). The sticky CTA scrolls to
+    // Value reflects the minimum tier (Trial). The sticky CTA scrolls to
     // the checkout section where the user's actual tier selection is preserved.
-    trackPixelEvent("InitiateCheckout", { value: 497, currency: "GBP" });
+    trackPixelEvent("InitiateCheckout", { value: trialPrice.amount, currency: currency || "GBP" });
     track("sticky_cta_click");
 
     const el = document.getElementById("checkout");
@@ -67,7 +66,7 @@ export default function StickyCheckoutCTA({ chatOutcome }: StickyCheckoutCTAProp
       >
         {getCtaText()}
       </button>
-      <p className="sticky-cta-credit">£497{converted497 ? ` (${converted497})` : ""} Trial fee fully credited if you upgrade within 30 days</p>
+      <p className="sticky-cta-credit">{trialPrice.formatted} Trial fee fully credited if you upgrade within 30 days</p>
     </div>
   );
 }

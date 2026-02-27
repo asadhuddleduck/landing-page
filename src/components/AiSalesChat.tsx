@@ -6,6 +6,7 @@ import type { UIMessage } from "ai";
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { track } from "@vercel/analytics";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
+import { detectCurrency } from "@/lib/currency";
 import { PricingCard, TestimonialCard, CTACard, ComparisonCard, TimelineCard } from "./ChatCards";
 
 function StreamingText({ text, isStreaming }: { text: string; isStreaming: boolean }) {
@@ -130,6 +131,7 @@ function getDynamicVariables(): Record<string, string> {
     utm_campaign: utms.utm_campaign || "",
     page_url: typeof window !== "undefined" ? window.location.href : "",
     returning_visitor: returningVisitor ? "true" : "false",
+    detected_currency: detectCurrency() || "",
     ...prevVars,
   };
 }

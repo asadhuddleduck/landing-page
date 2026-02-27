@@ -5,10 +5,9 @@ import { getVisitorId, getStoredUtms, getFbCookies } from "@/lib/visitor";
 import { trackPixelEvent } from "./MetaPixel";
 import { track } from "@vercel/analytics";
 import { gtagEvent } from "@/lib/ga";
-import PaymentForm from "./PaymentForm";
-import ConvertedPrice from "./ConvertedPrice";
+import { useCurrency } from "@/hooks/useCurrency";
 
-type CheckoutStep = "idle" | "details" | "paying" | "success";
+type CheckoutStep = "idle" | "details" | "success";
 
 export default function CheckoutSection() {
   const [step, setStep] = useState<CheckoutStep>("idle");
@@ -17,14 +16,16 @@ export default function CheckoutSection() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [clientSecret, setClientSecret] = useState("");
-  const [paymentIntentId, setPaymentIntentId] = useState("");
   const [error, setError] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const { currency, getDisplayPrice } = useCurrency();
   const viewItemFired = useRef(false);
   const submitting = useRef(false);
   const redirecting = useRef(false);
+
+  const trialPrice = getDisplayPrice(497, "trial");
+  const unlimitedPrice = getDisplayPrice(1300, "unlimited");
 
   // Fire view_item when checkout section scrolls into viewport
   useEffect(() => {
@@ -35,11 +36,11 @@ export default function CheckoutSection() {
         if (entry.isIntersecting && !viewItemFired.current) {
           viewItemFired.current = true;
           gtagEvent("view_item", {
-            currency: "GBP",
-            value: 497,
+            currency: currency || "GBP",
+            value: trialPrice.amount,
             items: [
-              { item_id: "ai-ad-engine-trial", item_name: "AI Ad Engine Trial", price: 497 },
-              { item_id: "ai-ad-engine-unlimited", item_name: "AI Ad Engine Unlimited", price: 1300 },
+              { item_id: "ai-ad-engine-trial", item_name: "AI Ad Engine Trial", price: trialPrice.amount },
+              { item_id: "ai-ad-engine-unlimited", item_name: "AI Ad Engine Unlimited", price: unlimitedPrice.amount },
             ],
           });
           observer.disconnect();
@@ -49,7 +50,7 @@ export default function CheckoutSection() {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [currency, trialPrice.amount, unlimitedPrice.amount]);
 
   const steps = selectedTier === "unlimited"
     ? [
@@ -84,13 +85,13 @@ export default function CheckoutSection() {
       ];
 
   function handleStartCheckout() {
-    const value = selectedTier === "unlimited" ? 1300 : 497;
+    const value = selectedTier === "unlimited" ? unlimitedPrice.amount : trialPrice.amount;
     const itemId = selectedTier === "unlimited" ? "ai-ad-engine-unlimited" : "ai-ad-engine-trial";
     const itemName = selectedTier === "unlimited" ? "AI Ad Engine Unlimited" : "AI Ad Engine Trial";
 
-    trackPixelEvent("InitiateCheckout", { value, currency: "GBP" });
+    trackPixelEvent("InitiateCheckout", { value, currency: currency || "GBP" });
     gtagEvent("begin_checkout", {
-      currency: "GBP",
+      currency: currency || "GBP",
       value,
       items: [{ item_id: itemId, item_name: itemName, price: value, quantity: 1 }],
     });
@@ -128,74 +129,33 @@ export default function CheckoutSection() {
 
       const { fbc, fbp } = getFbCookies();
 
-      if (selectedTier === "unlimited") {
-        // Unlimited tier: redirect to Stripe Checkout
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tier: "unlimited",
-            email,
-            name,
-            phone,
-            visitor_id: vid,
-            fbc,
-            fbp,
-            ...utms,
-          }),
-        });
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tier: selectedTier,
+          email,
+          name,
+          phone,
+          currency: currency || "GBP",
+          visitor_id: vid,
+          fbc,
+          fbp,
+          ...utms,
+        }),
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (data.url) {
-          redirecting.current = true;
-          window.location.href = data.url;
-          return;
-        } else if (data.error) {
-          setError(data.error);
-        } else {
-          console.error("[checkout] No redirect URL returned:", data);
-          setError("Something went wrong. Please try again.");
-        }
+      if (data.url) {
+        redirecting.current = true;
+        window.location.href = data.url;
+        return;
+      } else if (data.error) {
+        setError(data.error);
       } else {
-        // Trial tier: existing PaymentIntent flow
-        const res = await fetch("/api/create-payment-intent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            name,
-            phone,
-            visitor_id: vid,
-            fbc,
-            fbp,
-            ...utms,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (data.error) {
-          setError(data.error);
-        } else if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-          setPaymentIntentId(data.paymentIntentId);
-          gtagEvent("add_payment_info", {
-            currency: "GBP",
-            value: 497,
-            items: [{ item_id: "ai-ad-engine-trial", item_name: "AI Ad Engine Trial", price: 497, quantity: 1 }],
-          });
-          setStep("paying");
-          setTimeout(() => {
-            formRef.current?.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-          }, 100);
-        } else {
-          console.error("[checkout] No client secret returned:", data);
-          setError("Something went wrong. Please try again.");
-        }
+        console.error("[checkout] No redirect URL returned:", data);
+        setError("Something went wrong. Please try again.");
       }
     } catch (err) {
       console.error("[checkout] Error:", err);
@@ -223,8 +183,6 @@ export default function CheckoutSection() {
               if (selectedTier !== "trial") {
                 setSelectedTier("trial");
                 setStep("idle");
-                setClientSecret("");
-                setPaymentIntentId("");
               }
             }}
             onKeyDown={(e) => {
@@ -233,8 +191,6 @@ export default function CheckoutSection() {
                 if (selectedTier !== "trial") {
                   setSelectedTier("trial");
                   setStep("idle");
-                  setClientSecret("");
-                  setPaymentIntentId("");
                 }
               }
             }}
@@ -242,11 +198,10 @@ export default function CheckoutSection() {
             <span className="pricing-tier-badge pricing-tier-badge--new">NEW</span>
             <p className="pricing-tier-name">AI Ad Engine Trial</p>
             <div className="pricing-tier-price">
-              <span className="pricing-tier-currency">£</span>
-              <span className="pricing-tier-amount">497</span>
+              <span className="pricing-tier-currency">{trialPrice.symbol}</span>
+              <span className="pricing-tier-amount">{trialPrice.amount.toLocaleString("en-US")}</span>
             </div>
             <p className="pricing-tier-period">one-time</p>
-            <ConvertedPrice amountGBP={497} />
             <p className="pricing-tier-detail">1 campaign</p>
           </div>
 
@@ -260,8 +215,6 @@ export default function CheckoutSection() {
               if (selectedTier !== "unlimited") {
                 setSelectedTier("unlimited");
                 setStep("idle");
-                setClientSecret("");
-                setPaymentIntentId("");
               }
             }}
             onKeyDown={(e) => {
@@ -270,19 +223,16 @@ export default function CheckoutSection() {
                 if (selectedTier !== "unlimited") {
                   setSelectedTier("unlimited");
                   setStep("idle");
-                  setClientSecret("");
-                  setPaymentIntentId("");
                 }
               }
             }}
           >
             <p className="pricing-tier-name">AI Ad Engine Unlimited</p>
             <div className="pricing-tier-price">
-              <span className="pricing-tier-currency">£</span>
-              <span className="pricing-tier-amount">1,300</span>
+              <span className="pricing-tier-currency">{unlimitedPrice.symbol}</span>
+              <span className="pricing-tier-amount">{unlimitedPrice.amount.toLocaleString("en-US")}</span>
             </div>
             <p className="pricing-tier-period">per month</p>
-            <ConvertedPrice amountGBP={1300} />
             <p className="pricing-tier-detail">Unlimited campaigns</p>
           </div>
         </div>
@@ -340,103 +290,69 @@ export default function CheckoutSection() {
         )}
 
         {/* DETAILS: Contact form */}
-        {(step === "details" || step === "paying") && (
+        {step === "details" && (
           <div ref={formRef} className="checkout-form">
-            {step === "details" ? (
-              <form onSubmit={handleContinueToPayment}>
-                <p className="checkout-form-heading">Your details</p>
-                <div className="checkout-field">
-                  <label htmlFor="checkout-email" className="checkout-form-label">
-                    Email *
-                  </label>
-                  <input
-                    id="checkout-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
-                    className="checkout-input"
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="checkout-field">
-                  <label htmlFor="checkout-name" className="checkout-form-label">
-                    Full name
-                  </label>
-                  <input
-                    id="checkout-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Smith"
-                    className="checkout-input"
-                    autoComplete="name"
-                  />
-                </div>
-                <div className="checkout-field">
-                  <label htmlFor="checkout-phone" className="checkout-form-label">
-                    Phone
-                  </label>
-                  <input
-                    id="checkout-phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+44 7700 900000"
-                    className="checkout-input"
-                    autoComplete="tel"
-                  />
-                </div>
-                {error && <p className="checkout-error">{error}</p>}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="checkout-btn"
-                  style={{ marginTop: "20px" }}
-                >
-                  {loading ? "Setting up..." : "Continue to Payment"}
-                </button>
-                <div className="checkout-trust">
-                  <span>Powered by</span>
-                  <svg className="checkout-trust-stripe" viewBox="18 10 88 36" fill="currentColor" fillRule="evenodd" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M101.547 30.94c0-5.885-2.85-10.53-8.3-10.53-5.47 0-8.782 4.644-8.782 10.483 0 6.92 3.908 10.414 9.517 10.414 2.736 0 4.805-.62 6.368-1.494v-4.598c-1.563.782-3.356 1.264-5.632 1.264-2.23 0-4.207-.782-4.46-3.494h11.24c0-.3.046-1.494.046-2.046zM90.2 28.757c0-2.598 1.586-3.678 3.035-3.678 1.402 0 2.897 1.08 2.897 3.678zm-14.597-8.345c-2.253 0-3.7 1.057-4.506 1.793l-.3-1.425H65.73v26.805l5.747-1.218.023-6.506c.828.598 2.046 1.448 4.07 1.448 4.115 0 7.862-3.3 7.862-10.598-.023-6.667-3.816-10.3-7.84-10.3zm-1.38 15.84c-1.356 0-2.16-.483-2.713-1.08l-.023-8.53c.598-.667 1.425-1.126 2.736-1.126 2.092 0 3.54 2.345 3.54 5.356 0 3.08-1.425 5.38-3.54 5.38zm-16.4-17.196l5.77-1.24V13.15l-5.77 1.218zm0 1.747h5.77v20.115h-5.77zm-6.185 1.7l-.368-1.7h-4.966V40.92h5.747V27.286c1.356-1.77 3.655-1.448 4.368-1.195v-5.287c-.736-.276-3.425-.782-4.782 1.7zm-11.494-6.7L34.535 17l-.023 18.414c0 3.402 2.552 5.908 5.954 5.908 1.885 0 3.264-.345 4.023-.76v-4.667c-.736.3-4.368 1.356-4.368-2.046V25.7h4.368v-4.897h-4.37zm-15.54 10.828c0-.897.736-1.24 1.954-1.24a12.85 12.85 0 0 1 5.7 1.47V21.47c-1.908-.76-3.793-1.057-5.7-1.057-4.667 0-7.77 2.437-7.77 6.506 0 6.345 8.736 5.333 8.736 8.07 0 1.057-.92 1.402-2.207 1.402-1.908 0-4.345-.782-6.276-1.84v5.47c2.138.92 4.3 1.3 6.276 1.3 4.782 0 8.07-2.368 8.07-6.483-.023-6.85-8.782-5.632-8.782-8.207z" />
-                  </svg>
-                </div>
-              </form>
-            ) : (
-              <>
-                {/* PAYING: Show locked contact details + Payment Element */}
-                <div className="checkout-contact-summary">
-                  <p className="checkout-form-heading">Your details</p>
-                  <p className="checkout-contact-line">{email}</p>
-                  {name && (
-                    <p className="checkout-contact-line">{name}</p>
-                  )}
-                  {phone && (
-                    <p className="checkout-contact-line">{phone}</p>
-                  )}
-                  <button
-                    type="button"
-                    className="checkout-edit-btn"
-                    onClick={() => {
-                      setStep("details");
-                      setClientSecret("");
-                      setPaymentIntentId("");
-                    }}
-                  >
-                    Edit
-                  </button>
-                </div>
-                <div className="checkout-payment-section">
-                  <p className="checkout-form-heading">Payment</p>
-                  <PaymentForm
-                    clientSecret={clientSecret}
-                    paymentIntentId={paymentIntentId}
-                  />
-                </div>
-              </>
-            )}
+            <form onSubmit={handleContinueToPayment}>
+              <p className="checkout-form-heading">Your details</p>
+              <div className="checkout-field">
+                <label htmlFor="checkout-email" className="checkout-form-label">
+                  Email *
+                </label>
+                <input
+                  id="checkout-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="checkout-input"
+                  autoComplete="email"
+                />
+              </div>
+              <div className="checkout-field">
+                <label htmlFor="checkout-name" className="checkout-form-label">
+                  Full name
+                </label>
+                <input
+                  id="checkout-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Smith"
+                  className="checkout-input"
+                  autoComplete="name"
+                />
+              </div>
+              <div className="checkout-field">
+                <label htmlFor="checkout-phone" className="checkout-form-label">
+                  Phone
+                </label>
+                <input
+                  id="checkout-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+44 7700 900000"
+                  className="checkout-input"
+                  autoComplete="tel"
+                />
+              </div>
+              {error && <p className="checkout-error">{error}</p>}
+              <button
+                type="submit"
+                disabled={loading}
+                className="checkout-btn"
+                style={{ marginTop: "20px" }}
+              >
+                {loading ? "Setting up..." : "Continue to Checkout"}
+              </button>
+              <div className="checkout-trust">
+                <span>Powered by</span>
+                <svg className="checkout-trust-stripe" viewBox="18 10 88 36" fill="currentColor" fillRule="evenodd" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M101.547 30.94c0-5.885-2.85-10.53-8.3-10.53-5.47 0-8.782 4.644-8.782 10.483 0 6.92 3.908 10.414 9.517 10.414 2.736 0 4.805-.62 6.368-1.494v-4.598c-1.563.782-3.356 1.264-5.632 1.264-2.23 0-4.207-.782-4.46-3.494h11.24c0-.3.046-1.494.046-2.046zM90.2 28.757c0-2.598 1.586-3.678 3.035-3.678 1.402 0 2.897 1.08 2.897 3.678zm-14.597-8.345c-2.253 0-3.7 1.057-4.506 1.793l-.3-1.425H65.73v26.805l5.747-1.218.023-6.506c.828.598 2.046 1.448 4.07 1.448 4.115 0 7.862-3.3 7.862-10.598-.023-6.667-3.816-10.3-7.84-10.3zm-1.38 15.84c-1.356 0-2.16-.483-2.713-1.08l-.023-8.53c.598-.667 1.425-1.126 2.736-1.126 2.092 0 3.54 2.345 3.54 5.356 0 3.08-1.425 5.38-3.54 5.38zm-16.4-17.196l5.77-1.24V13.15l-5.77 1.218zm0 1.747h5.77v20.115h-5.77zm-6.185 1.7l-.368-1.7h-4.966V40.92h5.747V27.286c1.356-1.77 3.655-1.448 4.368-1.195v-5.287c-.736-.276-3.425-.782-4.782 1.7zm-11.494-6.7L34.535 17l-.023 18.414c0 3.402 2.552 5.908 5.954 5.908 1.885 0 3.264-.345 4.023-.76v-4.667c-.736.3-4.368 1.356-4.368-2.046V25.7h4.368v-4.897h-4.37zm-15.54 10.828c0-.897.736-1.24 1.954-1.24a12.85 12.85 0 0 1 5.7 1.47V21.47c-1.908-.76-3.793-1.057-5.7-1.057-4.667 0-7.77 2.437-7.77 6.506 0 6.345 8.736 5.333 8.736 8.07 0 1.057-.92 1.402-2.207 1.402-1.908 0-4.345-.782-6.276-1.84v5.47c2.138.92 4.3 1.3 6.276 1.3 4.782 0 8.07-2.368 8.07-6.483-.023-6.85-8.782-5.632-8.782-8.207z" />
+                </svg>
+              </div>
+            </form>
           </div>
         )}
 
@@ -476,7 +392,7 @@ export default function CheckoutSection() {
           </div>
           <div className="guarantee-badge-content">
             <p className="guarantee-badge-label">CREDIT GUARANTEE</p>
-            <p className="guarantee-badge-text">£497 Trial fee fully credited if you upgrade within 30 days. <ConvertedPrice amountGBP={497} inline /></p>
+            <p className="guarantee-badge-text">{trialPrice.formatted} Trial fee fully credited if you upgrade within 30 days.</p>
           </div>
         </div>
       )}

@@ -14,8 +14,6 @@
     "@libsql/client": "^0.17.0",
     "@next/third-parties": "^16.1.6",
     "@notionhq/client": "^5.9.0",
-    "@stripe/react-stripe-js": "^5.6.0",
-    "@stripe/stripe-js": "^8.7.0",
     "@vercel/analytics": "^1.6.1",
     "ai": "^6.0.103",
     "facebook-nodejs-business-sdk": "^24.0.1",

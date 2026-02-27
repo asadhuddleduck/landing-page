@@ -1,6 +1,16 @@
-// Static exchange rates from GBP (approximate, for display only)
-// Actual Stripe charge is always in GBP
-const EXCHANGE_RATES: Record<string, number> = {
+// Static exchange rates from GBP
+//
+// HOW TO UPDATE: Replace rates below with current GBP→X rates from xe.com,
+// then update RATES_LAST_UPDATED. Aim to refresh every 2-3 months.
+export const RATES_LAST_UPDATED = "2026-02-27";
+
+// Currencies where 1 unit = smallest unit (no cents). Don't multiply by 100.
+export const ZERO_DECIMAL_CURRENCIES = new Set(["JPY"]);
+
+// Buffer applied to Unlimited tier for non-GBP to cover Stripe 2% FX fee + margin
+export const FX_BUFFER = 0.05;
+
+export const EXCHANGE_RATES: Record<string, number> = {
   USD: 1.27,
   EUR: 1.17,
   AUD: 1.94,
@@ -27,7 +37,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: "\u20AC",
   AUD: "A$",
   CAD: "C$",
-  AED: "\u062F.\u0625",
+  AED: "AED",
   SGD: "S$",
   INR: "\u20B9",
   ZAR: "R",
@@ -120,7 +130,7 @@ export function detectCurrency(): string | null {
   if (lang === "it") return "EUR";
   if (lang === "es") return "EUR";
   if (lang === "nl") return "EUR";
-  if (lang === "pt") return "BRL";
+  if (lang === "pt") return "EUR";
   if (lang === "ja") return "JPY";
   if (lang === "zh") return "HKD";
   if (lang === "hi") return "INR";
@@ -142,18 +152,96 @@ export function getCurrencySymbol(currencyCode: string): string {
 }
 
 /**
- * Converts a GBP amount to a formatted local currency string.
- * Returns a string like "~ $631 USD" or "~ ¥94,549 JPY".
+ * Charm-rounds a raw converted price so it looks intentional, not calculated.
+ *
+ * Trial tier: ends in 7 (< 1 000) or 97 (≥ 1 000) — e.g. $627, AED 2,297
+ * Unlimited:  rounds to nearest 50 / 500 / 5 000 depending on magnitude
  */
-export function convertGBP(amountGBP: number, currencyCode: string): string {
+export function charmRound(raw: number, tier: "trial" | "unlimited"): number {
+  if (tier === "trial") {
+    if (raw < 1_000) {
+      // Nearest number ending in 7  (…7, …17, …27, …637, …967)
+      return Math.round((raw - 7) / 10) * 10 + 7;
+    }
+    // Nearest number ending in 97  (…97, …197, …1 097, …52 397)
+    return Math.round((raw - 97) / 100) * 100 + 97;
+  }
+
+  // Unlimited: clean round numbers that scale with magnitude
+  if (raw < 5_000) return Math.round(raw / 50) * 50;
+  if (raw < 50_000) return Math.round(raw / 500) * 500;
+  return Math.round(raw / 5_000) * 5_000;
+}
+
+/**
+ * Converts a GBP amount to a formatted local currency string.
+ * Returns a string like "~ $627 USD" or "~ ¥250,000 JPY".
+ *
+ * Pass `tier` to apply charm rounding. Without it, raw Math.round is used.
+ */
+export function convertGBP(
+  amountGBP: number,
+  currencyCode: string,
+  tier?: "trial" | "unlimited",
+): string {
   const rate = EXCHANGE_RATES[currencyCode];
   if (!rate) return "";
 
-  const converted = Math.round(amountGBP * rate);
+  const raw = amountGBP * rate;
+  const converted = tier ? charmRound(raw, tier) : Math.round(raw);
   const symbol = getCurrencySymbol(currencyCode);
 
   // Format with commas for readability
   const formatted = converted.toLocaleString("en-US");
 
   return `~ ${symbol}${formatted} ${currencyCode}`;
+}
+
+/**
+ * Returns a display-ready local price for a GBP amount.
+ *
+ * Trial: charm-rounded, no buffer (Adaptive Pricing handles FX)
+ * Unlimited: charm-rounded WITH 5% buffer (covers Stripe FX fee + margin)
+ * GBP: returns the GBP price directly
+ */
+export function getDisplayPrice(
+  amountGBP: number,
+  currencyCode: string,
+  tier: "trial" | "unlimited",
+): { amount: number; symbol: string; formatted: string } {
+  if (currencyCode === "GBP") {
+    const formatted = amountGBP.toLocaleString("en-GB");
+    return { amount: amountGBP, symbol: "£", formatted: `£${formatted}` };
+  }
+
+  const rate = EXCHANGE_RATES[currencyCode];
+  if (!rate) {
+    const formatted = amountGBP.toLocaleString("en-GB");
+    return { amount: amountGBP, symbol: "£", formatted: `£${formatted}` };
+  }
+
+  const raw = tier === "unlimited"
+    ? amountGBP * rate * (1 + FX_BUFFER)
+    : amountGBP * rate;
+
+  const amount = charmRound(raw, tier);
+  const symbol = getCurrencySymbol(currencyCode);
+  const formatted = `${symbol}${amount.toLocaleString("en-US")}`;
+
+  return { amount, symbol, formatted };
+}
+
+/**
+ * Returns the charge amount in Stripe's smallest currency unit.
+ * For most currencies: amount × 100 (cents). For zero-decimal (JPY): amount as-is.
+ *
+ * Used for Unlimited non-GBP price_data. Trial uses Adaptive Pricing, GBP uses Price IDs.
+ */
+export function getChargeAmountInSmallestUnit(
+  amountGBP: number,
+  currencyCode: string,
+  tier: "trial" | "unlimited",
+): number {
+  const { amount } = getDisplayPrice(amountGBP, currencyCode, tier);
+  return ZERO_DECIMAL_CURRENCIES.has(currencyCode) ? amount : amount * 100;
 }

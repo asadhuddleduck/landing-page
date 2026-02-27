@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const faqs: { question: string; highlight: string; answer: string }[] = [
   {
@@ -44,6 +45,18 @@ const faqs: { question: string; highlight: string; answer: string }[] = [
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { currency, getDisplayPrice } = useCurrency();
+
+  // Replace £ prices with local currency for non-GBP visitors
+  function withConversion(text: string): string {
+    if (!currency || currency === "GBP") return text;
+    const trial = getDisplayPrice(497, "trial");
+    const unlimited = getDisplayPrice(1300, "unlimited");
+    let result = text;
+    result = result.replace(/£497/g, trial.formatted);
+    result = result.replace(/£1,300/g, `${unlimited.formatted}`);
+    return result;
+  }
 
   return (
     <section className="section">
@@ -61,14 +74,16 @@ export default function FAQ() {
                 >
                   <span>
                     {(() => {
-                      const idx = faq.question.indexOf(faq.highlight);
-                      if (idx === -1) return faq.question;
-                      const before = faq.question.slice(0, idx);
-                      const after = faq.question.slice(idx + faq.highlight.length);
+                      const q = withConversion(faq.question);
+                      const h = withConversion(faq.highlight);
+                      const idx = q.indexOf(h);
+                      if (idx === -1) return q;
+                      const before = q.slice(0, idx);
+                      const after = q.slice(idx + h.length);
                       return (
                         <>
                           {before}
-                          <strong className="faq-highlight">{faq.highlight}</strong>
+                          <strong className="faq-highlight">{h}</strong>
                           {after}
                         </>
                       );
@@ -98,7 +113,7 @@ export default function FAQ() {
                       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       style={{ overflow: "hidden" }}
                     >
-                      <p className="faq-answer">{faq.answer}</p>
+                      <p className="faq-answer">{withConversion(faq.answer)}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

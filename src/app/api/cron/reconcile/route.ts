@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import { handlePurchase, handlePaymentIntentPurchase } from "@/lib/onboarding";
+import { handlePurchase } from "@/lib/onboarding";
 
 export const runtime = "nodejs";
 
@@ -23,13 +23,6 @@ export async function GET(request: NextRequest) {
     // Fetch recent successful checkout sessions
     const checkoutEvents = await stripe.events.list({
       type: "checkout.session.completed",
-      created: { gte: oneDayAgo },
-      limit: 100,
-    });
-
-    // Fetch recent successful payment intents (inline Trial flow)
-    const piEvents = await stripe.events.list({
-      type: "payment_intent.succeeded",
       created: { gte: oneDayAgo },
       limit: 100,
     });
@@ -59,36 +52,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Reconcile payment intents (only those with tier metadata = our inline flow)
-    for (const event of piEvents.data) {
-      const pi = event.data.object as import("stripe").Stripe.PaymentIntent;
-      if (!pi.metadata?.tier) continue; // Skip PIs from Checkout Sessions
-
-      try {
-        const existing = await db.execute({
-          sql: "SELECT 1 FROM purchases WHERE stripe_session_id = ?",
-          args: [pi.id],
-        });
-        if (existing.rows.length === 0) {
-          console.log(`[reconcile] Missing PI ${pi.id}, re-processing`);
-          await handlePaymentIntentPurchase(pi);
-          reconciled++;
-        } else {
-          alreadyExists++;
-        }
-      } catch (err) {
-        console.error(`[reconcile] Failed to reconcile PI ${pi.id}:`, err);
-        failed++;
-      }
-    }
-
     console.log(`[reconcile] Done: ${reconciled} reconciled, ${alreadyExists} already existed, ${failed} failed`);
 
     return NextResponse.json({
       reconciled,
       alreadyExists,
       failed,
-      eventsChecked: checkoutEvents.data.length + piEvents.data.length,
+      eventsChecked: checkoutEvents.data.length,
     });
   } catch (err) {
     console.error("[reconcile] Cron error:", err);

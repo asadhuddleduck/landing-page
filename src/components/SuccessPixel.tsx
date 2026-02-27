@@ -13,9 +13,10 @@ import { gtagEvent } from "@/lib/ga";
 interface SuccessPixelProps {
   eventId: string;
   value?: number;
+  currency?: string;
 }
 
-export default function SuccessPixel({ eventId, value = 497 }: SuccessPixelProps) {
+export default function SuccessPixel({ eventId, value = 497, currency = "GBP" }: SuccessPixelProps) {
   const hasFired = useRef(false);
 
   useEffect(() => {
@@ -24,14 +25,14 @@ export default function SuccessPixel({ eventId, value = 497 }: SuccessPixelProps
 
     trackPixelEvent(
       "Purchase",
-      { value, currency: "GBP" },
+      { value, currency },
       `stripe_${eventId}`
     );
 
     gtagEvent("purchase", {
       transaction_id: `stripe_${eventId}`,
       value,
-      currency: "GBP",
+      currency,
       items: [
         {
           item_id: value >= 1300 ? "ai-ad-engine-unlimited" : "ai-ad-engine-trial",
@@ -43,7 +44,7 @@ export default function SuccessPixel({ eventId, value = 497 }: SuccessPixelProps
     });
 
     track("purchase_completed", { event_id: eventId });
-  }, [eventId, value]);
+  }, [eventId, value, currency]);
 
   return null;
 }

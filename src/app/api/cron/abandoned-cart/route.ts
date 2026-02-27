@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { sendAbandonedCartEmail } from "@/lib/email";
+import { getCurrencySymbol } from "@/lib/currency";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
     // Find checkouts older than 1 hour with no matching purchase and not yet nudged
     const result = await db.execute({
       sql: `SELECT c.* FROM checkouts c
-            LEFT JOIN purchases p ON c.payment_intent_id = p.stripe_session_id
+            LEFT JOIN purchases p ON c.session_id = p.stripe_session_id
             WHERE p.stripe_session_id IS NULL
             AND c.created_at < datetime('now', '-1 hour')
             AND c.nudged_at IS NULL
@@ -36,29 +37,34 @@ export async function GET(request: NextRequest) {
       const email = row.email as string;
       const name = (row.name as string) || "";
       const amount = row.amount as number;
-      const paymentIntentId = row.payment_intent_id as string;
+      const sessionId = row.session_id as string;
+      const currency = (row.currency as string) || "GBP";
 
       try {
-        // Verify the PI is truly unpaid before sending (prevents race with webhook)
-        const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
-        if (pi.status === "succeeded") {
+        // Verify the session is truly unpaid before sending (prevents race with webhook)
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        if (session.payment_status === "paid") {
           await db.execute({
-            sql: `UPDATE checkouts SET nudged_at = datetime('now') WHERE payment_intent_id = ?`,
-            args: [paymentIntentId],
+            sql: `UPDATE checkouts SET nudged_at = datetime('now') WHERE session_id = ?`,
+            args: [sessionId],
           });
           continue;
         }
 
+        // Amount is stored as display amount (e.g. 497, 627, 1300)
+        const symbol = getCurrencySymbol(currency);
+        const formattedAmount = `${symbol}${amount.toLocaleString("en-US")}`;
+
         await sendAbandonedCartEmail({
           email,
           firstName: name.split(" ")[0] || "there",
-          amount: `£${(amount / 100).toLocaleString("en-GB")}`,
+          amount: formattedAmount,
         });
 
         // Mark as nudged so we don't re-send
         await db.execute({
-          sql: `UPDATE checkouts SET nudged_at = datetime('now') WHERE payment_intent_id = ?`,
-          args: [paymentIntentId],
+          sql: `UPDATE checkouts SET nudged_at = datetime('now') WHERE session_id = ?`,
+          args: [sessionId],
         });
 
         sent++;
