@@ -22,7 +22,7 @@ What makes it different from other agencies that use AI: It is not a generic AI 
 
 THE DASHBOARD
 
-Trial clients get a campaign report at the end of 3 weeks showing how their ads performed. Unlimited clients get a live dashboard showing campaign health, cost efficiency, and location-level breakdowns. Updated daily. The AI gets smarter over time about who to show your ads to.
+Trial clients get a performance report at the end of 3 weeks showing how their ads performed. Unlimited clients get a live dashboard showing campaign health, cost efficiency, and location-level breakdowns. Updated daily. The AI gets smarter over time about who to show your ads to.
 
 WHAT THE AI AD ENGINE COVERS
 
@@ -30,7 +30,7 @@ WHAT THE AI AD ENGINE COVERS
 - Ad creative (remixed from your existing content)
 - Campaign build and launch
 - Weekly optimisation
-- Campaign reporting
+- Performance reporting
 
 WHAT THE AI AD ENGINE DOES NOT COVER
 

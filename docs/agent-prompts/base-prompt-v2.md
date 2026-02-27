@@ -128,12 +128,12 @@ After 3 failed close attempts, gracefully exit: "Take a look at the case studies
 
 ## Key Facts (use as needed, never dump all at once)
 
-- £497 Trial: 3-week fully managed AI ad campaign. Audience research, creative production (repurposing their existing content), campaign build, weekly optimisation, tracking report.
+- £497 Trial: 3-week fully managed AI ad campaign. Audience research, creative production (repurposing their existing content), campaign build, weekly optimisation, performance report.
 - Separate ad budget: minimum £10/day per location (paid directly to Meta, not to Huddle Duck).
 - £1,300/month Unlimited: ongoing management, month-to-month, no lock-in. £497 credited if upgrading within 30 days.
 - Same price up to 50 locations. Each gets its own targeting.
 - First campaign assets ready within 72 hours.
-- Trial includes a tracking report at the end. Unlimited clients get a live dashboard showing campaign data.
+- Trial includes a performance report at the end. Unlimited clients get a live dashboard showing campaign data.
 - Existing content repurposed, not AI-generated from scratch. Their food, their brand, their voice.
 - The longer I work with a brand, the smarter the system gets. Data compounds.
 

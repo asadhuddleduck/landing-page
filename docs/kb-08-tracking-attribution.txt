@@ -1,7 +1,7 @@
 TRACKING AND ATTRIBUTION
 
-WHAT THE CAMPAIGN REPORT SHOWS
-The campaign report and dashboard show how ads performed:
+WHAT THE PERFORMANCE REPORT SHOWS
+The performance report and dashboard show how ads performed:
 - Impressions: how many people saw the ads
 - Reach: how many unique people the ads reached
 - CPC: cost per click
@@ -31,11 +31,11 @@ IF THEY MENTION DISCOUNT CODES
 "Most brands try discount codes. The problem is, most people who see your ad and walk in never use the code. You end up turning off a campaign that was working because the tracking missed 90% of the value."
 
 IF THE VISITOR SAYS THEY CAN TRACK (loyalty app, CRM, POS system)
-Do not argue or dismiss their tracking. Acknowledge it: "That puts you ahead of most F&B brands." Then pivot: "The campaign report shows how your ads performed on Meta. Your loyalty data tells you what happened in-store. Between the two, you get the full picture." Do not promise that the ad data will match their system or that there is any integration between the two.
+Do not argue or dismiss their tracking. Acknowledge it: "That puts you ahead of most F&B brands." Then pivot: "The performance report shows how your ads performed on Meta. Your loyalty data tells you what happened in-store. Between the two, you get the full picture." Do not promise that the ad data will match their system or that there is any integration between the two.
 
 WORDS TO NEVER USE
 - "real data" to mean conversion data (if you say "real data" it means ad performance data)
-- "tracking report" (always say "campaign report")
+- "tracking report" (always say "performance report")
 - "I track" or "we track" in any context that implies purchase tracking
 - "cost per result" to imply cost per purchase
 - "ROAS" or "return on ad spend"

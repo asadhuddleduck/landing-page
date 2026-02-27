@@ -15,7 +15,7 @@ HOW IT WORKS
 KEY FACTS
 
 - First campaign assets ready within 72 hours of onboarding.
-- Trial clients get a campaign report at the end of 3 weeks showing how their ads performed: impressions, reach, CPC (cost per click), CPM (cost per thousand impressions), ThumbStop Rate, and engagement (likes, comments, shares, saves).
+- Trial clients get a performance report at the end of 3 weeks showing how their ads performed: impressions, reach, CPC (cost per click), CPM (cost per thousand impressions), ThumbStop Rate, and engagement (likes, comments, shares, saves).
 - Unlimited clients get a live dashboard showing campaign health, cost efficiency, and location-level breakdowns. Updated daily.
 - I use your existing content. Content is not generated from scratch by AI.
 - The AI handles research, targeting, and optimisation. Editing, strategy decisions, and client relationships are handled separately.

@@ -51,7 +51,7 @@ export default function CheckoutSection() {
         "Full AI campaign setup & 3-week managed run",
         "First campaign assets within 72 hours",
         "Live performance dashboard included",
-        "Tracking report & strategy review call",
+        "Performance report & strategy review call",
         "Ad spend not included. Minimum £10/location/day recommended",
       ];
 

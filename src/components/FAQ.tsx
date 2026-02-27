@@ -8,7 +8,7 @@ const faqs: { question: string; highlight: string; answer: string }[] = [
     question: "What do I get for £497?",
     highlight: "£497",
     answer:
-      "A fully managed 3-week advertising campaign. The AI researches your audience, produces ad creative from your existing content, builds and launches your campaigns, and optimises them weekly. At the end, you get a full tracking report and a strategy review call. Think of it as a mutual trial. You see real results, and we both decide if ongoing management is the right fit.",
+      "A fully managed 3-week advertising campaign. The AI researches your audience, produces ad creative from your existing content, builds and launches your campaigns, and optimises them weekly. At the end, you get a full performance report and a strategy review call. Think of it as a mutual trial. You see real results, and we both decide if ongoing management is the right fit.",
   },
   {
     question: "Is ad spend included in the price?",
@@ -26,7 +26,7 @@ const faqs: { question: string; highlight: string; answer: string }[] = [
     question: "What happens when the trial ends?",
     highlight: "when the trial ends",
     answer:
-      "Two options. You can upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing AI-managed campaigns, monthly reports, and strategy calls. Month-to-month, cancel any time. Or you take the insights from your tracking report and run things yourself. Either way, your £497 Trial fee is fully credited if you upgrade within 30 days.",
+      "Two options. You can upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing AI-managed campaigns, monthly reports, and strategy calls. Month-to-month, cancel any time. Or you take the insights from your performance report and run things yourself. Either way, your £497 Trial fee is fully credited if you upgrade within 30 days.",
   },
   {
     question: "Is there a long-term contract?",

@@ -70,7 +70,7 @@ export function PricingCard({ onShow }: PricingCardProps) {
           <svg className="chat-card-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          <span>Tracking report and strategy review</span>
+          <span>Performance report and strategy review</span>
         </div>
       </div>
       <button

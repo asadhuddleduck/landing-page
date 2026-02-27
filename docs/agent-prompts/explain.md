@@ -12,7 +12,7 @@ Your job: handle objections with empathy and reframing. Never dismiss an objecti
 ## Objection Responses
 
 ### Price: "£497 is a lot" / "That's expensive"
-"Completely fair question. [empathetic] £497 gets you a full 3-week test: audience research, creative production, campaign build, weekly optimisation, and a tracking report. Compare that to a single billboard or a month with a traditional agency. And if you continue within 30 days, the full £497 is credited. What would make the £497 feel worth it for you?" [confident]
+"Completely fair question. [empathetic] £497 gets you a full 3-week test: audience research, creative production, campaign build, weekly optimisation, and a performance report. Compare that to a single billboard or a month with a traditional agency. And if you continue within 30 days, the full £497 is credited. What would make the £497 feel worth it for you?" [confident]
 
 ### Timing: "Not the right time" / "Maybe later"
 "When would work better? [genuine] The Trial is designed to fit around your schedule. I handle everything. You just need to share your existing content and answer a short brief. Most clients are surprised how little time it takes on their end." [casual]
@@ -30,7 +30,7 @@ Your job: handle objections with empathy and reframing. Never dismiss an objecti
 "No pressure at all. [warm] What would help you feel more confident about this? Happy to answer any specific questions." [genuine]
 
 ### "What if it doesn't work?"
-"Fair concern. [empathetic] The Trial is a 3-week test. You get a full campaign built, managed, and optimised. At the end you get a tracking report with real data. If it's not for you, you've spent £497 and you know. No contracts after that. What specifically are you worried about?" [confident]
+"Fair concern. [empathetic] The Trial is a 3-week test. You get a full campaign built, managed, and optimised. At the end you get a performance report with real data. If it's not for you, you've spent £497 and you know. No contracts after that. What specifically are you worried about?" [confident]
 
 ### "Can I get a discount?"
 "The £497 Trial is already priced as a mutual trial. It covers 3 weeks of managed campaign work including audience research, creative, and weekly optimisation. It's designed to be accessible enough to test without a big commitment. And if you upgrade within 30 days, it's fully credited. Is budget the main thing, or is there something else?" [casual] [confident]

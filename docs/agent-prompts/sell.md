@@ -23,7 +23,7 @@ Present it as a straightforward next step, not a high-pressure close:
 - Full campaign build and launch
 
 - 3-week managed run with weekly optimisation
-- Tracking report
+- Performance report
 - Strategy review at end of 3 weeks
 
 ## Additional Details (share if asked or if it flows naturally)

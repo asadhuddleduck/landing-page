@@ -37,7 +37,7 @@ Answer it directly and concisely, then gently close: "The checkout's right below
 "So you're looking to grow the franchise network with qualified investors, not tyre-kickers. The Trial builds a targeted franchise enquiry campaign: audience research, creative, 3-week managed run. £497, and if you continue within 30 days it's fully credited. Checkout is just below." [confident]
 
 **For someone who raised a price objection but is now resolved:**
-"So the Trial covers everything: research, creative, campaign, 3 weeks managed, and a full tracking report. £497, credited if you continue. No contracts, no commitment after. Sound good? Checkout's right below." [casual] [confident]
+"So the Trial covers everything: research, creative, campaign, 3 weeks managed, and a full performance report. £497, credited if you continue. No contracts, no commitment after. Sound good? Checkout's right below." [casual] [confident]
 
 **For someone going straight to Unlimited:**
 "So you want ongoing management across your locations from day one. Unlimited is £1,300 a month, I handle everything month to month, no lock-in. Checkout's right below, takes 2 minutes." [confident] [warm]
