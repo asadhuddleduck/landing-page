@@ -2,7 +2,7 @@ import type Stripe from "stripe";
 import { stripe } from "./stripe";
 import { db } from "./db";
 import { sendPurchaseConfirmation } from "./email";
-import { createPurchaseTask } from "./notion";
+import { createPurchaseTask, upsertLeadAsWon } from "./notion";
 import { sendConversionEvent } from "./meta-capi";
 
 /**
@@ -93,10 +93,13 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
       ipAddress: clientIp,
       userAgent: clientUa,
     }),
+
+    // Notion: upsert lead in Leads DB as Won
+    upsertLeadAsWon({ email, name, phone, amount }),
   ]);
 
   // Log results for observability
-  const labels = ["Email", "Notion", "Meta CAPI"];
+  const labels = ["Email", "Notion Task", "Meta CAPI", "Notion Lead"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding] ${labels[i]} failed:`, result.reason);
@@ -211,9 +214,12 @@ export async function handlePaymentIntentPurchase(
       ipAddress: clientIp,
       userAgent: clientUa,
     }),
+
+    // Notion: upsert lead in Leads DB as Won
+    upsertLeadAsWon({ email, name, phone, amount: 497 }),
   ]);
 
-  const labels = ["Email", "Notion", "Meta CAPI"];
+  const labels = ["Email", "Notion Task", "Meta CAPI", "Notion Lead"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding:pi] ${labels[i]} failed:`, result.reason);
