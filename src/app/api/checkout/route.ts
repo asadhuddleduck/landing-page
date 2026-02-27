@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
       automatic_tax: { enabled: true },
       tax_id_collection: { enabled: true },
       billing_address_collection: "required",
+      customer_update: { address: "auto", name: "auto" },
       phone_number_collection: { enabled: true },
       customer: customer.id,
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
