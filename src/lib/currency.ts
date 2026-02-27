@@ -33,16 +33,17 @@ export const EXCHANGE_RATES: Record<string, number> = {
 };
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
+  GBP: "£",
   USD: "$",
   EUR: "\u20AC",
   AUD: "A$",
   CAD: "C$",
-  AED: "AED",
+  AED: "AED\u00A0",
   SGD: "S$",
   INR: "\u20B9",
   ZAR: "R",
   NZD: "NZ$",
-  CHF: "CHF",
+  CHF: "CHF\u00A0",
   SEK: "kr",
   NOK: "kr",
   DKK: "kr",

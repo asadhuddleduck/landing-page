@@ -83,10 +83,12 @@ export async function POST(request: NextRequest) {
         lineItems = [{ price: priceId, quantity: 1 }];
       } else {
         // Use price_data with computed local amount for non-GBP
+        const productId = process.env.STRIPE_UNLIMITED_PRODUCT_ID?.trim();
+        if (!productId) throw new Error("STRIPE_UNLIMITED_PRODUCT_ID environment variable is not set");
         lineItems = [{
           price_data: {
             currency: resolvedCurrency.toLowerCase(),
-            product: process.env.STRIPE_UNLIMITED_PRODUCT_ID!,
+            product: productId,
             unit_amount: getChargeAmountInSmallestUnit(1300, resolvedCurrency, "unlimited"),
             recurring: { interval: "month" },
           },

@@ -3,7 +3,7 @@ import { db } from "./db";
 import { sendPurchaseConfirmation } from "./email";
 import { createPurchaseTask, upsertLeadAsWon } from "./notion";
 import { sendConversionEvent } from "./meta-capi";
-import { getCurrencySymbol } from "./currency";
+import { getCurrencySymbol, ZERO_DECIMAL_CURRENCIES } from "./currency";
 
 /**
  * Post-purchase orchestrator (Checkout Session flow).
@@ -28,7 +28,7 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
   // Derive amount from session (supports multi-currency)
   const amountTotal = session.amount_total ?? 0;
   const sessionCurrency = (session.currency ?? "gbp").toUpperCase();
-  const isZeroDecimal = sessionCurrency === "JPY";
+  const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(sessionCurrency);
   const amount = isZeroDecimal ? amountTotal : amountTotal / 100;
 
   // Format amount string for email

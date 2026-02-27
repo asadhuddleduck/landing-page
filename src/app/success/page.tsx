@@ -39,6 +39,7 @@ export default async function SuccessPage({
   let purchaseValue = 497;
   let purchaseCurrency = "GBP";
   let productName = "AI Ad Engine Trial";
+  let tier: "trial" | "unlimited" = "trial";
   let isSubscription = false;
   let hasValidOrder = false;
 
@@ -56,10 +57,12 @@ export default async function SuccessPage({
         const sessionCurrency = (session.currency ?? "gbp").toUpperCase();
         purchaseCurrency = sessionCurrency;
         const rawAmount = session.amount_total ?? 0;
-        purchaseValue = sessionCurrency === "JPY" ? rawAmount : rawAmount / 100;
+        const isZeroDecimal = sessionCurrency === "JPY"; // matches ZERO_DECIMAL_CURRENCIES
+        purchaseValue = isZeroDecimal ? rawAmount : rawAmount / 100;
 
         if (session.mode === "subscription") {
           productName = "AI Ad Engine Unlimited";
+          tier = "unlimited";
           isSubscription = true;
         }
       }
@@ -232,7 +235,7 @@ export default async function SuccessPage({
               Back to home
             </Link>
 
-            <SuccessPixel eventId={eventId} value={purchaseValue} currency={purchaseCurrency} />
+            <SuccessPixel eventId={eventId} value={purchaseValue} currency={purchaseCurrency} tier={tier} />
           </>
         ) : (
           <div style={{ textAlign: "center" }}>

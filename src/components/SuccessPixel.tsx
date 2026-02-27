@@ -14,9 +14,10 @@ interface SuccessPixelProps {
   eventId: string;
   value?: number;
   currency?: string;
+  tier?: "trial" | "unlimited";
 }
 
-export default function SuccessPixel({ eventId, value = 497, currency = "GBP" }: SuccessPixelProps) {
+export default function SuccessPixel({ eventId, value = 497, currency = "GBP", tier = "trial" }: SuccessPixelProps) {
   const hasFired = useRef(false);
 
   useEffect(() => {
@@ -35,8 +36,8 @@ export default function SuccessPixel({ eventId, value = 497, currency = "GBP" }:
       currency,
       items: [
         {
-          item_id: value >= 1300 ? "ai-ad-engine-unlimited" : "ai-ad-engine-trial",
-          item_name: value >= 1300 ? "AI Ad Engine Unlimited" : "AI Ad Engine Trial",
+          item_id: tier === "unlimited" ? "ai-ad-engine-unlimited" : "ai-ad-engine-trial",
+          item_name: tier === "unlimited" ? "AI Ad Engine Unlimited" : "AI Ad Engine Trial",
           price: value,
           quantity: 1,
         },
