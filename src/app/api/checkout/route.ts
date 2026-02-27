@@ -111,6 +111,13 @@ export async function POST(request: NextRequest) {
       billing_address_collection: "required",
       customer_update: { address: "auto", name: "auto" },
       phone_number_collection: { enabled: true },
+      custom_text: {
+        submit: {
+          message: resolvedTier === "unlimited"
+            ? "Cancel anytime — no contracts, no penalties. Your AI Ad Engine runs 24/7, optimising your campaigns while you focus on your restaurant."
+            : "One payment. No recurring fees. Your dedicated campaign manager will reach out to launch your AI-powered ads.",
+        },
+      },
       customer: customer.id,
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/#checkout`,
