@@ -115,7 +115,7 @@ Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseS
 | `CRON_SECRET` | Vercel cron authentication |
 | `NOTION_TOKEN` | Notion API for task creation |
 | `META_ACCESS_TOKEN` | Meta CAPI for purchase events |
-| `META_PIXEL_ID` | Meta Pixel ID (1780686211962897) |
+| `META_PIXEL_ID` | Meta Pixel ID (1812733952153450) |
 | `TURSO_DATABASE_URL` | Turso DB for purchase records |
 | `TURSO_AUTH_TOKEN` | Turso auth |
 | `NEXT_PUBLIC_TRACKING_URL` | Attribution tracker Vercel URL |
@@ -130,7 +130,7 @@ Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseS
 - `STRIPE_UNLIMITED_PRICE_ID`: `price_1T52ZXEMAaEi0IogKnHfM4fI` (£1,300 GBP, recurring monthly)
 - Stripe Product ID (Trial): `prod_U062C0TCKDiq7U` ("AI Ad Engine Trial")
 - Stripe Webhook ID: `we_1T25xGEMAaEi0IogUV98EJTE` (subscribed to: checkout.session.completed, payment_intent.succeeded)
-- `META_PIXEL_ID`: `1780686211962897`
+- `META_PIXEL_ID`: `1812733952153450`
 - Akmal's Notion User ID: `ac601ede-0d62-4107-b59e-21c0530b5348`
 - Notion Actions DB ID: `2c384fd7-bc4e-81a1-b469-e33afbf19157`
 - Notion Actions DB data source: `collection://2c384fd7-bc4e-813d-99c4-000b9a6385c8`
