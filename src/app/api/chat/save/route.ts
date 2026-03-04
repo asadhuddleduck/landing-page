@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { sendConversationNotification } from "@/lib/slack";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -14,6 +16,7 @@ const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_MAX = 200; // max requests per window
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_MESSAGES = 50;
+const MIN_USER_MESSAGES_FOR_SLACK = 3;
 
 function isRateLimited(visitorId: string): boolean {
   if (!visitorId) return false;
@@ -48,7 +51,7 @@ const extractionSchema = z.object({
   main_challenge: z.string().describe("The main marketing challenge they described, or empty string"),
   visitor_role: z.string().describe("Their role (owner, manager, marketing, etc.), or empty string"),
   is_fb: z.boolean().describe("Whether the visitor is in the food & beverage industry"),
-  objections_raised: z.string().describe("Any objections or concerns they raised, or empty string"),
+  objections_raised: z.array(z.string()).describe("List of individual objections, each as a short label (e.g. 'price too high', 'wants ROI guarantee', 'needs partner approval', 'not ready yet'). Empty array if none."),
   reached_checkout: z.boolean().describe("Whether the conversation progressed to discussing checkout/payment"),
   conversation_outcome: z.string().describe("Brief outcome: e.g. 'booked', 'interested', 'dropped off', 'not qualified'"),
 });
@@ -172,15 +175,53 @@ export async function POST(request: NextRequest) {
         extracted.location_count,
         extracted.main_challenge,
         extracted.is_fb ? 1 : 0,
-        extracted.objections_raised,
+        JSON.stringify(extracted.objections_raised),
         extracted.reached_checkout ? 1 : 0,
         extracted.conversation_outcome,
         conversationId,
       ],
     });
+    // INSERT each objection into the normalized objections table
+    if (extracted.objections_raised.length > 0) {
+      await Promise.all(
+        extracted.objections_raised.map((label) =>
+          db.execute({
+            sql: "INSERT INTO objections (conversation_id, label) VALUES (?, ?)",
+            args: [conversationId, label],
+          })
+        )
+      );
+    }
   } catch (err) {
     console.error("[chat/save] Extraction error:", err);
     // Still return success — transcript was saved even if extraction failed
+  }
+
+  // Slack notification (runs after response is sent, never blocks)
+  const userMessageCount = capped.filter((m) => m.role === "user").length;
+  if (extracted && userMessageCount >= MIN_USER_MESSAGES_FOR_SLACK) {
+    after(async () => {
+      try {
+        await sendConversationNotification({
+          conversationId,
+          businessName: extracted.business_name,
+          visitorRole: extracted.visitor_role,
+          locationCount: extracted.location_count,
+          mainChallenge: extracted.main_challenge,
+          isFb: extracted.is_fb,
+          objections: extracted.objections_raised,
+          reachedCheckout: extracted.reached_checkout,
+          durationSecs,
+          messageCount: capped.length,
+          utmSource: dynamicVariables.utm_source ?? "",
+          utmMedium: dynamicVariables.utm_medium ?? "",
+          utmCampaign: dynamicVariables.utm_campaign ?? "",
+          transcript,
+        });
+      } catch (err) {
+        console.error("[chat/save] Slack notification error:", err);
+      }
+    });
   }
 
   return NextResponse.json({
