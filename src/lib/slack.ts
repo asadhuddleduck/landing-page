@@ -9,7 +9,8 @@ const SONNET_OUTPUT_PER_MTOK = 15.0;
 const SONNET_CACHE_READ_PER_MTOK = 0.3;
 const HAIKU_INPUT_PER_MTOK = 1.0;
 const HAIKU_OUTPUT_PER_MTOK = 5.0;
-const SYSTEM_PROMPT_TOKENS = 10_000;
+const SYSTEM_PROMPT_TOKENS_V1 = 10_000;
+const SYSTEM_PROMPT_TOKENS_V2 = 87_000;
 const USD_TO_GBP = 0.79;
 
 export interface SlackConversationPayload {
@@ -27,6 +28,7 @@ export interface SlackConversationPayload {
   utmMedium: string;
   utmCampaign: string;
   transcript: string;
+  chatVersion: string;
 }
 
 interface CostBreakdown {
@@ -41,7 +43,8 @@ function estimateTokens(text: string): number {
 
 function estimateCost(
   transcript: string,
-  haikuUsage: { inputTokens: number; outputTokens: number }
+  haikuUsage: { inputTokens: number; outputTokens: number },
+  chatVersion: string
 ): CostBreakdown {
   const lines = transcript.split("\n").filter((l) => l.trim());
   const messages: { role: string; tokens: number }[] = [];
@@ -67,7 +70,8 @@ function estimateCost(
     }
   }
 
-  const sonnetCacheReadTokens = SYSTEM_PROMPT_TOKENS * turns;
+  const systemTokens = chatVersion === "v4" ? SYSTEM_PROMPT_TOKENS_V2 : SYSTEM_PROMPT_TOKENS_V1;
+  const sonnetCacheReadTokens = systemTokens * turns;
   const extractionInput = estimateTokens(transcript) + 100;
   const extractionOutput = 200;
   const haikuInputTokens = extractionInput + haikuUsage.inputTokens;
@@ -238,7 +242,7 @@ export async function sendConversationNotification(
   // Save pain point to normalized table
   await savePainPoint(payload.conversationId, result.pain_point);
 
-  const cost = estimateCost(payload.transcript, result.usage);
+  const cost = estimateCost(payload.transcript, result.usage, payload.chatVersion);
 
   const body = {
     blocks: buildBlocks(

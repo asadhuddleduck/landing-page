@@ -48,9 +48,10 @@ src/
       create-payment-intent/route.ts  # POST: creates PaymentIntent for Trial inline payment
       webhook/stripe/route.ts         # POST: handles checkout.session.completed + payment_intent.succeeded
       chat/route.ts                   # POST: AI chat streaming endpoint (Anthropic Claude via Vercel AI SDK)
-      chat/save/route.ts              # POST: saves conversation transcript to Turso + Haiku extraction
+      chat/save/route.ts              # POST: saves conversation transcript to Turso + Haiku extraction + Slack notification
       cron/abandoned-cart/route.ts    # GET: nudge abandoned checkouts via Resend (hourly cron)
       cron/reconcile/route.ts         # GET: cross-ref Stripe events with Turso, re-run missing (every 6h)
+    conversations/[id]/page.tsx      # Conversation viewer (linked from Slack notifications, noindex)
   components/
     Header.tsx               # Minimal header with logo + brand text (server)
     HeroChatSection.tsx      # Hero section with AI chat integration (client)
@@ -72,6 +73,8 @@ src/
     CookieNotice.tsx          # Soft "We use cookies" dismissible banner (client)
   lib/
     db.ts                    # Turso lazy proxy (from client-dashboards)
+    slack.ts                 # Slack webhook notifications (Block Kit, cost estimation, objection counts)
+    slack-summary.ts         # Haiku-powered conversation summary + pain point extraction
     stripe.ts                # Stripe client (fetchHttpClient for Vercel compat)
     email.ts                 # Resend transactional email (purchase confirmation, abandoned cart)
     meta-capi.ts             # Meta Conversions API (from attribution-tracker)
@@ -101,6 +104,48 @@ Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseS
 - **Cost:** ~$0.05-0.10/conversation with prompt caching
 - **Handoff doc:** `docs/handoff-chat-closing.md` — comprehensive guide for teams optimizing chat closing rates
 
+## V2 Chat Agent (4 Mar 2026) — In Testing
+V2 is a standalone sales chat system built on Cole Gordon's 7 Beliefs framework. It runs alongside V1 behind a feature flag. Full details in `docs/v2/V2-DEPLOYMENT-GUIDE.md`.
+
+- **Feature flag:** `?chatv=v4` URL param or `CHAT_PROMPT_VERSION=v4` env var. Default is V1 (`v3`).
+- **V2 prompt:** `docs/v2/v2-base-prompt.md` — 8-phase Cole Gordon closer (50-word max responses, 15-25 exchanges, mid-pitch deferral, LTV estimation, selective mirroring, short answer nudging)
+- **V2 KB:** 4 files in `docs/v2/` (sales methodology, objection handling, product context, examples) — ~87k tokens total
+- **V2 maxOutputTokens:** 400 (vs V1's 200)
+- **Conversation tagging:** `chat_version` column in `conversations` table (`v3` for V1, `v4` for V2)
+- **Anthropic API tier:** Tier 2 ($40 deposit, 450k ITPM) — required for V2's 87k token context
+- **Source material:** Cole Gordon's "Closers Into Leaders" course — 85 video transcripts, 61 Google Docs, 12 processed framework files. Stored at `/Users/asadshah/Claude Code Folder/cole-gordon-kb/`
+- **Rollback:** Remove `CHAT_PROMPT_VERSION` env var or set to `v3`. V1 files are completely untouched.
+- **Test cleanup:** `DELETE FROM conversations WHERE chat_version = 'v4'`
+
+## Slack Notifications (Mar 2026)
+Sends rich Block Kit notifications to Slack channel "AI Convo landing page" when visitors have meaningful conversations (3+ user messages).
+
+**Flow:** Conversation save (`/api/chat/save`) -> Haiku extraction -> `after()` fires `sendConversationNotification()` (non-blocking, runs after response)
+
+**What's in each notification:**
+- Business name, visitor role, location count, duration, message count
+- UTM source/medium attribution
+- Estimated token cost in £ (Sonnet cost estimated from transcript replay pattern + actual Haiku usage)
+- Pain point (AI-extracted by Haiku via `slack-summary.ts`)
+- Individual objections, each with 30-day frequency count from `objections` table (e.g. "price too high (3x in last 30 days)")
+- AI-generated summary (2-3 sentences)
+- Closing improvement tips (actionable bullet points)
+- "View Full Conversation" button linking to `/conversations/[id]`
+
+**Key files:**
+- `src/lib/slack.ts` — webhook sender, Block Kit builder, cost estimation, objection count queries
+- `src/lib/slack-summary.ts` — `generateConversationSummary()` using Haiku (returns summary, pain_point, closing_improvements, token usage)
+- `src/app/conversations/[id]/page.tsx` — server component conversation viewer (dark theme, chat bubble layout, noindex)
+- `src/app/api/chat/save/route.ts` — triggers notification via `after()`, inserts objections into normalized table
+
+**Thresholds:** `MIN_USER_MESSAGES_FOR_SLACK = 3` (filters out accidental clicks/short visits)
+
+**Cost estimation:** Sonnet input estimated by replaying cumulative message history per assistant turn + cached system prompt (10k tokens). Haiku usage captured from `generateObject` result. USD converted to GBP at 0.79 rate.
+
+**Normalized tables:** Each objection is INSERT'd as its own row in `objections` table during extraction. Pain points saved to `pain_points` table during Slack notification. Both tables support future V2 self-improving agent.
+
+**Slack webhook:** Incoming Webhook (send-only, no read/delete). Set in `SLACK_WEBHOOK_URL` env var (.env.local + Vercel production).
+
 ## Environment Variables
 
 ### In `.env.local` and Vercel
@@ -121,6 +166,7 @@ Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseS
 | `NEXT_PUBLIC_TRACKING_URL` | Attribution tracker Vercel URL |
 | `ANTHROPIC_API_KEY` | Anthropic API for AI chat |
 | `ANTHROPIC_MODEL` | Model ID (default: `claude-sonnet-4-6`) |
+| `SLACK_WEBHOOK_URL` | Slack Incoming Webhook for conversation notifications |
 | `CLOUDFLARE_API_KEY` | Cloudflare Global API Key (DNS management) |
 | `CLOUDFLARE_EMAIL` | Cloudflare account email |
 | `CLOUDFLARE_ZONE_ID` | Zone ID for huddleduck.co.uk |
@@ -165,7 +211,11 @@ Button click -> POST `/api/checkout` -> Checkout Session created (subscription m
 - DB name: `landing-page`
 - Table: `purchases` (stripe_session_id UNIQUE, stripe_customer_id, email, name, phone, amount_total, currency, visitor_id, utm_source, utm_medium, utm_campaign, tier, stripe_subscription_id, recurring, created_at)
 - Table: `checkouts` (email, name, payment_intent_id UNIQUE, amount, created_at, nudged_at) — tracks checkout starts for abandoned cart recovery
+- Table: `conversations` (conversation_id UNIQUE, agent_id, visitor_id, visitor_name, visitor_email, visitor_phone, visitor_role, business_name, location_count, main_challenge, is_fb, objections_raised JSON array, reached_checkout, conversation_outcome, transcript, duration_secs, utm_source, utm_medium, utm_campaign, created_at)
+- Table: `objections` (id AUTOINCREMENT, conversation_id FK, label TEXT, created_at) — normalized objection labels, one row per objection per conversation. Indexed on label and created_at
+- Table: `pain_points` (id AUTOINCREMENT, conversation_id FK, label TEXT, created_at) — normalized pain points, one row per conversation. Indexed on label and created_at
 - Query: `turso db shell landing-page "SELECT * FROM purchases"`
+- Objection trending: `SELECT label, COUNT(*) FROM objections WHERE created_at >= datetime('now', '-30 days') GROUP BY label ORDER BY COUNT(*) DESC`
 
 ## Attribution & Tracking
 - **Visitor ID**: `_vid` cookie (365 days, `crypto.randomUUID()`) - created by `visitor.ts`

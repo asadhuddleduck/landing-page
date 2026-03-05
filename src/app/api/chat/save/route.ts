@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { sendConversationNotification } from "@/lib/slack";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 // ---------------------------------------------------------------------------
 // In-memory rate limiting: per visitor_id
@@ -102,6 +102,8 @@ export async function POST(request: NextRequest) {
 
   // INSERT OR REPLACE into conversations
   try {
+    const chatVersion = dynamicVariables.chat_version || "v3";
+
     await db.execute({
       sql: `INSERT OR REPLACE INTO conversations (
         id, conversation_id, agent_id,
@@ -109,14 +111,14 @@ export async function POST(request: NextRequest) {
         visitor_role, business_name, location_count, main_challenge,
         is_fb, objections_raised, reached_checkout, conversation_outcome,
         transcript, duration_secs,
-        utm_source, utm_medium, utm_campaign
+        utm_source, utm_medium, utm_campaign, chat_version
       ) VALUES (
         ?, ?, ?,
         ?, ?, ?, ?,
         ?, ?, ?, ?,
         ?, ?, ?, ?,
         ?, ?,
-        ?, ?, ?
+        ?, ?, ?, ?
       )`,
       args: [
         conversationId,
@@ -139,6 +141,7 @@ export async function POST(request: NextRequest) {
         dynamicVariables.utm_source ?? "",
         dynamicVariables.utm_medium ?? "",
         dynamicVariables.utm_campaign ?? "",
+        chatVersion,
       ],
     });
   } catch (err) {
@@ -217,6 +220,7 @@ export async function POST(request: NextRequest) {
           utmMedium: dynamicVariables.utm_medium ?? "",
           utmCampaign: dynamicVariables.utm_campaign ?? "",
           transcript,
+          chatVersion: dynamicVariables.chat_version ?? "v3",
         });
       } catch (err) {
         console.error("[chat/save] Slack notification error:", err);

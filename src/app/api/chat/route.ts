@@ -39,12 +39,13 @@ setInterval(() => {
 // ---------------------------------------------------------------------------
 const docsDir = join(process.cwd(), "docs");
 
-const basePrompt = readFileSync(
+// V1: base-prompt-v3 + 9 KB files
+const v1Prompt = readFileSync(
   join(docsDir, "agent-prompts", "base-prompt-v3.md"),
   "utf-8"
 );
 
-const kbFiles = [
+const v1KbFiles = [
   "kb-01-product.txt",
   "kb-02-pricing.txt",
   "kb-03-differentiation.txt",
@@ -56,8 +57,23 @@ const kbFiles = [
   "kb-09-example-conversations.txt",
 ];
 
-const kbContent = kbFiles
+const v1KbContent = v1KbFiles
   .map((f) => readFileSync(join(docsDir, f), "utf-8"))
+  .join("\n\n---\n\n");
+
+// V2: base-prompt-v4 + 4 KB files (Cole Gordon methodology)
+const v2Dir = join(docsDir, "v2");
+const v2Prompt = readFileSync(join(v2Dir, "v2-base-prompt.md"), "utf-8");
+
+const v2KbFiles = [
+  "v2-kb-product-context.txt",
+  "v2-kb-sales-methodology.txt",
+  "v2-kb-objection-handling.txt",
+  "v2-kb-examples.txt",
+];
+
+const v2KbContent = v2KbFiles
+  .map((f) => readFileSync(join(v2Dir, f), "utf-8"))
   .join("\n\n---\n\n");
 
 /**
@@ -95,6 +111,15 @@ export async function POST(request: Request) {
   }
 
   const vars = dynamicVariables ?? {};
+
+  // Determine chat version: URL param > env var > default "v3"
+  const chatVersion =
+    vars.chat_version || process.env.CHAT_PROMPT_VERSION || "v3";
+  const isV2 = chatVersion === "v4";
+
+  const basePrompt = isV2 ? v2Prompt : v1Prompt;
+  const kbContent = isV2 ? v2KbContent : v1KbContent;
+
   const systemPrompt =
     interpolate(basePrompt, vars) + "\n\n# Knowledge Base\n\n" + kbContent;
 
@@ -111,7 +136,7 @@ export async function POST(request: Request) {
       },
     },
     messages: modelMessages,
-    maxOutputTokens: 200,
+    maxOutputTokens: isV2 ? 400 : 200,
   });
 
   return result.toUIMessageStreamResponse();

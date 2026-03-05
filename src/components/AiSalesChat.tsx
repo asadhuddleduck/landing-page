@@ -124,6 +124,12 @@ function getDynamicVariables(): Record<string, string> {
     }
   }
 
+  // Read chat version from URL param (?chatv=v4) for V2 testing
+  const chatVersion =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("chatv") || ""
+      : "";
+
   return {
     visitor_id: visitorId,
     utm_source: utms.utm_source || "",
@@ -132,6 +138,7 @@ function getDynamicVariables(): Record<string, string> {
     page_url: typeof window !== "undefined" ? window.location.href : "",
     returning_visitor: returningVisitor ? "true" : "false",
     detected_currency: detectCurrency() || "",
+    chat_version: chatVersion,
     ...prevVars,
   };
 }
@@ -489,12 +496,13 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
     };
   }, [saveConversation]);
 
-  // Clear nudge timer on user message
+  // Clear nudge timer and any displayed nudge message
   const clearNudgeTimer = useCallback(() => {
     if (nudgeTimerRef.current) {
       clearTimeout(nudgeTimerRef.current);
       nudgeTimerRef.current = null;
     }
+    setNudgeMessage(null);
   }, []);
 
   const startConversation = useCallback(
@@ -576,15 +584,20 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
       const val = e.target.value;
       setInput(val);
       onTypingChange?.(val.length > 0);
+      // Clear nudge message when user starts typing
+      if (val.length > 0 && nudgeMessage) {
+        setNudgeMessage(null);
+      }
     },
-    [onTypingChange]
+    [onTypingChange, nudgeMessage]
   );
 
   const markCardShown = useCallback((cardType: string) => {
     setShownCards((prev) => new Set(prev).add(cardType));
   }, []);
 
-  // Start 60s nudge timer when pricing card shown and streaming stops
+  // Start nudge timer when pricing card shown and streaming stops
+  // V2 conversations are longer, so 120s instead of 60s
   useEffect(() => {
     if (shownCards.has("pricing") && !isStreaming && !nudgeFiredRef.current) {
       nudgeTimerRef.current = setTimeout(() => {
@@ -592,7 +605,7 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
           nudgeFiredRef.current = true;
           setNudgeMessage("Any questions about the Trial? I'm here.");
         }
-      }, 60000);
+      }, 120000);
       return () => {
         if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
       };
