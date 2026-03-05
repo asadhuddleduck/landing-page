@@ -357,11 +357,18 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
   const startTimeRef = useRef<number | null>(null);
   const savedRef = useRef(false);
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chatTokenRef = useRef<string | null>(null);
 
   const transport = useMemo(
     () => new DefaultChatTransport({
       api: "/api/chat",
       body: () => ({ dynamicVariables: getDynamicVariables() }),
+      fetch: async (input, init) => {
+        const res = await fetch(input, init);
+        const token = res.headers.get("x-chat-token");
+        if (token) chatTokenRef.current = token;
+        return res;
+      },
     }),
     []
   );
@@ -405,6 +412,7 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
       messages: aiMessages.map((m) => ({ role: m.role, content: getMessageText(m) })),
       dynamicVariables: getDynamicVariables(),
       durationSecs: startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0,
+      chatToken: chatTokenRef.current,
     });
 
     if (useBeacon) {

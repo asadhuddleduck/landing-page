@@ -6,12 +6,13 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { sendConversationNotification } from "@/lib/slack";
 import { reportError } from "@/lib/error-reporting";
+import { verifyChatToken } from "@/lib/chat-token";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 // ---------------------------------------------------------------------------
-// In-memory rate limiting: per visitor_id
+// In-memory rate limiting: per IP
 // ---------------------------------------------------------------------------
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_MAX = 200; // max requests per window
@@ -19,13 +20,13 @@ const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_MESSAGES = 50;
 const MIN_USER_MESSAGES_FOR_SLACK = 3;
 
-function isRateLimited(visitorId: string): boolean {
-  if (!visitorId) return false;
+function isRateLimited(ip: string): boolean {
+  if (ip === "unknown") return true;
   const now = Date.now();
-  const entry = rateLimitMap.get(visitorId);
+  const entry = rateLimitMap.get(ip);
 
   if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(visitorId, { count: 1, windowStart: now });
+    rateLimitMap.set(ip, { count: 1, windowStart: now });
     return false;
   }
 
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
     messages?: { role: string; content: string }[];
     dynamicVariables?: Record<string, string>;
     durationSecs?: number;
+    chatToken?: string;
   };
 
   try {
@@ -76,22 +78,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { conversationId, messages, dynamicVariables = {}, durationSecs = 0 } = body;
+  const { conversationId, messages, dynamicVariables = {}, durationSecs = 0, chatToken } = body;
 
-  if (!conversationId) {
-    return NextResponse.json({ error: "Missing conversationId" }, { status: 400 });
+  if (!conversationId || typeof conversationId !== "string" || conversationId.length > 100) {
+    return NextResponse.json({ error: "Invalid conversationId" }, { status: 400 });
   }
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: "Missing or empty messages" }, { status: 400 });
   }
 
-  const visitorId = dynamicVariables.visitor_id ?? "";
-
-  // Rate limit check
-  if (isRateLimited(visitorId)) {
+  // Rate limit by IP
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (isRateLimited(ip)) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
+
+  // Validate chat token (proves conversation went through /api/chat)
+  if (!chatToken || !verifyChatToken(ip, chatToken)) {
+    return NextResponse.json({ error: "Invalid session" }, { status: 403 });
+  }
+
+  const cap = (s: string | undefined, max = 200) =>
+    (s ?? "").slice(0, max).replace(/[\n\r{}]/g, "");
+  const visitorId = dynamicVariables.visitor_id ?? "";
+  const chatVersion = cap(dynamicVariables.chat_version) || "v4";
 
   // Cap messages
   const capped = messages.slice(0, MAX_MESSAGES);
@@ -103,8 +114,6 @@ export async function POST(request: NextRequest) {
 
   // INSERT OR REPLACE into conversations
   try {
-    const chatVersion = dynamicVariables.chat_version || "v4";
-
     await db.execute({
       sql: `INSERT OR REPLACE INTO conversations (
         id, conversation_id, agent_id,
@@ -139,9 +148,9 @@ export async function POST(request: NextRequest) {
         "", // conversation_outcome — extracted later
         transcript,
         durationSecs,
-        dynamicVariables.utm_source ?? "",
-        dynamicVariables.utm_medium ?? "",
-        dynamicVariables.utm_campaign ?? "",
+        cap(dynamicVariables.utm_source),
+        cap(dynamicVariables.utm_medium),
+        cap(dynamicVariables.utm_campaign),
         chatVersion,
       ],
     });
@@ -225,11 +234,11 @@ export async function POST(request: NextRequest) {
           reachedCheckout: extracted.reached_checkout,
           durationSecs,
           messageCount: capped.length,
-          utmSource: dynamicVariables.utm_source ?? "",
-          utmMedium: dynamicVariables.utm_medium ?? "",
-          utmCampaign: dynamicVariables.utm_campaign ?? "",
+          utmSource: cap(dynamicVariables.utm_source),
+          utmMedium: cap(dynamicVariables.utm_medium),
+          utmCampaign: cap(dynamicVariables.utm_campaign),
           transcript,
-          chatVersion: dynamicVariables.chat_version || "v4",
+          chatVersion,
         });
       } catch (err) {
         await reportError(err, {

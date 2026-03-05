@@ -1,5 +1,6 @@
 import { generateConversationSummary } from "./slack-summary";
 import { db } from "./db";
+import { signConversationUrl } from "./chat-token";
 import * as Sentry from "@sentry/nextjs";
 
 // ---------------------------------------------------------------------------
@@ -148,7 +149,8 @@ function buildBlocks(
   objectionCounts: Map<string, number>,
   cost: CostBreakdown
 ): object[] {
-  const viewerUrl = `https://start.huddleduck.co.uk/conversations/${payload.conversationId}`;
+  const sig = signConversationUrl(payload.conversationId);
+  const viewerUrl = `https://start.huddleduck.co.uk/conversations/${payload.conversationId}?sig=${sig}`;
   const title = payload.businessName || "Unknown visitor";
 
   const blocks: object[] = [

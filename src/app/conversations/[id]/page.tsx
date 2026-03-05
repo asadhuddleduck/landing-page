@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { verifyConversationSignature } from "@/lib/chat-token";
 
 export const metadata: Metadata = {
   title: "Conversation | Huddle Duck",
@@ -29,10 +30,38 @@ function parseTranscript(raw: string): { role: string; content: string }[] {
 
 export default async function ConversationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ sig?: string }>;
 }) {
   const { id } = await params;
+  const { sig } = await searchParams;
+
+  if (!sig || !verifyConversationSignature(id, sig)) {
+    return (
+      <main
+        style={{
+          background: "var(--black)",
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--text-primary)",
+          fontFamily: "var(--font-primary)",
+        }}
+      >
+        <div style={{ maxWidth: 520, width: "100%", textAlign: "center" }}>
+          <h1 style={{ fontSize: 32, fontWeight: 700, margin: "0 0 16px" }}>
+            Access denied
+          </h1>
+          <p style={{ color: "var(--text-secondary)", fontSize: 18, margin: 0 }}>
+            This link is invalid or has expired.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   const result = await db.execute({
     sql: "SELECT * FROM conversations WHERE conversation_id = ? LIMIT 1",
