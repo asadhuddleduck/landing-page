@@ -6,7 +6,8 @@ import type { UIMessage } from "ai";
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { track } from "@vercel/analytics";
 import * as Sentry from "@sentry/nextjs";
-import { getVisitorId, getStoredUtms } from "@/lib/visitor";
+import { getVisitorId, getStoredUtms, getFbCookies } from "@/lib/visitor";
+import { trackCustomPixelEvent } from "./MetaPixel";
 import { detectCurrency } from "@/lib/currency";
 import { PricingCard, TestimonialCard, CTACard, ComparisonCard, TimelineCard } from "./ChatCards";
 
@@ -388,6 +389,29 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
 
   const isStreaming = status === "submitted" || status === "streaming";
 
+  // Fire AIChatEngaged when user reaches 3+ messages
+  const engagedFiredRef = useRef(false);
+  useEffect(() => {
+    if (engagedFiredRef.current || !conversationIdRef.current) return;
+    const userMsgCount = aiMessages.filter((m) => m.role === "user").length;
+    if (userMsgCount >= 3) {
+      engagedFiredRef.current = true;
+      const eventId = `aichat_engaged_${conversationIdRef.current}`;
+      trackCustomPixelEvent("AIChatEngaged", { content_name: "AI Sales Chat", num_messages: userMsgCount }, eventId);
+      const { fbc, fbp } = getFbCookies();
+      fetch("/api/chat/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName: "AIChatEngaged",
+          eventId,
+          fbc,
+          fbp,
+        }),
+      }).catch(() => {});
+    }
+  }, [aiMessages]);
+
   // Map AI SDK UIMessages to existing ChatMessage format — derived on every render
   // so streaming token updates are reflected immediately (no stale useEffect).
   // When nonFnb, we use the locally-set messages state instead.
@@ -518,6 +542,22 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
       conversationIdRef.current = crypto.randomUUID();
       startTimeRef.current = Date.now();
       track("conversation_started");
+
+      // Fire AIChat custom Meta event (browser pixel + server CAPI)
+      const chatEventId = `aichat_${conversationIdRef.current}`;
+      trackCustomPixelEvent("AIChat", { content_name: "AI Sales Chat" }, chatEventId);
+      const { fbc, fbp } = getFbCookies();
+      fetch("/api/chat/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName: "AIChat",
+          eventId: chatEventId,
+          fbc,
+          fbp,
+        }),
+      }).catch(() => {});
+
       if (firstMessage) {
         sendMessage({ text: firstMessage });
       }

@@ -66,6 +66,8 @@ export interface CAPIEventInput {
   // Custom data
   currency?: string;
   value?: number;
+  contentName?: string;
+  contentCategory?: string;
 }
 
 /**
@@ -124,11 +126,13 @@ export async function sendConversionEvent(
       serverEvent.setEventId(input.eventId);
     }
 
-    // Add custom data (value, currency) if provided
-    if (input.value !== undefined || input.currency) {
+    // Add custom data if provided
+    if (input.value !== undefined || input.currency || input.contentName || input.contentCategory) {
       const customData = new CustomData();
       if (input.value !== undefined) customData.setValue(input.value);
       if (input.currency) customData.setCurrency(input.currency);
+      if (input.contentName) customData.setContentName(input.contentName);
+      if (input.contentCategory) customData.setContentCategory(input.contentCategory);
       serverEvent.setCustomData(customData);
     }
 

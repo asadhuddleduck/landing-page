@@ -35,6 +35,24 @@ export function trackPixelEvent(
   }
 }
 
+/**
+ * Fire a custom Meta Pixel event (uses fbq("trackCustom", ...)).
+ * Standard events use "track"; custom events like AIChat need "trackCustom".
+ */
+export function trackCustomPixelEvent(
+  eventName: string,
+  params?: Record<string, unknown>,
+  eventId?: string
+) {
+  if (typeof window !== "undefined" && window.fbq) {
+    if (eventId) {
+      window.fbq("trackCustom", eventName, params || {}, { eventID: eventId });
+    } else {
+      window.fbq("trackCustom", eventName, params || {});
+    }
+  }
+}
+
 export default function MetaPixel() {
   const initialized = useRef(false);
 
