@@ -6,6 +6,7 @@ import {
   getStoredUtms,
   storeFirstTouchUtms,
   getFbCookies,
+  ensureFbcFromUrl,
 } from "@/lib/visitor";
 
 const TRACKING_URL = process.env.NEXT_PUBLIC_TRACKING_URL;
@@ -38,6 +39,9 @@ export default function TrackingScript() {
     // Store first-touch UTMs (only writes if none stored yet)
     storeFirstTouchUtms(urlUtms);
 
+    // Construct _fbc from fbclid URL param before Meta Pixel loads (race condition fix)
+    ensureFbcFromUrl();
+
     // Use current URL UTMs, fallback to stored first-touch
     const utms =
       Object.keys(urlUtms).length > 0 ? urlUtms : getStoredUtms();
@@ -58,6 +62,7 @@ export default function TrackingScript() {
       utm_geo: utms.utm_geo || null,
       fbc: fbc || null,
       fbp: fbp || null,
+      referrer: document.referrer || null,
     };
 
     fetch(`${TRACKING_URL}/api/track`, {

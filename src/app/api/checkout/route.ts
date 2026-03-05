@@ -54,6 +54,39 @@ export async function POST(request: NextRequest) {
     const resolvedTier = tier === "unlimited" ? "unlimited" : "trial";
     const origin = "https://start.huddleduck.co.uk";
 
+    // Server-side UTM/fbc recovery: if current session has no attribution data,
+    // look up prior checkouts by email to recover first-touch data
+    let resolvedFbc = fbc || "";
+    let resolvedFbp = fbp || "";
+    let resolvedUtmSource = utm_source || "";
+    let resolvedUtmMedium = utm_medium || "";
+    let resolvedUtmCampaign = utm_campaign || "";
+
+    if (!resolvedFbc || !resolvedUtmSource) {
+      try {
+        const prior = await db.execute({
+          sql: `SELECT utm_source, utm_medium, utm_campaign, fbc, fbp
+                FROM checkouts
+                WHERE email = ? AND (fbc != '' OR utm_source != '')
+                ORDER BY created_at DESC LIMIT 1`,
+          args: [email.trim().toLowerCase()],
+        });
+        if (prior.rows.length > 0) {
+          const row = prior.rows[0];
+          if (!resolvedFbc && row.fbc) resolvedFbc = row.fbc as string;
+          if (!resolvedFbp && row.fbp) resolvedFbp = row.fbp as string;
+          if (!resolvedUtmSource && row.utm_source) {
+            resolvedUtmSource = row.utm_source as string;
+            resolvedUtmMedium = (row.utm_medium as string) || "";
+            resolvedUtmCampaign = (row.utm_campaign as string) || "";
+          }
+          console.log(`[checkout] Recovered attribution from prior checkout for ${email}`);
+        }
+      } catch (err) {
+        console.error("[checkout] UTM recovery failed:", err);
+      }
+    }
+
     // Find existing customer by email, or create a new one
     const existing = await stripe.customers.list({ email, limit: 1 });
     let customer;
@@ -125,11 +158,11 @@ export async function POST(request: NextRequest) {
         tier: resolvedTier,
         currency: resolvedCurrency,
         visitor_id: visitor_id ?? "",
-        utm_source: utm_source ?? "",
-        utm_medium: utm_medium ?? "",
-        utm_campaign: utm_campaign ?? "",
-        fbc: fbc ?? "",
-        fbp: fbp ?? "",
+        utm_source: resolvedUtmSource,
+        utm_medium: resolvedUtmMedium,
+        utm_campaign: resolvedUtmCampaign,
+        fbc: resolvedFbc,
+        fbp: resolvedFbp,
         client_ip: ip,
         client_ua: ua.slice(0, 500),
       },
@@ -149,8 +182,8 @@ export async function POST(request: NextRequest) {
       : getDisplayPrice(resolvedTier === "unlimited" ? 1300 : 497, resolvedCurrency, resolvedTier as "trial" | "unlimited").amount;
 
     await db.execute({
-      sql: `INSERT OR IGNORE INTO checkouts (email, name, session_id, amount, currency, tier, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
+      sql: `INSERT OR IGNORE INTO checkouts (email, name, session_id, amount, currency, tier, utm_source, utm_medium, utm_campaign, fbc, fbp, visitor_id, client_ip, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
       args: [
         email,
         name || null,
@@ -158,6 +191,13 @@ export async function POST(request: NextRequest) {
         displayAmount,
         resolvedCurrency,
         resolvedTier,
+        resolvedUtmSource,
+        resolvedUtmMedium,
+        resolvedUtmCampaign,
+        resolvedFbc,
+        resolvedFbp,
+        visitor_id || "",
+        ip,
       ],
     });
 

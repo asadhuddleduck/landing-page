@@ -52,10 +52,54 @@ export function storeFirstTouchUtms(utms: Record<string, string>): void {
   }
 }
 
-/** Read Meta's _fbc and _fbp cookies (set by Meta Pixel). */
+/**
+ * Construct _fbc from fbclid URL param if Meta Pixel hasn't set it yet.
+ * Format: fb.1.{timestamp_ms}.{fbclid}
+ * Also stores fbclid in the _utms cookie for persistence.
+ */
+export function ensureFbcFromUrl(): void {
+  if (typeof window === "undefined") return;
+  const existing = getCookie("_fbc");
+  if (existing) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const fbclid = params.get("fbclid");
+  if (!fbclid) return;
+
+  const fbc = `fb.1.${Date.now()}.${fbclid}`;
+  setCookie("_fbc", fbc, COOKIE_DAYS);
+
+  // Also persist fbclid in _utms so it survives even if _fbc cookie is lost
+  const raw = getCookie(UTM_COOKIE);
+  if (raw) {
+    try {
+      const utms = JSON.parse(raw);
+      if (!utms.fbclid) {
+        utms.fbclid = fbclid;
+        setCookie(UTM_COOKIE, JSON.stringify(utms), COOKIE_DAYS);
+      }
+    } catch { /* ignore */ }
+  }
+}
+
+/**
+ * Read Meta's _fbc and _fbp cookies.
+ * Falls back to constructing _fbc from stored fbclid if Meta Pixel hasn't set it.
+ */
 export function getFbCookies(): { fbc: string | null; fbp: string | null } {
+  let fbc = getCookie("_fbc");
+
+  // Fallback: construct from stored fbclid if _fbc cookie was lost (cross-session)
+  if (!fbc) {
+    const stored = getStoredUtms();
+    if (stored.fbclid) {
+      fbc = `fb.1.${Date.now()}.${stored.fbclid}`;
+      setCookie("_fbc", fbc, COOKIE_DAYS);
+    }
+  }
+
   return {
-    fbc: getCookie("_fbc"),
+    fbc,
     fbp: getCookie("_fbp"),
   };
 }

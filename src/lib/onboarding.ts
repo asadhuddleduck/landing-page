@@ -4,6 +4,7 @@ import { sendPurchaseConfirmation } from "./email";
 import { createPurchaseTask, upsertLeadAsWon } from "./notion";
 import { sendConversionEvent } from "./meta-capi";
 import { getCurrencySymbol, ZERO_DECIMAL_CURRENCIES } from "./currency";
+import { recoverAttributionByIp, markContactAsCustomer } from "./attribution-recovery";
 
 /**
  * Post-purchase orchestrator (Checkout Session flow).
@@ -40,10 +41,32 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
   // Meta CAPI always in GBP (ad account currency)
   const capiValue = tier === "unlimited" ? 1300 : 497;
 
-  const fbc = metadata.fbc || undefined;
+  let fbc = metadata.fbc || undefined;
   const fbp = metadata.fbp || undefined;
   const clientIp = metadata.client_ip || undefined;
   const clientUa = metadata.client_ua || undefined;
+
+  // Cross-browser fbc recovery: if fbc is missing, query attribution-tracker
+  // by IP to find the original ad click and construct fbc from its fbclid
+  let recoveredUtmSource = metadata.utm_source || undefined;
+  let recoveredUtmMedium = metadata.utm_medium || undefined;
+  let recoveredUtmCampaign = metadata.utm_campaign || undefined;
+  if (!fbc && clientIp) {
+    try {
+      const recovered = await recoverAttributionByIp(clientIp);
+      if (recovered) {
+        if (recovered.fbc) fbc = recovered.fbc;
+        if (!recoveredUtmSource && recovered.utm_source) {
+          recoveredUtmSource = recovered.utm_source;
+          recoveredUtmMedium = recovered.utm_medium;
+          recoveredUtmCampaign = recovered.utm_campaign;
+        }
+        console.log(`[onboarding] Recovered attribution by IP: fbc=${!!recovered.fbc}, utm_source=${recovered.utm_source}`);
+      }
+    } catch (err) {
+      console.error("[onboarding] Attribution recovery failed:", err);
+    }
+  }
 
   // 1. Atomic dedup via INSERT ... ON CONFLICT DO NOTHING
   const insertResult = await db.execute({
@@ -64,9 +87,9 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
       session.amount_total,
       session.currency,
       metadata.visitor_id ?? null,
-      metadata.utm_source ?? null,
-      metadata.utm_medium ?? null,
-      metadata.utm_campaign ?? null,
+      recoveredUtmSource ?? null,
+      recoveredUtmMedium ?? null,
+      recoveredUtmCampaign ?? null,
       tier,
       subscriptionId,
       tier === "unlimited" ? 1 : 0,
@@ -110,10 +133,13 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
 
     // Notion: upsert lead in Leads DB as Won
     upsertLeadAsWon({ email, name, phone, amount }),
+
+    // Attribution tracker: mark contact as customer
+    markContactAsCustomer(email, clientIp),
   ]);
 
   // Log results for observability
-  const labels = ["Email", "Notion Task", "Meta CAPI", "Notion Lead"];
+  const labels = ["Email", "Notion Task", "Meta CAPI", "Notion Lead", "Attribution Tracker"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding] ${labels[i]} failed:`, result.reason);
