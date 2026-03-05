@@ -5,6 +5,7 @@ import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { track } from "@vercel/analytics";
+import * as Sentry from "@sentry/nextjs";
 import { getVisitorId, getStoredUtms } from "@/lib/visitor";
 import { detectCurrency } from "@/lib/currency";
 import { PricingCard, TestimonialCard, CTACard, ComparisonCard, TimelineCard } from "./ChatCards";
@@ -124,12 +125,6 @@ function getDynamicVariables(): Record<string, string> {
     }
   }
 
-  // Read chat version from URL param (?chatv=v4) for V2 testing
-  const chatVersion =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("chatv") || ""
-      : "";
-
   return {
     visitor_id: visitorId,
     utm_source: utms.utm_source || "",
@@ -138,7 +133,7 @@ function getDynamicVariables(): Record<string, string> {
     page_url: typeof window !== "undefined" ? window.location.href : "",
     returning_visitor: returningVisitor ? "true" : "false",
     detected_currency: detectCurrency() || "",
-    chat_version: chatVersion,
+    chat_version: "v4",
     ...prevVars,
   };
 }
@@ -377,6 +372,9 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
     transport,
     onError: (err: Error) => {
       track("widget_error", { reason: err.message });
+      Sentry.captureException(err, {
+        tags: { route: "AiSalesChat", severity: "critical" },
+      });
       setChatError(true);
     },
   });

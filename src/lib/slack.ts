@@ -1,5 +1,6 @@
 import { generateConversationSummary } from "./slack-summary";
 import { db } from "./db";
+import * as Sentry from "@sentry/nextjs";
 
 // ---------------------------------------------------------------------------
 // Pricing (per million tokens)
@@ -9,8 +10,7 @@ const SONNET_OUTPUT_PER_MTOK = 15.0;
 const SONNET_CACHE_READ_PER_MTOK = 0.3;
 const HAIKU_INPUT_PER_MTOK = 1.0;
 const HAIKU_OUTPUT_PER_MTOK = 5.0;
-const SYSTEM_PROMPT_TOKENS_V1 = 10_000;
-const SYSTEM_PROMPT_TOKENS_V2 = 87_000;
+const SYSTEM_PROMPT_TOKENS = 87_000;
 const USD_TO_GBP = 0.79;
 
 export interface SlackConversationPayload {
@@ -70,7 +70,7 @@ function estimateCost(
     }
   }
 
-  const systemTokens = chatVersion === "v4" ? SYSTEM_PROMPT_TOKENS_V2 : SYSTEM_PROMPT_TOKENS_V1;
+  const systemTokens = SYSTEM_PROMPT_TOKENS;
   const sonnetCacheReadTokens = systemTokens * turns;
   const extractionInput = estimateTokens(transcript) + 100;
   const extractionOutput = 200;
@@ -118,6 +118,7 @@ async function fetchObjectionCounts(): Promise<Map<string, number>> {
     }
     return counts;
   } catch (err) {
+    Sentry.captureException(err, { tags: { route: "slack", severity: "warning" } });
     console.error("[slack] Failed to fetch objection counts:", err);
     return new Map();
   }
@@ -132,6 +133,7 @@ async function savePainPoint(conversationId: string, label: string): Promise<voi
       args: [conversationId, label],
     });
   } catch (err) {
+    Sentry.captureException(err, { tags: { route: "slack", severity: "warning" } });
     console.error("[slack] Failed to save pain point:", err);
   }
 }

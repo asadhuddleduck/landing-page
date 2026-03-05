@@ -5,6 +5,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { sendConversationNotification } from "@/lib/slack";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
 
   // INSERT OR REPLACE into conversations
   try {
-    const chatVersion = dynamicVariables.chat_version || process.env.CHAT_PROMPT_VERSION || "v3";
+    const chatVersion = dynamicVariables.chat_version || "v4";
 
     await db.execute({
       sql: `INSERT OR REPLACE INTO conversations (
@@ -145,7 +146,11 @@ export async function POST(request: NextRequest) {
       ],
     });
   } catch (err) {
-    console.error("[chat/save] DB insert error:", err);
+    await reportError(err, {
+      route: "/api/chat/save",
+      severity: "critical",
+      extra: { conversationId, step: "db-insert" },
+    });
     return NextResponse.json({ error: "Failed to save" }, { status: 500 });
   }
 
@@ -196,7 +201,11 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (err) {
-    console.error("[chat/save] Extraction error:", err);
+    await reportError(err, {
+      route: "/api/chat/save",
+      severity: "warning",
+      extra: { conversationId, step: "haiku-extraction" },
+    });
     // Still return success — transcript was saved even if extraction failed
   }
 
@@ -220,10 +229,14 @@ export async function POST(request: NextRequest) {
           utmMedium: dynamicVariables.utm_medium ?? "",
           utmCampaign: dynamicVariables.utm_campaign ?? "",
           transcript,
-          chatVersion: dynamicVariables.chat_version || process.env.CHAT_PROMPT_VERSION || "v3",
+          chatVersion: dynamicVariables.chat_version || "v4",
         });
       } catch (err) {
-        console.error("[chat/save] Slack notification error:", err);
+        await reportError(err, {
+          route: "/api/chat/save",
+          severity: "warning",
+          extra: { conversationId, step: "slack-notification" },
+        });
       }
     });
   }

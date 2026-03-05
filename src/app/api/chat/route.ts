@@ -2,6 +2,7 @@ import { streamText, convertToModelMessages } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 
@@ -38,42 +39,19 @@ setInterval(() => {
 // Load system prompt and KB docs once at module scope (cached on cold start)
 // ---------------------------------------------------------------------------
 const docsDir = join(process.cwd(), "docs");
+const kbDir = join(docsDir, "v2");
 
-// V1: base-prompt-v3 + 9 KB files
-const v1Prompt = readFileSync(
-  join(docsDir, "agent-prompts", "base-prompt-v3.md"),
-  "utf-8"
-);
+const basePrompt = readFileSync(join(kbDir, "v2-base-prompt.md"), "utf-8");
 
-const v1KbFiles = [
-  "kb-01-product.txt",
-  "kb-02-pricing.txt",
-  "kb-03-differentiation.txt",
-  "kb-04-ideal-client.txt",
-  "kb-05-case-studies.txt",
-  "kb-06-faq.txt",
-  "kb-07-objection-handling.txt",
-  "kb-08-tracking-attribution.txt",
-  "kb-09-example-conversations.txt",
-];
-
-const v1KbContent = v1KbFiles
-  .map((f) => readFileSync(join(docsDir, f), "utf-8"))
-  .join("\n\n---\n\n");
-
-// V2: base-prompt-v4 + 4 KB files (Cole Gordon methodology)
-const v2Dir = join(docsDir, "v2");
-const v2Prompt = readFileSync(join(v2Dir, "v2-base-prompt.md"), "utf-8");
-
-const v2KbFiles = [
+const kbFiles = [
   "v2-kb-product-context.txt",
   "v2-kb-sales-methodology.txt",
   "v2-kb-objection-handling.txt",
   "v2-kb-examples.txt",
 ];
 
-const v2KbContent = v2KbFiles
-  .map((f) => readFileSync(join(v2Dir, f), "utf-8"))
+const kbContent = kbFiles
+  .map((f) => readFileSync(join(kbDir, f), "utf-8"))
   .join("\n\n---\n\n");
 
 /**
@@ -112,32 +90,40 @@ export async function POST(request: Request) {
 
   const vars = dynamicVariables ?? {};
 
-  // Determine chat version: URL param > env var > default "v3"
-  const chatVersion =
-    vars.chat_version || process.env.CHAT_PROMPT_VERSION || "v3";
-  const isV2 = chatVersion === "v4";
-
-  const basePrompt = isV2 ? v2Prompt : v1Prompt;
-  const kbContent = isV2 ? v2KbContent : v1KbContent;
-
   const systemPrompt =
     interpolate(basePrompt, vars) + "\n\n# Knowledge Base\n\n" + kbContent;
 
   // Convert UIMessages (from DefaultChatTransport) to model messages
-  const modelMessages = await convertToModelMessages(messages);
+  try {
+    const modelMessages = await convertToModelMessages(messages);
 
-  const result = streamText({
-    model: anthropic(process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6"),
-    system: {
-      role: "system",
-      content: systemPrompt,
-      providerOptions: {
-        anthropic: { cacheControl: { type: "ephemeral" } },
+    const result = streamText({
+      model: anthropic(process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6"),
+      system: {
+        role: "system",
+        content: systemPrompt,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" } },
+        },
       },
-    },
-    messages: modelMessages,
-    maxOutputTokens: isV2 ? 400 : 200,
-  });
+      messages: modelMessages,
+      maxOutputTokens: 400,
+      onError({ error }) {
+        reportError(error, {
+          route: "/api/chat",
+          severity: "critical",
+          extra: { visitorId, chatVersion: "v4", messageCount: messages.length },
+        });
+      },
+    });
 
-  return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    await reportError(error, {
+      route: "/api/chat",
+      severity: "critical",
+      extra: { visitorId, chatVersion: "v4", messageCount: messages.length },
+    });
+    return new Response("Internal server error", { status: 500 });
+  }
 }
