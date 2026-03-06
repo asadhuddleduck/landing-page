@@ -136,10 +136,27 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
 
     // Attribution tracker: mark contact as customer
     markContactAsCustomer(email, clientIp),
+
+    // Duck-emails: suppress from drip sequence
+    (async () => {
+      const duckUrl = process.env.DUCK_EMAILS_API_URL;
+      const duckSecret = process.env.DUCK_EMAILS_API_SECRET;
+      if (!duckUrl || !duckSecret || !email) return;
+
+      const res = await fetch(`${duckUrl}/api/contacts/suppress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${duckSecret}`,
+        },
+        body: JSON.stringify({ email, reason: "purchased" }),
+      });
+      if (!res.ok) throw new Error(`Duck-emails suppress failed: ${res.status}`);
+    })(),
   ]);
 
   // Log results for observability
-  const labels = ["Email", "Notion Task", "Meta CAPI", "Notion Lead", "Attribution Tracker"];
+  const labels = ["Email", "Notion Task", "Meta CAPI", "Notion Lead", "Attribution Tracker", "Duck Emails Suppress"];
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       console.error(`[onboarding] ${labels[i]} failed:`, result.reason);

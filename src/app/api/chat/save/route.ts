@@ -272,6 +272,44 @@ export async function POST(request: NextRequest) {
           });
         }
       });
+
+      // Sync email to duck-emails drip sequence
+      if (ext.visitor_email) {
+        after(async () => {
+          try {
+            const duckUrl = process.env.DUCK_EMAILS_API_URL;
+            const duckSecret = process.env.DUCK_EMAILS_API_SECRET;
+            if (!duckUrl || !duckSecret) return;
+
+            const res = await fetch(`${duckUrl}/api/contacts`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${duckSecret}`,
+              },
+              body: JSON.stringify({
+                email: ext.visitor_email,
+                source: "chat",
+                metadata: {
+                  business_name: ext.business_name || undefined,
+                  buying_intent: ext.buying_intent,
+                  conversation_outcome: ext.conversation_outcome,
+                  conversation_id: conversationId,
+                },
+              }),
+            });
+            if (!res.ok) {
+              console.error(`[save] Duck-emails sync failed: ${res.status}`);
+            }
+          } catch (err) {
+            await reportError(err, {
+              route: "/api/chat/save",
+              severity: "warning",
+              extra: { conversationId, step: "duck-emails-sync" },
+            });
+          }
+        });
+      }
     }
 
     // ViewContent event: engaged F&B visitor (discussed product)
