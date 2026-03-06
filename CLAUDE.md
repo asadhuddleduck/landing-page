@@ -94,8 +94,8 @@ Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseS
 ## AI Chat Integration
 - **Model:** Claude Sonnet (`claude-sonnet-4-6`) via Anthropic API, configurable via `ANTHROPIC_MODEL` env var
 - **SDK:** Vercel AI SDK v6 — `useChat` hook on client, `streamText` on server
-- **Prompt:** `docs/agent-prompts/base-prompt-v3.md` — 6-phase sales flow (Hook, Qualify, Discovery, Reflection, Offer, Soft Close)
-- **Knowledge base:** 9 text files in `docs/` (kb-01 through kb-09) — loaded into system message at module scope, ~10k tokens
+- **Prompt:** `docs/v2/v2-base-prompt.md` — Cole Gordon 7 Beliefs closer (8-phase, 50-word max responses, 15-25 exchanges)
+- **Knowledge base:** 4 files in `docs/v2/` (sales methodology, objection handling, product context, examples) — ~87k tokens total
 - **Prompt caching:** System prompt + KB docs cached via Anthropic ephemeral caching (90% cost reduction after first message)
 - **Extraction:** Claude Haiku (`claude-haiku-4-5`) extracts business_name, location_count, etc. from transcripts on save
 - **Dynamic variables:** visitor_id, UTMs, returning_visitor context — interpolated server-side via `{{ variable }}` placeholders
@@ -103,19 +103,10 @@ Header -> HeroChatSection (with AiSalesChat + LogoStrip) -> SocialProof -> CaseS
 - **Conversation persistence:** Transcript saved to Turso `conversations` table on 5-min inactivity, page leave, or warm exit
 - **Cost:** ~$0.05-0.10/conversation with prompt caching
 - **Handoff doc:** `docs/handoff-chat-closing.md` — comprehensive guide for teams optimizing chat closing rates
-
-## V2 Chat Agent (4 Mar 2026) — In Testing
-V2 is a standalone sales chat system built on Cole Gordon's 7 Beliefs framework. It runs alongside V1 behind a feature flag. Full details in `docs/v2/V2-DEPLOYMENT-GUIDE.md`.
-
-- **Feature flag:** `?chatv=v4` URL param or `CHAT_PROMPT_VERSION=v4` env var. Default is V1 (`v3`).
-- **V2 prompt:** `docs/v2/v2-base-prompt.md` — 8-phase Cole Gordon closer (50-word max responses, 15-25 exchanges, mid-pitch deferral, LTV estimation, selective mirroring, short answer nudging)
-- **V2 KB:** 4 files in `docs/v2/` (sales methodology, objection handling, product context, examples) — ~87k tokens total
-- **V2 maxOutputTokens:** 400 (vs V1's 200)
-- **Conversation tagging:** `chat_version` column in `conversations` table (`v3` for V1, `v4` for V2)
-- **Anthropic API tier:** Tier 2 ($40 deposit, 450k ITPM) — required for V2's 87k token context
-- **Source material:** Cole Gordon's "Closers Into Leaders" course — 85 video transcripts, 61 Google Docs, 12 processed framework files. Stored at `/Users/asadshah/Claude Code Folder/cole-gordon-kb/`
-- **Rollback:** Remove `CHAT_PROMPT_VERSION` env var or set to `v3`. V1 files are completely untouched.
-- **Test cleanup:** `DELETE FROM conversations WHERE chat_version = 'v4'`
+- **Anthropic API tier:** Tier 2 ($40 deposit, 450k ITPM) — required for 87k token context
+- **Source material:** Cole Gordon's "Closers Into Leaders" course. Processed files in `/Users/asadshah/Claude Code Folder/cole-gordon-kb/`
+- **maxOutputTokens:** 400
+- **Conversation tagging:** `chat_version` column in `conversations` table (current value: `diy-sonnet`)
 
 ## Slack Notifications (Mar 2026)
 Sends rich Block Kit notifications to Slack channel "AI Convo landing page" when visitors have meaningful conversations (3+ user messages).

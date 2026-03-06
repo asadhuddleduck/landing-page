@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { sendConversationNotification } from "@/lib/slack";
 import { reportError } from "@/lib/error-reporting";
 import { verifyChatToken } from "@/lib/chat-token";
+import { sendConversionEvent } from "@/lib/meta-capi";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -52,10 +53,23 @@ const extractionSchema = z.object({
   location_count: z.string().describe("Number of locations, or empty string if not mentioned"),
   main_challenge: z.string().describe("The main marketing challenge they described, or empty string"),
   visitor_role: z.string().describe("Their role (owner, manager, marketing, etc.), or empty string"),
+  visitor_email: z.string().describe("Email address if the visitor shared one during the conversation. Empty string if not mentioned."),
+  visitor_phone: z.string().describe("Phone number if the visitor shared one during the conversation. Empty string if not mentioned."),
   is_fb: z.boolean().describe("Whether the visitor is in the food & beverage industry"),
   objections_raised: z.array(z.string()).describe("List of individual objections, each as a short label (e.g. 'price too high', 'wants ROI guarantee', 'needs partner approval', 'not ready yet'). Empty array if none."),
-  reached_checkout: z.boolean().describe("Whether the conversation progressed to discussing checkout/payment"),
-  conversation_outcome: z.string().describe("Brief outcome: e.g. 'booked', 'interested', 'dropped off', 'not qualified'"),
+  buying_intent: z.number().min(1).max(5).describe(
+    "Buying intent score: 1=just browsing or not F&B, 2=asked questions about the product, 3=discussed pricing or details, 4=asked how to buy or showed urgency, 5=explicitly said they want to purchase or clicked checkout"
+  ),
+  conversation_outcome: z.enum([
+    "qualified",
+    "not_qualified",
+    "nurture",
+    "dropped_off",
+    "booked",
+  ]).describe("qualified=F&B with buying intent, not_qualified=not F&B or not a real prospect, nurture=F&B and interested but not ready yet, dropped_off=left mid-conversation, booked=requested a call or demo"),
+  qualification_reason: z.string().describe(
+    "Brief reason for the outcome. E.g. 'Not in F&B, runs a clothing store', 'Owns 3 pizza shops, concerned about ROI but interested', 'Asked about pricing then went silent'"
+  ),
 });
 
 // ---------------------------------------------------------------------------
@@ -102,7 +116,7 @@ export async function POST(request: NextRequest) {
   const cap = (s: string | undefined, max = 200) =>
     (s ?? "").slice(0, max).replace(/[\n\r{}]/g, "");
   const visitorId = dynamicVariables.visitor_id ?? "";
-  const chatVersion = cap(dynamicVariables.chat_version) || "v4";
+  const chatVersion = cap(dynamicVariables.chat_version) || "diy-sonnet";
 
   // Cap messages
   const capped = messages.slice(0, MAX_MESSAGES);
@@ -133,7 +147,7 @@ export async function POST(request: NextRequest) {
       args: [
         conversationId,
         conversationId,
-        "diy-sonnet-4.6",
+        "diy-sonnet",
         visitorId,
         "", // visitor_name
         "", // visitor_email
@@ -178,23 +192,31 @@ export async function POST(request: NextRequest) {
     await db.execute({
       sql: `UPDATE conversations SET
         visitor_role = ?,
+        visitor_email = ?,
+        visitor_phone = ?,
         business_name = ?,
         location_count = ?,
         main_challenge = ?,
         is_fb = ?,
         objections_raised = ?,
         reached_checkout = ?,
-        conversation_outcome = ?
+        buying_intent = ?,
+        conversation_outcome = ?,
+        qualification_reason = ?
       WHERE conversation_id = ?`,
       args: [
         extracted.visitor_role,
+        extracted.visitor_email,
+        extracted.visitor_phone,
         extracted.business_name,
         extracted.location_count,
         extracted.main_challenge,
         extracted.is_fb ? 1 : 0,
         JSON.stringify(extracted.objections_raised),
-        extracted.reached_checkout ? 1 : 0,
+        extracted.buying_intent >= 4 ? 1 : 0, // backwards compat: high intent = reached_checkout
+        extracted.buying_intent,
         extracted.conversation_outcome,
+        extracted.qualification_reason,
         conversationId,
       ],
     });
@@ -218,20 +240,115 @@ export async function POST(request: NextRequest) {
     // Still return success — transcript was saved even if extraction failed
   }
 
-  // Slack notification (runs after response is sent, never blocks)
+  // Fire Meta CAPI events + Slack notification after response is sent
   const userMessageCount = capped.filter((m) => m.role === "user").length;
-  if (extracted && userMessageCount >= MIN_USER_MESSAGES_FOR_SLACK) {
+
+  if (extracted) {
+    const ext = extracted; // capture for after() closures (TS narrowing doesn't carry into async callbacks)
+    const ua = request.headers.get("user-agent") || undefined;
+
+    // Lead event: only when we captured contact info from an F&B visitor
+    const hasContactInfo = (ext.visitor_email && ext.visitor_email !== "") ||
+                           (ext.visitor_phone && ext.visitor_phone !== "");
+    if (hasContactInfo && ext.is_fb) {
+      after(async () => {
+        try {
+          await sendConversionEvent({
+            eventName: "Lead",
+            eventId: `lead_${conversationId}`,
+            eventSourceUrl: "https://start.huddleduck.co.uk",
+            email: ext.visitor_email || undefined,
+            phone: ext.visitor_phone || undefined,
+            ipAddress: ip,
+            userAgent: ua,
+            contentName: ext.business_name || "Unknown Business",
+            contentCategory: ext.conversation_outcome,
+          });
+        } catch (err) {
+          await reportError(err, {
+            route: "/api/chat/save",
+            severity: "warning",
+            extra: { conversationId, step: "capi-lead" },
+          });
+        }
+      });
+    }
+
+    // ViewContent event: engaged F&B visitor (discussed product)
+    if (ext.buying_intent >= 2 && ext.is_fb) {
+      after(async () => {
+        try {
+          await sendConversionEvent({
+            eventName: "ViewContent",
+            eventId: `vc_${conversationId}`,
+            eventSourceUrl: "https://start.huddleduck.co.uk",
+            ipAddress: ip,
+            userAgent: ua,
+            contentName: ext.business_name || "Unknown Business",
+          });
+        } catch (err) {
+          await reportError(err, {
+            route: "/api/chat/save",
+            severity: "warning",
+            extra: { conversationId, step: "capi-viewcontent" },
+          });
+        }
+      });
+    }
+
+    // Slack notification
+    if (userMessageCount >= MIN_USER_MESSAGES_FOR_SLACK) {
+      after(async () => {
+        try {
+          await sendConversationNotification({
+            conversationId,
+            businessName: ext.business_name,
+            visitorRole: ext.visitor_role,
+            locationCount: ext.location_count,
+            mainChallenge: ext.main_challenge,
+            isFb: ext.is_fb,
+            objections: ext.objections_raised,
+            reachedCheckout: ext.buying_intent >= 4,
+            buyingIntent: ext.buying_intent,
+            conversationOutcome: ext.conversation_outcome,
+            qualificationReason: ext.qualification_reason,
+            visitorEmail: ext.visitor_email,
+            visitorPhone: ext.visitor_phone,
+            durationSecs,
+            messageCount: capped.length,
+            utmSource: cap(dynamicVariables.utm_source),
+            utmMedium: cap(dynamicVariables.utm_medium),
+            utmCampaign: cap(dynamicVariables.utm_campaign),
+            transcript,
+            chatVersion,
+          });
+        } catch (err) {
+          await reportError(err, {
+            route: "/api/chat/save",
+            severity: "warning",
+            extra: { conversationId, step: "slack-notification" },
+          });
+        }
+      });
+    }
+  } else if (userMessageCount >= MIN_USER_MESSAGES_FOR_SLACK) {
+    // Extraction failed but conversation was meaningful — send minimal Slack notification
     after(async () => {
       try {
         await sendConversationNotification({
           conversationId,
-          businessName: extracted.business_name,
-          visitorRole: extracted.visitor_role,
-          locationCount: extracted.location_count,
-          mainChallenge: extracted.main_challenge,
-          isFb: extracted.is_fb,
-          objections: extracted.objections_raised,
-          reachedCheckout: extracted.reached_checkout,
+          businessName: "",
+          visitorRole: "",
+          locationCount: "",
+          mainChallenge: "",
+          isFb: false,
+          objections: [],
+          reachedCheckout: false,
+          buyingIntent: 0,
+          conversationOutcome: "dropped_off",
+          qualificationReason: "Extraction failed — review transcript manually",
+          visitorEmail: "",
+          visitorPhone: "",
           durationSecs,
           messageCount: capped.length,
           utmSource: cap(dynamicVariables.utm_source),
@@ -244,7 +361,7 @@ export async function POST(request: NextRequest) {
         await reportError(err, {
           route: "/api/chat/save",
           severity: "warning",
-          extra: { conversationId, step: "slack-notification" },
+          extra: { conversationId, step: "slack-fallback" },
         });
       }
     });

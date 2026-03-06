@@ -134,7 +134,7 @@ function getDynamicVariables(): Record<string, string> {
     page_url: typeof window !== "undefined" ? window.location.href : "",
     returning_visitor: returningVisitor ? "true" : "false",
     detected_currency: detectCurrency() || "",
-    chat_version: "v4",
+    chat_version: "diy-sonnet",
     ...prevVars,
   };
 }
@@ -643,7 +643,7 @@ export default function AiSalesChat({ onConversationEnd, onTypingChange }: AiSal
   }, []);
 
   // Start nudge timer when pricing card shown and streaming stops
-  // V2 conversations are longer, so 120s instead of 60s
+  // Allow 120s before nudge since conversations can run long
   useEffect(() => {
     if (shownCards.has("pricing") && !isStreaming && !nudgeFiredRef.current) {
       nudgeTimerRef.current = setTimeout(() => {

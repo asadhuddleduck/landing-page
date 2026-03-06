@@ -100,13 +100,23 @@ export default function CheckoutSection() {
     const itemId = selectedTier === "unlimited" ? "ai-ad-engine-unlimited" : "ai-ad-engine-trial";
     const itemName = selectedTier === "unlimited" ? "AI Ad Engine Unlimited" : "AI Ad Engine Trial";
 
-    trackPixelEvent("InitiateCheckout", { value, currency: currency || "GBP" });
+    const eventId = `ic_${Date.now()}`;
+    trackPixelEvent("InitiateCheckout", { value, currency: currency || "GBP" }, eventId);
     gtagEvent("begin_checkout", {
       currency: currency || "GBP",
       value,
       items: [{ item_id: itemId, item_name: itemName, price: value, quantity: 1 }],
     });
     track("checkout_click");
+
+    // Server-side CAPI InitiateCheckout for dedup with pixel
+    const { fbc, fbp } = getFbCookies();
+    fetch("/api/chat/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventName: "InitiateCheckout", eventId, fbc, fbp }),
+    }).catch(() => {});
+
     setStep("details");
     // Scroll the form into view after a tick
     setTimeout(() => {

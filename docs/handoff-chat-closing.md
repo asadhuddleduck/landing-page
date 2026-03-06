@@ -30,8 +30,8 @@ Browser (AiSalesChat.tsx)              Server (/api/chat/route.ts)
 | `src/components/AiSalesChat.tsx` | Client-side chat UI — all UX logic, message display, input handling, card detection |
 | `src/app/api/chat/route.ts` | Streaming endpoint — loads prompt + KB docs, sends to Anthropic, returns SSE stream |
 | `src/app/api/chat/save/route.ts` | Persistence — saves transcript to Turso, runs Haiku extraction for structured fields |
-| `docs/agent-prompts/base-prompt-v3.md` | **THE PROMPT** — source of truth for the agent's personality, flow, and rules |
-| `docs/kb-01-product.txt` through `kb-09-example-conversations.txt` | Knowledge base docs — product info, pricing, case studies, FAQ, objection handling |
+| `docs/v2/v2-base-prompt.md` | **THE PROMPT** — source of truth for the agent's personality, flow, and rules |
+| `docs/v2/v2-kb-*.txt` | Knowledge base docs — sales methodology, objection handling, product context, examples |
 | `src/components/ChatCards.tsx` | Rich cards (PricingCard, TestimonialCard, CTACard) triggered by keywords in agent responses |
 | `src/app/globals.css` | All chat styling — message cards, animations, streaming effects, power bar |
 
@@ -40,15 +40,15 @@ Browser (AiSalesChat.tsx)              Server (/api/chat/route.ts)
 - **Chat model:** Claude Sonnet 4.6 (`claude-sonnet-4-6`) — configurable via `ANTHROPIC_MODEL` env var
 - **Extraction model:** Claude Haiku 4.5 — extracts business_name, location_count, etc. from transcripts
 - **Cost:** ~$0.05-0.10/conversation with prompt caching (system prompt + KB docs cached for 5 min)
-- **Max output tokens:** 150 per response (keeps replies short per the prompt rules)
+- **Max output tokens:** 400 per response (keeps replies short per the prompt rules)
 
 ---
 
 ## The Prompt (How the Sales Flow Works)
 
-**Location:** `docs/agent-prompts/base-prompt-v3.md` (119 lines, ~7KB)
+**Location:** `docs/v2/v2-base-prompt.md`
 
-### 6-Phase Sales Flow
+### 8-Phase Sales Flow (Cole Gordon 7 Beliefs Framework)
 
 1. **Hook** — Pattern-interrupt opening. Short, punchy, creates curiosity. Under 20 words.
 2. **Pattern-Recognition Qualify** — Identifies if they're F&B, how many locations, what they're currently doing.
@@ -203,11 +203,11 @@ Based on test conversations:
 ## How to Change the Agent's Behavior
 
 ### Quick changes (prompt tuning):
-1. Edit `docs/agent-prompts/base-prompt-v3.md`
+1. Edit `docs/v2/v2-base-prompt.md`
 2. Changes take effect on next cold start / deploy
 
 ### Knowledge updates:
-1. Edit the relevant `docs/kb-*.txt` file
+1. Edit the relevant `docs/v2/v2-kb-*.txt` file
 2. Same — next cold start / deploy
 
 ### Response length:

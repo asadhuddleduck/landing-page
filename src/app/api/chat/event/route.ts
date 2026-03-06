@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendConversionEvent } from "@/lib/meta-capi";
 
-const VALID_EVENTS = new Set(["AIChat", "AIChatEngaged"]);
+const VALID_EVENTS = new Set(["AIChat", "AIChatEngaged", "InitiateCheckout"]);
 
 export async function POST(req: NextRequest) {
   try {

@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         reportError(error, {
           route: "/api/chat",
           severity: "critical",
-          extra: { visitorId, chatVersion: "v4", messageCount: messages.length },
+          extra: { visitorId, chatVersion: "diy-sonnet", messageCount: messages.length },
         });
       },
     });
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
     await reportError(error, {
       route: "/api/chat",
       severity: "critical",
-      extra: { visitorId, chatVersion: "v4", messageCount: messages.length },
+      extra: { visitorId, chatVersion: "diy-sonnet", messageCount: messages.length },
     });
     return new Response("Internal server error", { status: 500 });
   }

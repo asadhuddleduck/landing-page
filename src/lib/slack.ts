@@ -23,6 +23,11 @@ export interface SlackConversationPayload {
   isFb: boolean;
   objections: string[];
   reachedCheckout: boolean;
+  buyingIntent: number;
+  conversationOutcome: string;
+  qualificationReason: string;
+  visitorEmail: string;
+  visitorPhone: string;
   durationSecs: number;
   messageCount: number;
   utmSource: string;
@@ -153,10 +158,25 @@ function buildBlocks(
   const viewerUrl = `https://start.huddleduck.co.uk/conversations/${payload.conversationId}?sig=${sig}`;
   const title = payload.businessName || "Unknown visitor";
 
+  // Outcome badge
+  const outcomeBadges: Record<string, string> = {
+    qualified: "QUALIFIED",
+    not_qualified: "NOT QUALIFIED",
+    nurture: "NURTURE",
+    dropped_off: "DROPPED OFF",
+    booked: "BOOKED",
+  };
+  const badge = outcomeBadges[payload.conversationOutcome] || payload.conversationOutcome.toUpperCase();
+  const intentDots = "●".repeat(payload.buyingIntent) + "○".repeat(5 - payload.buyingIntent);
+
   const blocks: object[] = [
     {
       type: "header",
       text: { type: "plain_text", text: `🤖  ${title}`, emoji: true },
+    },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: `*${badge}*  |  Intent: ${intentDots} (${payload.buyingIntent}/5)${payload.visitorEmail ? `  |  📧 ${payload.visitorEmail}` : ""}${payload.visitorPhone ? `  |  📱 ${payload.visitorPhone}` : ""}` },
     },
     {
       type: "section",
@@ -168,6 +188,14 @@ function buildBlocks(
       ],
     },
   ];
+
+  // Qualification reason
+  if (payload.qualificationReason) {
+    blocks.push({
+      type: "section",
+      text: { type: "mrkdwn", text: `*📝 Reason:* ${payload.qualificationReason}` },
+    });
+  }
 
   // Pain point
   if (analysis.painPoint) {
