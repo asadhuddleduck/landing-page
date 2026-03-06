@@ -79,7 +79,7 @@ src/
     email.ts                 # Resend transactional email (purchase confirmation, abandoned cart)
     meta-capi.ts             # Meta Conversions API (from attribution-tracker)
     notion.ts                # Notion task creation in Actions DB
-    onboarding.ts            # Post-purchase orchestrator (Promise.allSettled, atomic dedup)
+    onboarding.ts            # Post-purchase orchestrator (Promise.allSettled, atomic dedup, duck-emails suppression)
     visitor.ts               # Cookie utilities: getVisitorId, getStoredUtms, getFbCookies
 public/
   duck-logo.png              # Huddle Duck logo
@@ -137,6 +137,20 @@ Sends rich Block Kit notifications to Slack channel "AI Convo landing page" when
 
 **Slack webhook:** Incoming Webhook (send-only, no read/delete). Set in `SLACK_WEBHOOK_URL` env var (.env.local + Vercel production).
 
+## Duck-Emails Integration (Mar 2026)
+
+Landing-page syncs with the duck-emails drip system via two API calls:
+
+### Chat Email Sync
+When the AI chat extracts a visitor's email (F&B visitor with contact info), `chat/save/route.ts` calls `POST ${DUCK_EMAILS_API_URL}/api/contacts` via `after()` (non-blocking). Sends email, source ("chat"), and metadata (business_name, buying_intent, conversation_outcome, conversation_id). Contact enters drip sequence at position 0.
+
+### Purchaser Suppression
+When a purchase completes, `onboarding.ts` calls `POST ${DUCK_EMAILS_API_URL}/api/contacts/suppress` inside `Promise.allSettled` (6th promise, alongside email confirmation, Notion task, Meta CAPI, Notion lead upsert, and attribution tracker). Sends `{ email, reason: "purchased" }`. Purchaser is excluded from all future drip emails.
+
+### Key files
+- `src/app/api/chat/save/route.ts` (lines 276-312) — duck-emails contact sync via `after()`
+- `src/lib/onboarding.ts` (lines 141-155) — duck-emails purchaser suppression in `Promise.allSettled`
+
 ## Environment Variables
 
 ### In `.env.local` and Vercel
@@ -158,6 +172,8 @@ Sends rich Block Kit notifications to Slack channel "AI Convo landing page" when
 | `ANTHROPIC_API_KEY` | Anthropic API for AI chat |
 | `ANTHROPIC_MODEL` | Model ID (default: `claude-sonnet-4-6`) |
 | `SLACK_WEBHOOK_URL` | Slack Incoming Webhook for conversation notifications |
+| `DUCK_EMAILS_API_URL` | Duck-emails API base URL (`https://duck-emails-ten.vercel.app`) |
+| `DUCK_EMAILS_API_SECRET` | Shared secret for duck-emails API auth (same as duck-emails `API_SECRET`) |
 | `CLOUDFLARE_API_KEY` | Cloudflare Global API Key (DNS management) |
 | `CLOUDFLARE_EMAIL` | Cloudflare account email |
 | `CLOUDFLARE_ZONE_ID` | Zone ID for huddleduck.co.uk |
@@ -197,6 +213,9 @@ Button click -> POST `/api/checkout` -> Checkout Session created (subscription m
 2. Resend: branded purchase confirmation email
 3. Notion: Create task for Akmal in Actions DB
 4. Meta CAPI: `Purchase` event with `stripe_{id}` for pixel dedup
+5. Notion: Upsert lead as Won in Leads DB
+6. Attribution tracker: mark contact as customer
+7. Duck-emails: suppress purchaser from drip sequence
 
 ## Turso Database
 - DB name: `landing-page`
