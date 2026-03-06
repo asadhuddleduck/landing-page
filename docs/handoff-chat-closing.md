@@ -85,19 +85,14 @@ The prompt uses `{{ variable_name }}` placeholders, interpolated server-side:
 
 ## Knowledge Base (What the Agent Knows)
 
-9 text files, loaded into the system message (~7k tokens total):
+4 files in `docs/v2/`, loaded into the system message (~87k tokens total):
 
 | File | Content |
 |---|---|
-| `kb-01-product.txt` | What the AI Ad Engine is, what's included, how it works |
-| `kb-02-pricing.txt` | £497 Trial, £1,300/mo Unlimited, what's included in each |
-| `kb-03-differentiation.txt` | How this differs from agencies, freelancers, DIY ads |
-| `kb-04-ideal-client.txt` | F&B, 2+ locations, £500+/mo ad budget, wants growth |
-| `kb-05-case-studies.txt` | Phat Buns, Shakedown, Burger & Sauce, Dough Club, Chai Green results |
-| `kb-06-faq.txt` | Common questions and answers |
-| `kb-07-objection-handling.txt` | Price objections, trust objections, timing objections |
-| `kb-08-tracking-attribution.txt` | How tracking/attribution works |
-| `kb-09-example-conversations.txt` | Example conversations showing ideal flow |
+| `v2-kb-product-context.txt` | Product details, pricing, what's included, how it works |
+| `v2-kb-sales-methodology.txt` | Cole Gordon 7 Beliefs framework, closing techniques |
+| `v2-kb-objection-handling.txt` | Price, trust, timing objections with reframe scripts |
+| `v2-kb-examples.txt` | Example conversations showing ideal flow |
 
 **To update what the agent knows:** Edit these files directly. Changes take effect on next cold start (or next Vercel deploy). No API calls, no dashboard — just text files.
 
@@ -196,7 +191,7 @@ Based on test conversations:
 
 5. **Returning visitor flow** — The `prev_*` variables exist but the prompt could use stronger returning visitor hooks ("Last time you mentioned your 5 locations in London...").
 
-6. **Example conversations in KB** — `kb-09-example-conversations.txt` shapes the agent's conversational style. Adding more examples of successful closes would help.
+6. **Example conversations in KB** — `v2-kb-examples.txt` shapes the agent's conversational style. Adding more examples of successful closes would help.
 
 ---
 
@@ -211,7 +206,7 @@ Based on test conversations:
 2. Same — next cold start / deploy
 
 ### Response length:
-- `maxOutputTokens: 150` in `src/app/api/chat/route.ts` line 68
+- `maxOutputTokens: 400` in `src/app/api/chat/route.ts`
 - Increase if you want longer responses (but the 25-word prompt rule is the real limiter)
 
 ### Model:

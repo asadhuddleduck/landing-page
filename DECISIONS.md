@@ -110,9 +110,9 @@ Decisions made for the landing-page project that should NOT be revisited without
 **Decision:** The landing page chat was migrated from ElevenLabs Conversational AI (WebSocket, $0.32/conversation) to direct Anthropic API calls via Vercel AI SDK (HTTP streaming, ~$0.05-0.10/conversation).
 **Rationale:** ElevenLabs cost ~£112/month for a text-only chat — the platform fee added zero value since voice/TTS features weren't used. Direct API calls with prompt caching reduce costs by 75-85%. The prompt, KB docs, and all UX logic stayed the same.
 
-### System prompt + 9 KB docs stuffed into system message (no RAG)
-**Decision:** The system prompt (`docs/agent-prompts/base-prompt-v3.md`) and all 9 KB docs (`docs/kb-01` through `kb-09`) are concatenated into a single system message (~10k tokens).
-**Rationale:** 10k tokens is well within the 200k context window. Stuffing everything into the system message with Anthropic's prompt caching is cheaper and more reliable than RAG. Every KB doc is always available to the agent — no retrieval misses.
+### System prompt + 4 KB docs stuffed into system message (no RAG)
+**Decision:** The system prompt (`docs/v2/v2-base-prompt.md`) and 4 KB docs (`docs/v2/v2-kb-*.txt`) are concatenated into a single system message (~87k tokens).
+**Rationale:** 87k tokens is within the 200k context window. Stuffing everything into the system message with Anthropic's prompt caching is cheaper and more reliable than RAG. Every KB doc is always available to the agent — no retrieval misses.
 
 ### Prompt caching via Anthropic ephemeral cache control
 **Decision:** The system message (prompt + KB) has `providerOptions.anthropic.cacheControl: { type: "ephemeral" }`, enabling Anthropic's automatic prompt caching.
