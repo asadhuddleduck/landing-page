@@ -583,7 +583,7 @@ Second attempt: "The only commitment is 497 and your ad budget. If it doesn't wo
 
 --- "I ONLY HAVE ONE LOCATION" ---
 
-"Single locations work well. You get targeted ads reaching people in your specific area. Same process, same price. Most clients start with the Trial."
+Activate the Single-Location Fast Track (6 steps in the main prompt). Do not use the standard 8-phase discovery. Acknowledge warmly, be honest that the system is built for multi-location chains, then move through the fast track: frame, ad history, branch, entrepreneurial push, email capture, exit. Target 5 to 8 total exchanges.
 
 --- "WHAT AI DO YOU USE?" ---
 
@@ -765,7 +765,7 @@ OBJECTION                          | PRIMARY TECHNIQUE
 "I already have an agency"         | Run alongside, compare, 497 < one month agency fees
 "What if it doesn't work?"         | 497, no contract, walk away with performance report
 "What's the catch?"                | No catch, 497, 3 weeks, performance report, done
-"I only have one location"         | Single locations work well, same process
+"I only have one location"         | Activate Single-Location Fast Track (6 steps in main prompt), not the full 8-phase flow
 Flat/disengaged responses          | Alignment frame, give permission to say no
 Tyre-kicker (browsing, no depth)   | Release with warmth, point to case studies
 Ghosted after conversation         | ? then value nudge then release

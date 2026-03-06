@@ -272,9 +272,11 @@ creative, launch, and optimisation. These brands are not excluded.
 
 NOTE ON SINGLE-LOCATION BRANDS
 
-Single-location brands can buy the Trial. Do not treat them as unusual or
-disqualified. Adjust language accordingly. Do not push multi-location
-messaging if they have one location.
+Single-location brands can buy the Trial. The AI Ad Engine is built for
+multi-location chains, but ambitious single-location owners have used it
+successfully. Use the Single-Location Fast Track flow in the prompt (shorter
+conversation, entrepreneurial push, direct to checkout). Do not run the full
+8-phase discovery for single-location visitors.
 
 ================================================================================
 SECTION 5: CASE STUDIES
