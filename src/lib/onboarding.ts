@@ -12,6 +12,21 @@ import { recoverAttributionByIp, markContactAsCustomer } from "./attribution-rec
  * Fans out to all downstream services in parallel. Never throws.
  */
 export async function handlePurchase(session: Stripe.Checkout.Session) {
+  // Shared Stripe account guard. SuperPulse (superpulse.io) runs on the SAME
+  // Stripe account, so its £27/£97 audit and £300/mo subscription
+  // checkout.session.completed events are delivered to this webhook too. Only
+  // onboard OUR products, which always carry metadata.tier ('trial'|'unlimited').
+  // Without this, SuperPulse buyers were wrongly onboarded as "AI Ad Engine Trial":
+  // wrong confirmation email, wrong Akmal task, and a fake £497 Meta CAPI Purchase
+  // polluting the AI Ad Engine ad data. (Also protects the reconcile cron.)
+  const sessionTier = session.metadata?.tier;
+  if (sessionTier !== "trial" && sessionTier !== "unlimited") {
+    console.log(
+      `[onboarding] Ignoring foreign Stripe session ${session.id} — no AI Ad Engine tier marker (likely a SuperPulse purchase).`,
+    );
+    return;
+  }
+
   const email =
     session.customer_details?.email ?? session.customer_email ?? "";
   const name = session.customer_details?.name ?? null;
