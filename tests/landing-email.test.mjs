@@ -61,7 +61,9 @@ test("local opt-out persists even while its HatchFlow mirror is unavailable", as
     await database.execute("UPDATE email_marketing_permissions SET allowed = 1");
     assert.equal((await landingPageEligibility(database, request, async () => false)).reason, "unsubscribed");
     const options = { endpoint: "https://hatchflow.example.test/api/notify/email", secret: "test-key" };
+    assert.equal(await mirrorPendingUnsubscribes(database, { ...options, fetcher: async () => Response.json({ ok: false }) }), 0);
     assert.equal(await mirrorPendingUnsubscribes(database, { ...options, fetcher: async () => new Response(null, { status: 503 }) }), 0);
+    assert.equal(await mirrorPendingUnsubscribes(database, { ...options, fetcher: async () => Response.json({ ok: false }) }), 0);
     assert.equal(await mirrorPendingUnsubscribes(database, { ...options, fetcher: async (_url, init) => {
       assert.equal(JSON.parse(init.body).source, "landing-page");
       return Response.json({ ok: true });
