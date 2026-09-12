@@ -2,77 +2,48 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCurrency } from "@/hooks/useCurrency";
-import { EXCHANGE_RATES, getCurrencySymbol } from "@/lib/currency";
 
 const faqs: { question: string; highlight: string; answer: string }[] = [
   {
-    question: "What do I get for £497?",
-    highlight: "£497",
+    question: "How does the waitlist work?",
+    highlight: "waitlist",
     answer:
-      "A fully managed 3-week advertising campaign. The AI researches your audience, produces ad creative from your existing content, builds and launches your campaigns, and optimises them weekly. At the end, you get a full performance report and a strategy review call. Think of it as a mutual trial. You see real results, and we both decide if ongoing management is the right fit.",
+      "You tell us about your business, we review every applicant by hand, and we onboard new clients in waves as capacity opens up. We only take on businesses we believe we can move the needle for, so not every applicant gets a spot.",
   },
   {
-    question: "Is ad spend included in the price?",
-    highlight: "ad spend included",
+    question: "Who is this for?",
+    highlight: "Who is this for",
     answer:
-      "The £497 covers strategy, creative production, and campaign management. Ad spend is separate. You pay Meta directly. We recommend a minimum of £10 per location per day. So for a single location, your total investment is £497 plus roughly £210 in ad spend over the 3 weeks.",
+      "Local businesses with a physical presence — restaurants, cafés, gyms, salons, clinics, dental practices, retail. If your customers walk through a door, we can help. We don't currently work with pure e-commerce or B2B SaaS.",
+  },
+  {
+    question: "How do I jump the queue?",
+    highlight: "jump the queue",
+    answer:
+      "After joining the waitlist you'll see a short follow-up form — seven questions about how content currently fits into your business. Answering it tells us you're serious and gives us the context to prioritise you ahead of less-engaged signups.",
+  },
+  {
+    question: "When will I hear back?",
+    highlight: "hear back",
+    answer:
+      "We aim to respond to every signup within a few working days. If we have capacity for you, we'll book a short call to walk through what working together looks like and you can decide whether to move forward.",
   },
   {
     question: "How is this different from a marketing agency?",
     highlight: "different from a marketing agency",
     answer:
-      "A traditional agency charges £2,000 to £5,000 per month, takes weeks to onboard, and runs the same playbook for every client. The AI deep-researches your specific audience, competitors, and local market before a single ad goes live. You get a strategy built on data, not guesswork. The Trial is £497 for 3 weeks of fully managed campaigns. Compare that to a single month with a traditional agency.",
+      "Traditional agencies onboard slowly, run a generic playbook, and charge thousands per month regardless of results. We use AI to do deep research on your specific audience, competitors, and local market before a single ad goes live — strategy built on data, not guesswork.",
   },
   {
-    question: "What happens when the trial ends?",
-    highlight: "when the trial ends",
-    answer:
-      "Two options. You can upgrade to AI Ad Engine Unlimited at £1,300 per month for ongoing AI-managed campaigns, monthly reports, and strategy calls. Month-to-month, cancel any time. Or you take the insights from your performance report and run things yourself. Either way, your £497 Trial fee is fully credited if you upgrade within 30 days.",
-  },
-  {
-    question: "Is there a long-term contract?",
-    highlight: "long-term contract",
-    answer:
-      "No. The Trial is a one-time payment. If you upgrade to Unlimited, it's month-to-month. No lock-in, no cancellation fees, no notice period. You stay because the results make sense, not because of a contract.",
-  },
-  {
-    question: "We have multiple locations. Does the price change?",
+    question: "We have multiple locations. Does that matter?",
     highlight: "multiple locations",
     answer:
-      "Same price, whether you have 2 locations or 200. Each location gets its own targeting and campaigns tailored to its local audience. Start with a Trial or Unlimited plan and we scale from there.",
+      "It helps. Each location gets its own targeting and creative tailored to its local audience. Mention it in the brief info field — multi-location operators often jump the queue because the upside is bigger on both sides.",
   },
 ];
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const { currency, getDisplayPrice } = useCurrency();
-
-  // Replace £ prices with local currency for non-GBP visitors
-  function withConversion(text: string): string {
-    if (!currency || currency === "GBP") return text;
-    const trial = getDisplayPrice(497, "trial");
-    const unlimited = getDisplayPrice(1300, "unlimited");
-    const rate = EXCHANGE_RATES[currency] ?? 1;
-    const sym = getCurrencySymbol(currency);
-    // Round reference amounts to clean numbers
-    const round = (gbp: number) => {
-      const raw = gbp * rate;
-      let rounded: number;
-      if (raw < 100) rounded = Math.round(raw / 5) * 5;
-      else if (raw < 1000) rounded = Math.round(raw / 50) * 50;
-      else rounded = Math.round(raw / 500) * 500;
-      return `${sym}${rounded.toLocaleString("en-US")}`;
-    };
-    let result = text;
-    result = result.replace(/£497/g, trial.formatted);
-    result = result.replace(/£1,300/g, unlimited.formatted);
-    result = result.replace(/£2,000/g, round(2000));
-    result = result.replace(/£5,000/g, round(5000));
-    result = result.replace(/£210/g, round(210));
-    result = result.replace(/£10/g, round(10));
-    return result;
-  }
 
   return (
     <section className="section">
@@ -90,16 +61,14 @@ export default function FAQ() {
                 >
                   <span>
                     {(() => {
-                      const q = withConversion(faq.question);
-                      const h = withConversion(faq.highlight);
-                      const idx = q.indexOf(h);
-                      if (idx === -1) return q;
-                      const before = q.slice(0, idx);
-                      const after = q.slice(idx + h.length);
+                      const idx = faq.question.indexOf(faq.highlight);
+                      if (idx === -1) return faq.question;
+                      const before = faq.question.slice(0, idx);
+                      const after = faq.question.slice(idx + faq.highlight.length);
                       return (
                         <>
                           {before}
-                          <strong className="faq-highlight">{h}</strong>
+                          <strong className="faq-highlight">{faq.highlight}</strong>
                           {after}
                         </>
                       );
@@ -129,7 +98,7 @@ export default function FAQ() {
                       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       style={{ overflow: "hidden" }}
                     >
-                      <p className="faq-answer">{withConversion(faq.answer)}</p>
+                      <p className="faq-answer">{faq.answer}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

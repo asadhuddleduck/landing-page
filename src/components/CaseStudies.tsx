@@ -47,7 +47,7 @@ const caseStudies = [
   {
     brand: "Burger & Sauce",
     logo: "/logos/burger-and-sauce.png",
-    method: "Full AI Ad Engine Trial delivered. Client asked to rate the experience.",
+    method: "Full AI ad campaign delivered end-to-end. Client asked to rate the experience.",
     outcome: "Perfect 10/10 NPS score. Praised communication, results, and accountability.",
     quote: "\"Is 20 an option?\"",
     cite: "Adam, Marketing Manager",

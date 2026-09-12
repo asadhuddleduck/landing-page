@@ -1,14 +1,13 @@
 import Header from "@/components/Header";
-import HeroChatSection from "@/components/HeroChatSection";
+import HeroWaitlist from "@/components/HeroWaitlist";
 import SocialProof from "@/components/SocialProof";
 import CaseStudies from "@/components/CaseStudies";
 import FounderSection from "@/components/FounderSection";
-import CheckoutSection from "@/components/CheckoutSection";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
-import StickyCheckoutCTA from "@/components/StickyCheckoutCTA";
 import ConvergenceBackground from "@/components/ConvergenceBackground";
-
+import LogoStrip from "@/components/LogoStrip";
+import WaitlistForm from "@/components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -17,16 +16,24 @@ export default function Home() {
       <ConvergenceBackground />
 
       <main>
-        <HeroChatSection />
-        <CheckoutSection />
+        <HeroWaitlist />
+
+        <section className="section" aria-label="Trusted by">
+          <LogoStrip />
+        </section>
+
         <SocialProof />
         <CaseStudies />
         <FounderSection />
+
+        <section className="section" aria-label="Join the waitlist">
+          <WaitlistForm variant="inline" />
+        </section>
+
         <FAQ />
       </main>
 
       <Footer />
-      <StickyCheckoutCTA />
     </>
   );
 }

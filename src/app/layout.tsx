@@ -28,25 +28,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Your food looks incredible. Your ads don't. | Huddle Duck",
+  title: "Join the waitlist | Huddle Duck",
   description:
-    "AI-powered advertising built for restaurant chains. AI Ad Engine from £497.",
+    "AI ads for local businesses, done for you. We onboard new clients in waves — tell us about your business and we'll bring you in if it's a fit.",
   metadataBase: new URL("https://start.huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Your food looks incredible. Your ads don't.",
+    title: "AI ads for local businesses, done for you.",
     description:
-      "AI-powered advertising built for restaurant chains. AI Ad Engine from £497.",
+      "Join the Huddle Duck waitlist. We onboard new clients in waves — tell us about your business and we'll bring you in if it's a fit.",
     url: "https://start.huddleduck.co.uk",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Huddle Duck AI Ad Engine",
+        alt: "Huddle Duck — AI ads for local businesses",
       },
     ],
     siteName: "Huddle Duck",
@@ -54,9 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Your food looks incredible. Your ads don't.",
+    title: "AI ads for local businesses, done for you.",
     description:
-      "AI-powered advertising built for restaurant chains. AI Ad Engine from £497.",
+      "Join the Huddle Duck waitlist. We onboard new clients in waves.",
     images: ["/og-image.jpg"],
   },
 };
@@ -104,20 +104,6 @@ export default function RootLayout({
                   name: "Huddle Duck",
                   url: "https://huddleduck.co.uk",
                   logo: "https://start.huddleduck.co.uk/duck-logo.png",
-                },
-                {
-                  "@type": "Product",
-                  name: "AI Ad Engine",
-                  description:
-                    "AI that makes sure everyone near your restaurant knows about you. Deep audience research, real content remade into ads, managed campaigns.",
-                  offers: {
-                    "@type": "AggregateOffer",
-                    lowPrice: "497",
-                    highPrice: "1300",
-                    priceCurrency: "GBP",
-                    offerCount: 2,
-                    availability: "https://schema.org/InStock",
-                  },
                 },
               ],
             }),
