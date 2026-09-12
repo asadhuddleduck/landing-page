@@ -1,6 +1,12 @@
 # Design Decisions Log
 
-Decisions made for the landing-page project that should NOT be revisited without discussion.
+Current behavior is defined by the deployed source, `vercel.json` and the latest dated entry. Older entries are historical and can describe removed features.
+
+## 12 September 2026: HatchFlow email ownership
+
+All retained service and marketing email paths submit immutable jobs to HatchFlow. Native email state advances only on provider acceptance receipts. HatchFlow owns sender identities, shared limits, canonical suppression and replies. Marketing requires separately verified permission; checkout capture alone is held. Old checkout and chat pages remain absent, and old abandoned-cart/reconciliation schedules remain disabled. The new five-minute email reconciliation cron only recovers existing source jobs and mirrors opt-outs. See `docs/HATCHFLOW-EMAIL.md` and the recovered deployment baseline record.
+
+The older Resend, Loops and scheduling descriptions below are decision history. They are not current operating instructions.
 
 
 ## Payment Architecture
