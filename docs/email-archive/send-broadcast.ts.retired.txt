@@ -1,0 +1,256 @@
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import { Resend } from "resend";
+import {
+  htmlToPlainText,
+  marketingEmailSettings,
+} from "./marketing-email";
+
+// Read RESEND_API_KEY from .env.local
+const envPath = resolve(__dirname, "../.env.local");
+const envContent = readFileSync(envPath, "utf-8");
+const apiKey = envContent
+  .split("\n")
+  .find((line) => line.startsWith("RESEND_API_KEY="))
+  ?.split("=")[1]
+  ?.trim();
+
+if (!apiKey) {
+  console.error("RESEND_API_KEY not found in .env.local");
+  process.exit(1);
+}
+
+const resend = new Resend(apiKey);
+const marketingEmail = marketingEmailSettings(envContent);
+const MEME_URL = "https://i.imgflip.com/aldxm3.jpg";
+const CTA_URL =
+  "https://start.huddleduck.co.uk?utm_source=email&utm_medium=broadcast&utm_campaign=ai-ad-engine-launch";
+const UNSUB_MAILTO =
+  "mailto:asad@huddleduck.co.uk?subject=Unsubscribe&body=Please%20remove%20me%20from%20future%20emails";
+
+const broadcastHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="light only"/>
+<meta name="supported-color-schemes" content="light only"/>
+<title>The AI Ad Engine for food &amp; drink businesses</title>
+</head>
+<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;color-scheme:light only;-webkit-color-scheme:light only;">
+
+<!-- Preheader (hidden preview text) -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+  I built an AI Ad Engine specifically for restaurants, cafes &amp; takeaways. One-time setup, no contracts.
+  &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+</div>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F5F5F5;">
+<tr><td align="center" style="padding:40px 16px 60px;">
+
+<!-- Main card -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#FFFFFF;border:1px solid #E5E5E5;border-radius:16px;">
+
+<!-- Logo -->
+<tr><td align="center" style="padding:40px 32px 0;">
+  <img src="https://start.huddleduck.co.uk/duck-logo.png" width="48" height="48" alt="Huddle Duck" style="display:block;border-radius:12px;" />
+</td></tr>
+
+<!-- Heading -->
+<tr><td align="center" style="padding:24px 32px 0;">
+  <h1 style="margin:0;font-size:26px;font-weight:800;color:#1A1A1A;line-height:1.3;">
+    The AI Ad Engine for food &amp; drink businesses
+  </h1>
+</td></tr>
+
+<!-- Body -->
+<tr><td style="padding:20px 32px 0;">
+  <p style="margin:0 0 16px;font-size:16px;color:#333333;line-height:1.6;">
+    If you run a restaurant, cafe, or takeaway - I&rsquo;ve been building something specifically for you.
+  </p>
+  <p style="margin:0 0 16px;font-size:16px;color:#333333;line-height:1.6;">
+    Instead of running your ads the old way - DIY, agency, or some generic tool - I&rsquo;ve built an <strong style="color:#1A1A1A;">AI Ad Engine</strong> that does it all for you.
+  </p>
+  <p style="margin:0;font-size:16px;color:#333333;line-height:1.6;">
+    It researches your market, writes your copy, produces scroll-stopping video ads (not AI slop - real content no one would clock as AI), and launches your campaigns targeting hungry customers in your area. You just approve.
+  </p>
+</td></tr>
+
+<!-- Meme Image -->
+<tr><td align="center" style="padding:24px 32px 0;">
+  <img src="${MEME_URL}" width="456" alt="Expanding brain meme - from running your own ads to getting a custom AI Ad Engine" style="display:block;max-width:100%;height:auto;border-radius:12px;" />
+</td></tr>
+
+<!-- Offer -->
+<tr><td style="padding:24px 32px 0;">
+  <p style="margin:0;font-size:16px;color:#333333;line-height:1.6;">
+    I&rsquo;m opening it up for the first time. <strong style="color:#1A1A1A;">&pound;497 one-time setup.</strong> No contracts. No monthly fees unless you want ongoing management.
+  </p>
+</td></tr>
+
+<!-- CTA Button -->
+<tr><td align="center" style="padding:28px 32px 0;">
+  <a href="${CTA_URL}" style="display:inline-block;padding:14px 32px;background:#1EBA8F;color:#FFFFFF;font-size:16px;font-weight:700;text-decoration:none;border-radius:8px;">See how it works &rarr;</a>
+</td></tr>
+
+<!-- Divider -->
+<tr><td style="padding:28px 32px 0;">
+  <div style="height:1px;background:#E5E5E5;"></div>
+</td></tr>
+
+<!-- Footer -->
+<tr><td align="center" style="padding:24px 32px 12px;">
+  <p style="margin:0;font-size:14px;color:#666666;line-height:1.5;">
+    Questions? Just reply to this email.
+  </p>
+  <p style="margin:12px 0 0;font-size:13px;color:#999999;">
+    Huddle Duck Ltd &middot; Solihull, UK
+  </p>
+</td></tr>
+
+<!-- Unsubscribe -->
+<tr><td align="center" style="padding:0 32px 32px;">
+  <p style="margin:0;font-size:12px;color:#999999;line-height:1.5;">
+    Not interested in AI advertising for food businesses? Totally fair -
+    <a href="${UNSUB_MAILTO}" style="color:#999999;text-decoration:underline;">unsubscribe here</a>
+    and I won&rsquo;t bother you again.
+  </p>
+</td></tr>
+
+</table>
+<!-- End main card -->
+
+</td></tr>
+</table>
+</body>
+</html>`;
+
+// Parse quoted CSV row (handles commas inside quotes)
+function parseCsvRow(row: string): string[] {
+  const fields: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < row.length; i++) {
+    const ch = row[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === "," && !inQuotes) {
+      fields.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  fields.push(current.trim());
+  return fields;
+}
+
+const EMAIL_HEADERS = {
+  "List-Unsubscribe": `<${UNSUB_MAILTO}>`,
+};
+const broadcastText = htmlToPlainText(broadcastHtml);
+
+async function main() {
+  const args = process.argv.slice(2);
+
+  // --test: send a single test email
+  if (args[0] === "--test") {
+    const testEmail = args[1];
+    if (!testEmail) {
+      console.error(
+        "Usage: npx tsx scripts/send-broadcast.ts --test you@email.com"
+      );
+      process.exit(1);
+    }
+    console.log(`Sending test email to ${testEmail}...`);
+    const { error } = await resend.emails.send({
+      from: marketingEmail.from,
+      to: testEmail,
+      replyTo: marketingEmail.replyTo,
+      subject: "I built something for you",
+      html: broadcastHtml,
+      text: broadcastText,
+      headers: EMAIL_HEADERS,
+    });
+    if (error) {
+      console.error("Test send failed:", error);
+      process.exit(1);
+    }
+    console.log("Test email sent! Check your inbox.");
+    return;
+  }
+
+  // --send-all: loop through CSV and send individually, skipping agency clients
+  if (args[0] === "--send-all") {
+    const csvPath = resolve(
+      process.env.HOME || "~",
+      "Downloads/systeme export 28 feb 2026.csv"
+    );
+    const csv = readFileSync(csvPath, "utf-8");
+    const lines = csv.split("\n").filter((l) => l.trim());
+    const rows = lines.slice(1);
+
+    let sent = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+      const fields = parseCsvRow(rows[i]);
+      const email = fields[0];
+      const tags = fields[7] || "";
+
+      if (!email) {
+        console.log(`[${i + 1}/${rows.length}] SKIP - no email`);
+        skipped++;
+        continue;
+      }
+
+      if (tags.includes("agency client")) {
+        console.log(`[${i + 1}/${rows.length}] SKIP (client) - ${email}`);
+        skipped++;
+        continue;
+      }
+
+      const { error } = await resend.emails.send({
+        from: marketingEmail.from,
+        to: email,
+        replyTo: marketingEmail.replyTo,
+        subject: "I built something for you",
+        html: broadcastHtml,
+        text: broadcastText,
+        headers: EMAIL_HEADERS,
+      });
+
+      if (error) {
+        console.log(
+          `[${i + 1}/${rows.length}] FAIL - ${email}: ${error.message}`
+        );
+        failed++;
+      } else {
+        console.log(`[${i + 1}/${rows.length}] SENT - ${email}`);
+        sent++;
+      }
+
+      // Rate limit: 2 req/s max
+      await new Promise((r) => setTimeout(r, 600));
+    }
+
+    console.log("---");
+    console.log(`Done! ${sent} sent, ${skipped} skipped, ${failed} failed`);
+    return;
+  }
+
+  // Default: show usage
+  console.log("Usage:");
+  console.log(
+    "  npx tsx scripts/send-broadcast.ts --test you@email.com   # send test"
+  );
+  console.log(
+    "  npx tsx scripts/send-broadcast.ts --send-all              # send to full list (excludes agency clients)"
+  );
+}
+
+main().catch((err) => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});

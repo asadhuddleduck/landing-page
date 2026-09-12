@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     // Find checkouts older than 1 hour with no matching purchase and not yet nudged
     const result = await db.execute({
       sql: `SELECT c.* FROM checkouts c
+            JOIN email_marketing_permissions permission ON permission.email = lower(trim(c.email)) AND permission.allowed = 1
             LEFT JOIN purchases p ON c.session_id = p.stripe_session_id
             WHERE p.stripe_session_id IS NULL
             AND c.created_at < datetime('now', '-1 hour')
@@ -31,6 +32,9 @@ export async function GET(request: NextRequest) {
     });
 
     let sent = 0;
+    let queued = 0;
+    let suppressed = 0;
+    let uncertain = 0;
     let failed = 0;
 
     for (const row of result.rows) {
@@ -55,17 +59,22 @@ export async function GET(request: NextRequest) {
         const symbol = getCurrencySymbol(currency);
         const formattedAmount = `${symbol}${amount.toLocaleString("en-US")}`;
 
-        await sendAbandonedCartEmail({
+        const receipt = await sendAbandonedCartEmail({
+          sessionId,
           email,
           firstName: name.split(" ")[0] || "there",
           amount: formattedAmount,
         });
 
-        // Mark as nudged so we don't re-send
-        await db.execute({
-          sql: `UPDATE checkouts SET nudged_at = datetime('now') WHERE session_id = ?`,
-          args: [sessionId],
-        });
+        if (receipt.status !== "accepted") {
+          if (receipt.status === "queued") queued++;
+          else if (receipt.status === "suppressed") suppressed++;
+          else if (receipt.status === "uncertain") uncertain++;
+          else failed++;
+          continue;
+        }
+        // The source receipt transaction already recorded nudged_at using the
+        // real provider acceptance time. A queued result never reaches here.
 
         sent++;
       } catch (err) {
@@ -87,6 +96,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       processed: result.rows.length,
       sent,
+      queued,
+      suppressed,
+      uncertain,
       failed,
       cleaned: cleanup.rowsAffected,
     });

@@ -120,8 +120,9 @@ export async function handlePurchase(session: Stripe.Checkout.Session) {
 
   // 2. Side effects (only reached if INSERT succeeded)
   const results = await Promise.allSettled([
-    // Purchase confirmation email via Resend
+    // Purchase confirmation through HatchFlow
     sendPurchaseConfirmation({
+      sessionId: session.id,
       email,
       firstName: name?.split(" ")[0] ?? "there",
       product: productName,

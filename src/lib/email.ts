@@ -1,15 +1,7 @@
-import { Resend } from "resend";
-
-let resendClient: Resend | null = null;
-
-function getResend(): Resend {
-  if (!resendClient) {
-    const key = process.env.RESEND_API_KEY;
-    if (!key) throw new Error("RESEND_API_KEY env var is not set");
-    resendClient = new Resend(key);
-  }
-  return resendClient;
-}
+import { createHash } from "node:crypto";
+import { db } from "./db";
+import { emailUnsubscribeUrl, landingPageEmailSource } from "./email-source";
+import { requireAccepted, stableEmailJobId, type EmailReceipt } from "./hatchflow-email";
 
 // --- HTML template ---
 
@@ -125,7 +117,7 @@ function purchaseConfirmationHtml(vars: {
     Questions? Just reply to this email.
   </p>
   <p style="margin:12px 0 0;font-size:13px;color:#333333;">
-    Huddle Duck Ltd &middot; London, UK
+
   </p>
 </td></tr>
 
@@ -141,31 +133,18 @@ function purchaseConfirmationHtml(vars: {
 // --- Public API ---
 
 export async function sendPurchaseConfirmation(params: {
-  email: string;
-  firstName: string;
-  product: string;
-  amount: string;
+  sessionId: string; email: string; firstName: string; product: string; amount: string;
 }): Promise<void> {
-  const resend = getResend();
-
-  const html = purchaseConfirmationHtml({
-    firstName: params.firstName,
-    product: params.product,
-    amount: params.amount,
+  const source = landingPageEmailSource(db);
+  const sourceJobId = stableEmailJobId("purchase-confirmation", params.sessionId);
+  const saved = await source.getJob(sourceJobId);
+  if (saved && saved.request.to !== params.email.trim().toLowerCase()) throw new Error("Purchase email recipient changed");
+  const receipt = await source.submit(saved?.request ?? {
+    sourceJobId, brand: "huddleduck", purpose: "service", category: "purchase-confirmation",
+    to: params.email, subject: "You're in! Here's what happens next", html: purchaseConfirmationHtml(params),
+    eligibility: { sessionId: params.sessionId },
   });
-
-  const { error } = await resend.emails.send({
-    from: "Huddle Duck <asad@huddleduck.co.uk>",
-    to: params.email,
-    subject: `You're in! Here's what happens next`,
-    html,
-  });
-
-  if (error) {
-    throw new Error(`Resend error: ${error.message}`);
-  }
-
-  console.log(`[email] Purchase confirmation sent to ${params.email}`);
+  requireAccepted(receipt);
 }
 
 // --- Abandoned cart HTML template ---
@@ -174,7 +153,7 @@ function abandonedCartHtml(vars: {
   firstName: string;
   amount: string;
 }): string {
-  const { firstName, amount } = vars;
+  const { firstName } = vars;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -225,7 +204,7 @@ function abandonedCartHtml(vars: {
     Questions? Just reply to this email.
   </p>
   <p style="margin:12px 0 0;font-size:13px;color:#333333;">
-    Huddle Duck Ltd &middot; London, UK
+
   </p>
 </td></tr>
 
@@ -241,27 +220,18 @@ function abandonedCartHtml(vars: {
 // --- Abandoned cart email ---
 
 export async function sendAbandonedCartEmail(params: {
-  email: string;
-  firstName: string;
-  amount: string;
-}): Promise<void> {
-  const resend = getResend();
-
-  const html = abandonedCartHtml({
-    firstName: params.firstName,
-    amount: params.amount,
+  sessionId: string; email: string; firstName: string; amount: string;
+}): Promise<EmailReceipt> {
+  const source = landingPageEmailSource(db);
+  const sourceJobId = stableEmailJobId("abandoned-cart", params.sessionId);
+  const saved = await source.getJob(sourceJobId);
+  if (saved && saved.request.to !== params.email.trim().toLowerCase()) throw new Error("Checkout email recipient changed");
+  if (saved) return source.submit(saved.request);
+  const unsubUrl = emailUnsubscribeUrl(params.email);
+  const html = abandonedCartHtml(params);
+  return source.submit({
+    sourceJobId, brand: "huddleduck", purpose: "marketing", category: "abandoned-cart",
+    to: params.email, subject: "You were so close...", html, unsubUrl,
+    contentVersion: createHash("sha256").update(html).digest("hex"), eligibility: { sessionId: params.sessionId },
   });
-
-  const { error } = await resend.emails.send({
-    from: "Huddle Duck <asad@huddleduck.co.uk>",
-    to: params.email,
-    subject: "You were so close...",
-    html,
-  });
-
-  if (error) {
-    throw new Error(`Resend error: ${error.message}`);
-  }
-
-  console.log(`[email] Abandoned cart nudge sent to ${params.email}`);
 }

@@ -161,7 +161,9 @@ When a purchase completes, `onboarding.ts` calls `POST ${DUCK_EMAILS_API_URL}/ap
 | `STRIPE_PRICE_ID` | Stripe Price ID for £497 Trial product |
 | `STRIPE_UNLIMITED_PRICE_ID` | Stripe Price ID for £1,300/mo Unlimited subscription |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signature verification (whsec_...) |
-| `RESEND_API_KEY` | Resend transactional email |
+| `HATCHFLOW_EMAIL_URL` | HatchFlow email endpoint |
+| `HATCHFLOW_EMAIL_SECRET` | Distinct landing-page source credential |
+| `EMAIL_UNSUB_SECRET` | Preserve recipient unsubscribe signatures |
 | `CRON_SECRET` | Vercel cron authentication |
 | `NOTION_TOKEN` | Notion API for task creation |
 | `META_ACCESS_TOKEN` | Meta CAPI for purchase events |
