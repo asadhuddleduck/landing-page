@@ -1,12 +1,18 @@
+import { databaseFetch } from "./database-fetch";
 import { createClient, type Client } from "@libsql/client";
 
 let _db: Client | null = null;
 
 export function getDb(): Client {
   if (!_db) {
+    const url = process.env.TURSO_DATABASE_URL?.trim();
+    const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
+    if (!url) throw new Error("TURSO_DATABASE_URL is not set");
+    if (!authToken) throw new Error("TURSO_AUTH_TOKEN is not set");
     _db = createClient({
-      url: process.env.TURSO_DATABASE_URL!.trim(),
-      authToken: process.env.TURSO_AUTH_TOKEN!.trim(),
+      fetch: databaseFetch,
+      url,
+      authToken,
     });
   }
   return _db;

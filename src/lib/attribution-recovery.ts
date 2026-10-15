@@ -1,3 +1,4 @@
+import { databaseFetch } from "./database-fetch";
 import { createClient } from "@libsql/client";
 
 /**
@@ -16,7 +17,7 @@ function getAtClient() {
     const url = process.env.ATTRIBUTION_TRACKER_DB_URL;
     const token = process.env.ATTRIBUTION_TRACKER_DB_TOKEN;
     if (!url || !token) return null;
-    atClient = createClient({ url, authToken: token });
+    atClient = createClient({ url, authToken: token, fetch: databaseFetch });
   }
   return atClient;
 }
