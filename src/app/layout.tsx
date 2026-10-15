@@ -21,6 +21,12 @@ const caveat = Caveat({
   display: "swap",
 });
 
+// The analytics component embeds one ID in JavaScript. Ignore stray whitespace
+// and repeated lines in the deployment setting rather than producing invalid JS.
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+  ?.split(/\s+/)
+  .find((value) => /^G-[A-Z0-9]+$/.test(value));
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -90,8 +96,8 @@ export default function RootLayout({
             `,
           }}
         />
-        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        {gaMeasurementId && (
+          <GoogleAnalytics gaId={gaMeasurementId} />
         )}
         <script
           type="application/ld+json"

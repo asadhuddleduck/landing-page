@@ -76,3 +76,12 @@ CookieNotice, MetaPixel, useCurrency, db and stripe; these files are unchanged.
 The initial default local Turbopack build fails on the retained dependency symlink;
 the complete webpack production build succeeds. The deployment build installs
 normal dependencies and uses the default production build.
+
+The first live browser pass exposed a pre-existing duplicated, newline-separated
+Google Analytics ID in production configuration, causing the provider's inline
+script to fail on both routes. The root layout now extracts one valid measurement
+ID before passing it to the existing analytics component. No live environment
+setting, sender or integration ownership was changed.
+Regression verification built with a synthetic duplicated ID on two lines, then
+opened both `/start` and `/` in a browser: one valid inline analytics script and
+no page errors on either route.
