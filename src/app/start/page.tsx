@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import Image from "next/image";
 import ClientLogoBar from "@/components/huddle/ClientLogoBar";
+import CampaignNumbers from "@/components/huddle/CampaignNumbers";
+import FoundersLetter from "@/components/huddle/FoundersLetter";
 import PrimaryAction from "@/components/huddle/PrimaryAction";
 import { HUDDLE_START } from "@/lib/huddle-start";
 import styles from "./start.module.css";
@@ -454,12 +456,14 @@ export default function StartPage() {
           </div>
         </section>
 
+        <CampaignNumbers />
+
         <section
           className={`${styles.section} ${styles.pricing}`}
           aria-labelledby="pricing-title"
         >
           <div className={styles.sectionLabel}>
-            <span>05 / THE INVESTMENT</span>
+            <span>06 / THE INVESTMENT</span>
             <span>ONE FEE. ALL YOUR LOCATIONS.</span>
           </div>
           <div className={styles.priceGrid}>
@@ -488,7 +492,8 @@ export default function StartPage() {
                 THE HUDDLE DUCK AI AD ENGINE
               </span>
               <div className={styles.priceAmount}>
-                £1,300<span>+ VAT / month</span>
+                £{HUDDLE_START.monthlyFee.toLocaleString("en-GB")}
+                <span>+ VAT / month</span>
               </div>
               <div className={styles.priceRule} />
               <ul>
@@ -586,6 +591,7 @@ export default function StartPage() {
             campaign.
           </p>
         </section>
+        <FoundersLetter />
       </main>
 
       <footer className={styles.footer}>

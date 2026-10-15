@@ -1,0 +1,525 @@
+.section {
+  padding: 95px max(40px, calc((100vw - 1200px) / 2));
+  background: #e9ede5;
+  color: #0b1813;
+}
+.label {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #cbd3c8;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #536357;
+}
+.intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  padding: 55px 0 65px;
+  align-items: center;
+}
+.section .intro h2 {
+  font-size: clamp(42px, 5vw, 68px);
+  font-weight: 600;
+  letter-spacing: -0.065em;
+  line-height: 1.08;
+}
+.section .intro h2 span {
+  color: #768177;
+}
+.about,
+.exampleLabel {
+  display: block;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  line-height: 1.5;
+  color: #536357;
+}
+.daily > p {
+  display: flex;
+  gap: 18px;
+  align-items: baseline;
+}
+.daily > p > strong {
+  font-size: 100px;
+  letter-spacing: -0.08em;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.daily > p > span {
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+.section .daily .hourly {
+  font-size: 21px;
+  letter-spacing: -0.025em;
+  gap: 5px;
+  margin-top: 3px;
+}
+.section .daily .hourly strong {
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: inherit;
+}
+.section .daily .feeBasis {
+  display: block;
+  font-size: 11px;
+  line-height: 1.7;
+  max-width: 340px;
+  color: #536357;
+  margin-top: 20px;
+}
+.loyalty {
+  padding: 40px;
+  background: #f8faf4;
+  border: 1px solid #cad4c5;
+}
+.section .loyalty h3 {
+  font-size: clamp(27px, 3vw, 40px);
+  font-weight: 550;
+  line-height: 1.2;
+  letter-spacing: -0.05em;
+  margin-top: 23px;
+}
+.section .lead {
+  max-width: 700px;
+  color: #536357;
+  font-size: 15px;
+  line-height: 1.8;
+  margin-top: 20px;
+}
+.chain {
+  display: grid;
+  grid-template-columns: 1fr 25px 1fr 25px 1fr 25px 1fr;
+  gap: 18px;
+  margin-top: 38px;
+  padding: 30px 0;
+  border-block: 1px solid #d9ded7;
+  align-items: center;
+}
+.chain > div {
+  text-align: center;
+}
+.chain strong {
+  display: block;
+  font-size: clamp(48px, 5.2vw, 76px);
+  font-weight: 550;
+  letter-spacing: -0.07em;
+  line-height: 1;
+}
+.chain div > span {
+  display: block;
+  color: #536357;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 15px;
+}
+.chain .total strong {
+  color: #147d60;
+}
+.operator {
+  text-align: center;
+  font-size: 24px;
+  color: #7b8c7e;
+  margin-top: -45px;
+}
+.assumptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 20px;
+  padding: 25px 0;
+}
+.assumptions p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #536357;
+}
+.assumptions strong {
+  color: #0b1813;
+  font-weight: 600;
+}
+.payback {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+  padding: 30px;
+  background: #dfebe1;
+}
+.payback > div {
+  flex-shrink: 0;
+}
+.payback > div > span {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: #48604b;
+}
+.payback > div > strong {
+  display: block;
+  font-size: 50px;
+  font-weight: 600;
+  letter-spacing: -0.065em;
+  line-height: 1.2;
+  margin-top: 8px;
+  color: #126348;
+}
+.payback > p {
+  font-size: 16px;
+  line-height: 1.65;
+  max-width: 570px;
+  letter-spacing: -0.015em;
+}
+.payback > p > span {
+  display: inline-block;
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #536357;
+}
+.section .contributionNote {
+  margin-top: 18px;
+  color: #536357;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.workings {
+  margin-top: 22px;
+  font-size: 12px;
+  color: #536357;
+}
+.workings summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+  padding-block: 8px;
+}
+.workings summary::-webkit-details-marker {
+  display: none;
+}
+.workings summary span {
+  color: #147d60;
+  font-size: 18px;
+}
+.workings[open] summary span {
+  rotate: 45deg;
+}
+.workings summary:focus-visible {
+  outline: 2px solid #147d60;
+  outline-offset: 4px;
+}
+.workings > div {
+  max-width: 850px;
+  padding-top: 7px;
+  line-height: 1.8;
+}
+.section .workings p + p {
+  margin-top: 12px;
+}
+.franchise {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 75px;
+  padding-block: 60px;
+  border-bottom: 1px solid #cbd3c8;
+}
+.section .franchise h3,
+.section .media h3 {
+  font-size: clamp(30px, 3.5vw, 47px);
+  font-weight: 550;
+  letter-spacing: -0.055em;
+  line-height: 1.1;
+  margin-top: 22px;
+}
+.franchise h3 > span,
+.media h3 > span {
+  color: #768177;
+}
+.section .franchise > div > p {
+  color: #536357;
+  font-size: 15px;
+  line-height: 1.8;
+  margin-top: 24px;
+  max-width: 590px;
+}
+.franchiseMath {
+  text-align: center;
+  align-self: center;
+  border-left: 1px solid #cbd3c8;
+  padding-left: 45px;
+}
+.one {
+  display: block;
+  font-size: 90px;
+  font-weight: 550;
+  letter-spacing: -0.07em;
+  line-height: 1;
+}
+.section .franchiseMath > p {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+}
+.franchiseMath > div {
+  margin-top: 22px;
+}
+.franchiseMath > div > strong {
+  display: block;
+  font-size: 36px;
+  font-weight: 550;
+  letter-spacing: -0.06em;
+  color: #147d60;
+  line-height: 1.3;
+}
+.franchiseMath > div > span {
+  font-size: 11px;
+  color: #536357;
+}
+.section .franchiseMath .franchiseNote {
+  font-size: 10px !important;
+  line-height: 1.7;
+  margin-top: 17px !important;
+  max-width: 260px;
+  margin-inline: auto;
+}
+.media {
+  padding-top: 55px;
+}
+.mediaHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 60px;
+}
+.mediaHeading > p {
+  max-width: 370px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #536357;
+}
+.section .mediaAssumption {
+  margin-top: 34px;
+  font-size: 13px;
+  color: #536357;
+}
+.comparisons {
+  display: grid;
+  gap: 26px;
+  margin-top: 26px;
+}
+.comparison > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 25px;
+  font-size: 15px;
+}
+.comparison strong {
+  font-weight: 600;
+}
+.comparison > div > span {
+  font-size: 20px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+.comparison small {
+  font-size: 12px;
+  font-weight: 400;
+  color: #536357;
+  letter-spacing: 0;
+}
+.barTrack {
+  margin-top: 11px;
+  height: 10px;
+  background: #d6ddd2;
+}
+.barTrack > div {
+  height: 100%;
+}
+.digitalBar {
+  background: #168567;
+}
+.otherBar {
+  background: #8b9b89;
+}
+.section .comparison > p {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #536357;
+}
+.section .mediaNote {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #536357;
+  margin-top: 27px;
+  max-width: 900px;
+}
+@media (max-width: 850px) {
+  .intro {
+    gap: 50px;
+  }
+  .payback {
+    gap: 25px;
+    padding: 24px;
+  }
+  .payback > p {
+    font-size: 14px;
+  }
+  .franchise {
+    gap: 35px;
+  }
+  .mediaHeading {
+    display: block;
+  }
+  .section .mediaHeading > p {
+    margin-top: 20px;
+    max-width: 600px;
+  }
+}
+@media (max-width: 600px) {
+  .section {
+    padding: 60px 24px;
+  }
+  .label {
+    font-size: 8px;
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+  .label > span:last-child {
+    text-align: right;
+    max-width: 155px;
+  }
+  .intro {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 35px 0;
+  }
+  .section .intro h2 {
+    font-size: 39px;
+  }
+  .daily > p > strong {
+    font-size: 85px;
+  }
+  .daily > p > span {
+    font-size: 22px;
+  }
+  .section .daily .feeBasis {
+    font-size: 11px;
+    margin-top: 15px;
+  }
+  .loyalty {
+    padding: 25px 18px;
+    margin-inline: -8px;
+  }
+  .exampleLabel {
+    font-size: 8px;
+  }
+  .section .loyalty h3 {
+    font-size: 28px;
+    margin-top: 20px;
+  }
+  .section .lead {
+    font-size: 13px;
+    line-height: 1.8;
+    margin-top: 18px;
+  }
+  .chain {
+    grid-template-columns: 1fr 10px 1fr 10px 1fr 10px 1fr;
+    gap: 4px;
+    margin-top: 27px;
+    padding-block: 25px;
+  }
+  .chain strong {
+    font-size: 44px;
+  }
+  .chain div > span {
+    font-size: 10px;
+    margin-top: 12px;
+  }
+  .operator {
+    font-size: 15px;
+    margin-top: -46px;
+  }
+  .assumptions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding-block: 20px;
+  }
+  .assumptions p {
+    font-size: 12px;
+  }
+  .payback {
+    display: block;
+    padding: 22px;
+  }
+  .payback > div > strong {
+    font-size: 45px;
+  }
+  .section .payback > p {
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  .payback > p > span {
+    font-size: 11px;
+  }
+  .workings {
+    font-size: 11px;
+  }
+  .franchise {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding-block: 40px;
+  }
+  .section .franchise h3,
+  .section .media h3 {
+    font-size: 33px;
+  }
+  .section .franchise > div > p {
+    font-size: 13px;
+    margin-top: 20px;
+  }
+  .franchiseMath {
+    border-left: 0;
+    border-top: 1px solid #cbd3c8;
+    padding: 26px 0 0;
+  }
+  .one {
+    font-size: 70px;
+  }
+  .media {
+    padding-top: 40px;
+  }
+  .section .mediaHeading > p {
+    font-size: 13px;
+  }
+  .section .mediaAssumption {
+    font-size: 12px;
+    margin-top: 28px;
+  }
+  .comparison > div:first-child {
+    align-items: flex-start;
+    font-size: 13px;
+    gap: 20px;
+  }
+  .comparison > div > span {
+    font-size: 18px;
+    text-align: right;
+  }
+  .comparison small {
+    display: block;
+    max-width: 150px;
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  .section .comparison > p {
+    font-size: 10px;
+  }
+  .section .mediaNote {
+    font-size: 10px;
+  }
+}

@@ -1,0 +1,156 @@
+.section {
+  padding: 100px max(40px, calc((100vw - 1200px) / 2));
+  background: #f6f7f2;
+  color: #17271e;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.5fr;
+  gap: 100px;
+  align-items: start;
+}
+.byline {
+  position: sticky;
+  top: 40px;
+}
+.byline > span {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  color: #5a685f;
+}
+.section .byline h2 {
+  font-size: 38px;
+  font-weight: 550;
+  line-height: 1.12;
+  letter-spacing: -0.055em;
+  margin-top: 25px;
+}
+.section .byline > p {
+  font-size: 12px;
+  margin-top: 30px;
+  line-height: 1.8;
+}
+.byline > p > span {
+  color: #5a685f;
+  font-size: 11px;
+}
+.letter {
+  max-width: 700px;
+}
+.letter article + article {
+  margin-top: 55px;
+  padding-top: 45px;
+  border-top: 1px solid #d9ded7;
+}
+.section .letter h3 {
+  font-size: 25px;
+  font-weight: 550;
+  letter-spacing: -0.035em;
+  line-height: 1.4;
+  margin-bottom: 25px;
+}
+.letter h3 > span {
+  color: #147d60;
+  margin-right: 6px;
+}
+.section .letter article > p {
+  font-size: 17px;
+  line-height: 1.9;
+  color: #44564a;
+  margin-top: 22px;
+  letter-spacing: -0.01em;
+}
+.section .letter a {
+  color: #09684d;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.section .letter a:hover {
+  color: #094b39;
+  text-decoration-thickness: 2px;
+}
+.section .letter a:focus-visible {
+  outline: 2px solid #147d60;
+  outline-offset: 5px;
+}
+.signature {
+  margin-top: 45px;
+}
+.signature p {
+  font-size: 15px;
+  color: #44564a;
+}
+.signature strong {
+  display: block;
+  font-family: var(--font-caveat), Georgia, serif;
+  font-size: 54px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #126348;
+  margin-top: 12px;
+}
+.signature > span {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #5a685f;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 1050px) {
+  .layout {
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: 60px;
+  }
+  .section .byline h2 {
+    font-size: 32px;
+  }
+}
+@media (max-width: 760px) {
+  .section {
+    padding: 60px 24px;
+  }
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 38px;
+  }
+  .byline {
+    position: static;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #d9ded7;
+  }
+  .section .byline h2 {
+    font-size: 35px;
+    margin-top: 20px;
+  }
+  .section .byline > p {
+    margin-top: 20px;
+  }
+  .section .letter h3 {
+    font-size: 23px;
+    margin-bottom: 22px;
+  }
+  .section .letter article > p {
+    font-size: 16px;
+    line-height: 1.85;
+    margin-top: 20px;
+  }
+  .letter article + article {
+    margin-top: 40px;
+    padding-top: 35px;
+  }
+  .signature {
+    margin-top: 35px;
+  }
+}

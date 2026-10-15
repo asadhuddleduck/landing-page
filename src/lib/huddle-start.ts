@@ -1,4 +1,5 @@
 export const HUDDLE_START = {
+  monthlyFee: 1300,
   directDebitUrl: "https://pay.gocardless.com/BRT00039D8Q2CHE",
   whatsappUrl:
     "https://wa.me/447706428225?text=" +

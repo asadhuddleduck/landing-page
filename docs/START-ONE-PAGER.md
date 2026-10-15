@@ -98,3 +98,41 @@ Repeated runs keep each lane wider than the viewport. Copies are hidden from
 assistive technology, hover/focus pause the animation, and reduced motion hides
 the copies and exposes static keyboard-scrollable rows. No client-feed API is
 added. The surrounding surface uses Huddle Duck sage.
+
+## Illustrative economics and founder letter
+
+Asad requested two further sections: simple fee/payback examples and a long
+personal P.S., P.P.S. and P.P.P.S. with quiet text links. They sit before the
+investment card and at the bottom of the main page respectively.
+
+The numbers are derived from `campaign-economics.ts` and the same monthly fee
+used by the price card. £42/day and £1.75/hour are rounded using a 31-day month
+and 24-hour days, excluding VAT. The actual monthly price remains in the
+investment card. Do not present the daily approximation as an annual average.
+
+The loyalty illustration assumes five new regulars from month one, four friends
+each from month two (20), and two friends each from month three (40). All 65
+make three visits per month from their start date. A £20 sale leaves £10 after
+variable costs. That produces 2,040 visits and £20,400 contribution over the
+year, covering £15,600 annual service fees. Ad spend and fixed overheads remain
+separate. The original five alone would not cover the fee; referrals and repeat
+visits are explicit assumptions. Keep the visible qualification and workings.
+
+The franchise illustration assumes one completed sale contributing £20,000
+after other acquisition/onboarding costs. It describes a scenario, not a result
+or a forecast, and an enquiry is distinguished from a completed deal.
+
+Asad chose a labelled illustration while the 10,000% comparative claim lacks a
+specific substantiated campaign comparison. The £100 media example assumes £5
+per 1,000 digital impressions, 10p per printed/delivered leaflet and £20 per
+1,000 estimated billboard impressions. These produce 20,000 ad impressions,
+1,000 leaflet deliveries and 5,000 estimated billboard impressions. They are
+different metrics, not unique customer counts. These prices are illustrative,
+not supplier quotes, and exclude the service fee. Do not turn the example into
+a historical performance claim or add the 10,000% number without evidence.
+
+The founder letter builds trust around responsibility, brand knowledge and
+candid communication. Its first-person intentions were explicitly requested
+by Asad. Do not add invented personal history or testimonials. Inline CTAs are
+quiet green underlined links, as he requested, with no payment at setup and
+the same verified GoCardless/business WhatsApp destinations.
