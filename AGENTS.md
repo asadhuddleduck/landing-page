@@ -62,4 +62,16 @@ and no outbound or production mutation occurred during testing.
 
 Read `docs/HATCHFLOW-EMAIL.md`. All email transport and replies belong to HatchFlow. Marketing requires verified permission and fresh dispatch eligibility. Queued work never advances native state. Preserve existing unsubscribe links, suppression and immutable source identities. Never restore archived direct provider scripts or old reminder schedules.
 
+## Client one-pager and refreshed branding
+
+`/start` is the reusable client one-pager, separate from the waitlist homepage.
+Read `docs/START-ONE-PAGER.md` before changing its offer, flow or design.
+Its shared primary action is `src/components/huddle/PrimaryAction.tsx`.
+It uses an exact copy of SuperPulse editorial-1.2 `coin.css`, with Huddle Duck
+colour variables. Preserve the 20px corners, 2px edge, 5px raised base, press,
+shine and reduced-motion/busy/disabled states. Reuse it for progression actions
+rather than making a separate page animation. This route's premium refresh uses
+local Inter, Huddle Duck green, deep ink, quiet paper surfaces and generous space.
+Keep its styles scoped and preserve the existing homepage.
+
 CANARY-END-LANDINGPAGE-73A1

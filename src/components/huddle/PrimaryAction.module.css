@@ -1,0 +1,30 @@
+.action {
+  --sp-coin-face: #1eba8f;
+  --sp-coin-hover: #3dd5aa;
+  --sp-coin-ink: #052b22;
+  --sp-coin-border: 2px;
+  --sp-coin-radius: 20px;
+  --sp-coin-depth: 5px;
+  --sp-coin-travel: 4px;
+  --sp-coin-weight: 800;
+  --sp-coin-entry: 520ms;
+  --sp-coin-period: 3200ms;
+  --sp-font: var(--font-huddle-start), Arial, sans-serif;
+  --sp-fog: #1eba8f;
+  padding: 18px 25px;
+  min-height: 62px;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

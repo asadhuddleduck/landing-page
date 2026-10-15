@@ -9,6 +9,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: "https://start.huddleduck.co.uk/start",
+      lastModified: new Date("2026-10-15"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: "https://start.huddleduck.co.uk/privacy",
       lastModified: new Date(),
       changeFrequency: "monthly",
