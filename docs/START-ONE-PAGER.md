@@ -53,9 +53,11 @@ or branding with the button treatment.
 
 The source began from the authenticated production commit 1caf7c7. Preserve
 the waitlist, HatchFlow email ownership and five-minute reconciliation cron.
-Cloudflare redirects only exact `/start` and `/start/` requests on the apex/www
-hosts to https://start.huddleduck.co.uk/start, preserving query strings. Root
-redirects retain their existing behaviour.
+The public site now serves directly at https://huddleduck.co.uk/start. The apex
+domain belongs to this same Vercel project, with Cloudflare managing DNS. The
+old apex and www redirects to the start subdomain are disabled; www redirects
+to the apex. Keep the old start subdomain working for existing links. Canonical,
+Open Graph URLs, sitemap and robots use the apex. Do not restore the old redirect.
 
 Check desktop/mobile layout, keyboard use, reduced motion, authorisation and
 WhatsApp destinations, metadata, social image, sitemap and existing homepage.
@@ -85,3 +87,14 @@ setting, sender or integration ownership was changed.
 Regression verification built with a synthetic duplicated ID on two lines, then
 opened both `/start` and `/` in a browser: one valid inline analytics script and
 no page errors on either route.
+
+## SuperPulse logo bar
+
+Asad requested the same logo-bar design as SuperPulse. `ClientLogoBar` reuses the
+deployed SuperPulse 87b7d680 layout: two full-width monochrome rows with opposing
+82s/68s loops, faded edges, optical logo sizing and mobile scaling. It uses the
+12 restaurant marks already represented by Huddle Duck, copied as local WebPs.
+Repeated runs keep each lane wider than the viewport. Copies are hidden from
+assistive technology, hover/focus pause the animation, and reduced motion hides
+the copies and exposes static keyboard-scrollable rows. No client-feed API is
+added. The surrounding surface uses Huddle Duck sage.

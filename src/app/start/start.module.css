@@ -127,7 +127,6 @@
 .heroIndex,
 .heroFoot,
 .sectionLabel,
-.trustLabel,
 .includedLabel,
 .priceEyebrow {
   font-size: 10px;
@@ -214,33 +213,9 @@
   font-size: 9px;
 }
 .trust {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 42px 40px;
+  padding: 28px 0 36px;
   border-bottom: 1px solid var(--hd-line);
-  display: flex;
-  gap: 60px;
-  align-items: center;
-}
-.trustLabel {
-  color: var(--hd-muted);
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-.logoRow {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 35px;
-}
-.clientLogo {
-  width: 118px;
-  height: 48px;
-  object-fit: contain;
-  filter: grayscale(1) brightness(0.35);
-  mix-blend-mode: multiply;
-  opacity: 0.82;
+  background: #e9ede5;
 }
 .section {
   max-width: 1280px;
@@ -862,16 +837,6 @@
   .heroCopy {
     font-size: 15px;
   }
-  .trust {
-    gap: 28px;
-  }
-  .logoRow {
-    gap: 20px;
-  }
-  .clientLogo {
-    width: 94px;
-    height: 42px;
-  }
   .pressureGrid,
   .workGrid,
   .processGrid,
@@ -967,24 +932,7 @@
     text-align: right;
   }
   .trust {
-    padding: 30px 24px;
-    display: block;
-  }
-  .trustLabel {
-    display: block;
-    font-size: 8px;
-    margin-bottom: 24px;
-  }
-  .logoRow {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-items: start;
-    gap: 22px 18px;
-  }
-  .clientLogo {
-    width: 100%;
-    max-width: 100px;
-    height: 35px;
+    padding-block: 24px;
   }
   .section {
     padding: 60px 24px;

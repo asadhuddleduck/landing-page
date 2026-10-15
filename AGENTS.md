@@ -2,7 +2,8 @@ CANARY-TOP-LANDINGPAGE-73A1
 
 # Huddle Duck landing page
 
-Production Next.js site for `start.huddleduck.co.uk`. The current working tree
+Production Next.js site for `huddleduck.co.uk`, retaining the original
+`start.huddleduck.co.uk` alias for existing links. The current working tree
 is centered on the waitlist experience. Older chat and checkout pages are absent. Do not recreate deleted flows
 from historical documentation.
 
@@ -73,5 +74,9 @@ shine and reduced-motion/busy/disabled states. Reuse it for progression actions
 rather than making a separate page animation. This route's premium refresh uses
 local Inter, Huddle Duck green, deep ink, quiet paper surfaces and generous space.
 Keep its styles scoped and preserve the existing homepage.
+The client logo bar reuses the SuperPulse two-row monochrome marquee treatment
+through `ClientLogoBar`. Keep the optical sizing, faded edges, opposing loops,
+pause-on-hover/focus and reduced-motion scrolling. Canonical URLs use the apex
+domain; `/start` must load directly without redirecting to a subdomain.
 
 CANARY-END-LANDINGPAGE-73A1

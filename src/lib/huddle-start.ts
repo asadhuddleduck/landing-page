@@ -5,7 +5,7 @@ export const HUDDLE_START = {
     encodeURIComponent(
       "Hi Huddle Duck, I've set up my Direct Debit. My business name is: ",
     ),
-  canonicalUrl: "https://start.huddleduck.co.uk/start",
+  canonicalUrl: "https://huddleduck.co.uk/start",
   headline: "When a branch is quiet, everyone looks at you.",
   title: "Your next campaign. Taken care of. | Huddle Duck",
   description:

@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import Image from "next/image";
+import ClientLogoBar from "@/components/huddle/ClientLogoBar";
 import PrimaryAction from "@/components/huddle/PrimaryAction";
 import { HUDDLE_START } from "@/lib/huddle-start";
 import styles from "./start.module.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://huddleduck.co.uk"),
   title: HUDDLE_START.title,
   description: HUDDLE_START.description,
   alternates: { canonical: HUDDLE_START.canonicalUrl },
@@ -220,29 +222,8 @@ export default function StartPage() {
           </div>
         </section>
 
-        <section
-          className={styles.trust}
-          aria-label="Brands we have worked with"
-        >
-          <span className={styles.trustLabel}>In good company.</span>
-          <div className={styles.logoRow}>
-            {[
-              ["/logos/burger-and-sauce.png", "Burger & Sauce"],
-              ["/logos/phatbuns.png", "Phat Buns"],
-              ["/logos/shakedown.png", "Shakedown"],
-              ["/logos/doughclub-new.png", "Dough Club"],
-              ["/logos/chai-green.png", "Chai Green"],
-            ].map(([src, name]) => (
-              <Image
-                key={name}
-                src={src}
-                alt={name}
-                width={130}
-                height={50}
-                className={styles.clientLogo}
-              />
-            ))}
-          </div>
+        <section className={styles.trust}>
+          <ClientLogoBar />
         </section>
 
         <section

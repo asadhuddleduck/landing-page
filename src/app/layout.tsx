@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   title: "Join the waitlist | Huddle Duck",
   description:
     "AI ads for local businesses, done for you. We onboard new clients in waves — tell us about your business and we'll bring you in if it's a fit.",
-  metadataBase: new URL("https://start.huddleduck.co.uk"),
+  metadataBase: new URL("https://huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: "AI ads for local businesses, done for you.",
     description:
       "Join the Huddle Duck waitlist. We onboard new clients in waves — tell us about your business and we'll bring you in if it's a fit.",
-    url: "https://start.huddleduck.co.uk",
+    url: "https://huddleduck.co.uk",
     images: [
       {
         url: "/og-image.jpg",
@@ -109,7 +109,7 @@ export default function RootLayout({
                   "@type": "Organization",
                   name: "Huddle Duck",
                   url: "https://huddleduck.co.uk",
-                  logo: "https://start.huddleduck.co.uk/duck-logo.png",
+                  logo: "https://huddleduck.co.uk/duck-logo.png",
                 },
               ],
             }),
