@@ -99,7 +99,7 @@ assistive technology, hover/focus pause the animation, and reduced motion hides
 the copies and exposes static keyboard-scrollable rows. No client-feed API is
 added. The surrounding surface uses Huddle Duck sage.
 
-## Illustrative economics and founder letter
+## Simple economics and founder letter
 
 Asad requested two further sections: simple fee/payback examples and a long
 personal P.S., P.P.S. and P.P.P.S. with quiet text links. They sit before the
@@ -110,13 +110,21 @@ used by the price card. £42/day and £1.75/hour are rounded using a 31-day mont
 and 24-hour days, excluding VAT. The actual monthly price remains in the
 investment card. Do not present the daily approximation as an annual average.
 
-The loyalty illustration assumes five new regulars from month one, four friends
+Copy refinement, 15 October: Asad asked for short everyday wording in the fee
+section. Do not use formal "illustration" or "example" labels in the rendered
+section. Lead with the simple idea, use conditional language such as "could"
+and "if", and keep the actual cost and referral assumptions readable. The
+expandable workings carry the timing and detailed calculation. Use "left after
+the cost of each order" instead of contribution, and "ad views" instead of
+impressions. This wording change does not turn the assumed numbers into results.
+
+The loyalty maths assumes five new regulars from month one, four friends
 each from month two (20), and two friends each from month three (40). All 65
 make three visits per month from their start date. A £20 sale leaves £10 after
 variable costs. That produces 2,040 visits and £20,400 contribution over the
 year, covering £15,600 annual service fees. Ad spend and fixed overheads remain
 separate. The original five alone would not cover the fee; referrals and repeat
-visits are explicit assumptions. Keep the visible qualification and workings.
+visits are explicit assumptions. Keep the short cost note and workings.
 
 The franchise illustration assumes one completed sale contributing £20,000
 after other acquisition/onboarding costs. It describes a scenario, not a result

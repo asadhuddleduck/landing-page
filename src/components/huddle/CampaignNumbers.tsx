@@ -28,25 +28,25 @@ export default function CampaignNumbers() {
             Or <strong>£{n.hourlyFee.toFixed(2)}</strong> an hour.
           </p>
           <p className={styles.feeBasis}>
-            Rounded over a 31-day month and 24-hour days, excluding VAT. Billed
-            monthly. One service fee across all your locations.
+            One fee for all your locations. Billed monthly, plus VAT.
+            Daily and hourly figures use a 31-day month.
           </p>
         </div>
       </div>
 
       <article className={styles.loyalty} aria-labelledby="loyalty-title">
         <div className={styles.exampleLabel}>
-          ILLUSTRATION 01 / THE REGULARS
+          01 / FIVE NEW REGULARS
         </div>
         <h3 id="loyalty-title">
-          What if just five new people
+          Five people love your food.
           <br />
-          became the start of something bigger?
+          Word gets around.
         </h3>
         <p className={styles.lead}>
-          They love the food. They come back. They bring someone. When the food
-          and the experience give people a reason to recommend you, the first
-          visit can be the start of a much longer story.
+          They come back. They bring their mates. Their mates bring family.
+          If five new regulars each bring four people, and those people each
+          bring two more, here&apos;s where you could end up.
         </p>
         <div
           className={styles.chain}
@@ -54,22 +54,14 @@ export default function CampaignNumbers() {
         >
           <div>
             <strong>{n.originalRegulars}</strong>
-            <span>
-              new regulars
-              <br />
-              in month one
-            </span>
+            <span>new regulars</span>
           </div>
           <span className={styles.operator} aria-hidden="true">
             +
           </span>
           <div>
             <strong>{n.friends}</strong>
-            <span>
-              friends join
-              <br />
-              in month two
-            </span>
+            <span>friends</span>
           </div>
           <span className={styles.operator} aria-hidden="true">
             +
@@ -77,9 +69,9 @@ export default function CampaignNumbers() {
           <div>
             <strong>{n.friendsOfFriends}</strong>
             <span>
-              their friends join
+              friends of
               <br />
-              in month three
+              friends
             </span>
           </div>
           <span className={styles.operator} aria-hidden="true">
@@ -96,57 +88,56 @@ export default function CampaignNumbers() {
         </div>
         <div className={styles.assumptions}>
           <p>
-            <strong>{pounds(n.averageOrder)}</strong> average sale
+            <strong>{pounds(n.averageOrder)}</strong> spent each visit
           </p>
           <p>
             <strong>{n.visitsPerMonth} visits</strong> per person, per month
           </p>
           <p>
-            <strong>{pounds(n.contributionPerVisit)}</strong> left per visit
-            after variable costs
+            <strong>{pounds(n.contributionPerVisit)}</strong> left after the
+            cost of each order
           </p>
         </div>
         <div className={styles.payback}>
           <div>
-            <span>CONTRIBUTION OVER THE YEAR</span>
+            <span>LEFT FROM THEIR ORDERS IN A YEAR</span>
             <strong>{pounds(n.yearlyContribution)}</strong>
           </div>
           <p>
-            In this illustration, the contribution covers{" "}
-            <strong>a whole year of our service fees.</strong>
+            That could cover <strong>a whole year of our fees.</strong>
             <br />
             <span>
-              It started with five people. The referrals and repeat visits do
-              the rest.
+              All starting with five people who loved what you do.
             </span>
           </p>
         </div>
         <p className={styles.contributionNote}>
-          Illustrative contribution, excluding VAT. Ad spend and fixed overheads
-          are separate. Actual referrals and repeat visits vary.
+          Based on the visits and referrals above. Before VAT, ad spend and
+          your day-to-day running costs.
         </p>
         <details className={styles.workings}>
           <summary>
-            See the simple workings <span aria-hidden="true">+</span>
+            How the maths works <span aria-hidden="true">+</span>
           </summary>
           <div>
             <p>
-              The original five each bring four new people. Those twenty each
-              bring two more. All 65 are new regulars in this example.
+              Five new regulars join in month one. Each brings four friends
+              in month two. Those twenty each bring two more in month three.
+              That makes 65 regulars.
             </p>
             <p>
               The first five visit for 12 months, the next twenty for 11 months
               and the final forty for 10 months. At three visits a month, that
               is {n.yearlyVisits.toLocaleString("en-GB")} visits. With £10 left
-              after per-order costs on each visit, the contribution is{" "}
-              {pounds(n.yearlyContribution)}. A year of service fees is{" "}
+              after the cost of each order, that leaves{" "}
+              {pounds(n.yearlyContribution)}. A year of our fees is{" "}
               {pounds(n.annualFee)}.
             </p>
             <p>
-              These are assumptions, not a forecast. All figures exclude VAT.
-              The example pays back the service fee; your ad spend and fixed
-              overheads are separate. Your actual repeat visits, referrals,
-              margins and customer timing determine your result.
+              This needs those people to keep visiting and recommending you.
+              What you actually earn depends on how often they return, who
+              they bring and how much you make on each order. VAT, ad spend
+              and day-to-day running costs are separate.
             </p>
           </div>
         </details>
@@ -155,18 +146,17 @@ export default function CampaignNumbers() {
       <article className={styles.franchise} aria-labelledby="franchise-title">
         <div>
           <div className={styles.exampleLabel}>
-            ILLUSTRATION 02 / THE BIGGER OPPORTUNITY
+            02 / ONE NEW FRANCHISEE
           </div>
           <h3 id="franchise-title">
-            One franchisee.
+            One franchisee could
             <br />
-            <span>Across an entire year.</span>
+            <span>cover the whole year.</span>
           </h3>
           <p>
-            We can also build campaigns for franchise enquiries. If one
-            completed franchise sale leaves your business with{" "}
-            {pounds(n.franchiseContribution)} after the other acquisition and
-            onboarding costs, that one deal covers a year of our service fees.
+            Looking for franchisees? We can run those campaigns too. If one
+            new franchisee brings in {pounds(n.franchiseContribution)} after
+            your costs, that one deal covers a year of our fees.
           </p>
         </div>
         <div className={styles.franchiseMath}>
@@ -174,33 +164,32 @@ export default function CampaignNumbers() {
           <p>completed franchise sale</p>
           <div>
             <strong>{pounds(n.franchiseContribution)}</strong>
-            <span>illustrative contribution</span>
+            <span>left after your costs</span>
           </div>
           <p className={styles.franchiseNote}>
-            Your own franchise fee and costs decide the maths. An enquiry still
-            has to become a signed deal.
+            It has to be a completed sale. Your franchise fee and costs decide
+            what&apos;s left.
           </p>
         </div>
       </article>
 
       <article className={styles.media} aria-labelledby="media-title">
         <div className={styles.exampleLabel}>
-          ILLUSTRATION 03 / MAKE THE MEDIA BUDGET TRAVEL
+          03 / MAKE YOUR BUDGET GO FURTHER
         </div>
         <div className={styles.mediaHeading}>
           <h3 id="media-title">
             The same £100.
             <br />
-            <span>Very different possibilities.</span>
+            <span>How far could it go?</span>
           </h3>
           <p>
-            Print, delivery and the location of a billboard all affect what your
-            budget buys. Local digital ads let us test the message, choose the
-            area and adjust the spend as response data comes in.
+            With local ads, we choose the area, test what gets attention and
+            put more of your budget behind what works.
           </p>
         </div>
         <p className={styles.mediaAssumption}>
-          An illustrative £100 media budget, using the assumed prices below:
+          Here&apos;s what £100 buys at the rates below. Actual costs vary.
         </p>
         <div className={styles.comparisons}>
           {n.mediaExamples.map((item, i) => (
@@ -223,11 +212,10 @@ export default function CampaignNumbers() {
           ))}
         </div>
         <p className={styles.mediaNote}>
-          Illustrative prices only, not supplier quotes or measured campaign
-          results. Ad impressions, delivered leaflets and estimated billboard
-          views are different measures; they are not unique customers. This
-          compares media spend only, excluding service fees. Actual costs and
-          results vary.
+          These rates are for the maths, not live quotes or past results.
+          Ad views, leaflet deliveries and estimated billboard views count
+          different things. They don&apos;t tell you how many people will buy.
+          This is the media budget only. Our fee is separate.
         </p>
       </article>
     </section>
