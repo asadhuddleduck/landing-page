@@ -76,7 +76,9 @@ local Inter, Huddle Duck green, deep ink, quiet paper surfaces and generous spac
 Keep its styles scoped and preserve the existing homepage.
 The client logo bar reuses the SuperPulse two-row monochrome marquee treatment
 through `ClientLogoBar`. Keep the optical sizing, faded edges, opposing loops,
-pause-on-hover/focus and reduced-motion scrolling. Canonical URLs use the apex
+continuous scrolling on desktop and mobile. The bar is passive: hover, focus,
+click and tap never pause it. Do not add links, focus stops, dragging or pointer
+controls. Reduced motion uses a static wrapped logo layout. Canonical URLs use the apex
 domain; `/start` must load directly without redirecting to a subdomain.
 
 CANARY-END-LANDINGPAGE-73A1

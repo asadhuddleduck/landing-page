@@ -95,9 +95,11 @@ deployed SuperPulse 87b7d680 layout: two full-width monochrome rows with opposin
 82s/68s loops, faded edges, optical logo sizing and mobile scaling. It uses the
 12 restaurant marks already represented by Huddle Duck, copied as local WebPs.
 Repeated runs keep each lane wider than the viewport. Copies are hidden from
-assistive technology, hover/focus pause the animation, and reduced motion hides
-the copies and exposes static keyboard-scrollable rows. No client-feed API is
-added. The surrounding surface uses Huddle Duck sage.
+assistive technology. Owner decision, 15 October: the bar is passive on desktop
+and mobile. Hover, focus, click and tap must never pause it. No links, keyboard
+stops, image dragging or pointer controls. Reduced motion hides the copies and
+shows all marks in static wrapped rows, with no scrolling interaction. No
+client-feed API is added. The surrounding surface uses Huddle Duck sage.
 
 ## Simple economics and founder letter
 

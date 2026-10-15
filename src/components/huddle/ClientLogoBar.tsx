@@ -53,6 +53,7 @@ function LogoGroup({
               style={
                 { "--client-logo-height": `${opticalHeight}px` } as LogoStyle
               }
+              draggable={false}
               decoding="async"
               loading="eager"
               fetchPriority="low"
@@ -81,7 +82,6 @@ export default function ClientLogoBar() {
           <div
             key={index}
             className={`${styles.viewport} ${index === 0 ? styles.forward : styles.reverse}`}
-            tabIndex={0}
             role="group"
             aria-label={`Client logos, row ${index + 1} of 2`}
           >

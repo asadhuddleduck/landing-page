@@ -2,6 +2,8 @@
   --client-logo-gap: clamp(2.1rem, 5vw, 4.5rem);
   width: 100%;
   min-width: 0;
+  pointer-events: none;
+  user-select: none;
 }
 
 .light {
@@ -62,12 +64,6 @@
   display: none;
 }
 
-.viewport:focus-visible {
-  border-radius: 0.35rem;
-  outline: 2px solid var(--client-logo-caption);
-  outline-offset: 3px;
-}
-
 .track {
   display: flex;
   width: max-content;
@@ -85,11 +81,6 @@
   animation-delay: -61s;
   animation-direction: reverse;
   animation-duration: 68s;
-}
-
-.root:hover .track,
-.root:focus-within .track {
-  animation-play-state: paused;
 }
 
 .group {
@@ -145,37 +136,25 @@
 
 @media (prefers-reduced-motion: reduce) {
   .viewport {
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scroll-snap-type: x proximity;
+    display: block;
     -webkit-mask-image: none;
     mask-image: none;
-    scrollbar-color: var(--client-logo-caption) transparent;
-    scrollbar-width: thin;
-  }
-
-  .viewport::-webkit-scrollbar {
-    display: block;
-    height: 5px;
-  }
-
-  .viewport::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: var(--client-logo-caption);
   }
 
   .track {
+    display: block;
+    width: 100%;
     animation: none;
     transform: none;
     will-change: auto;
   }
 
   .group {
-    padding-block-end: 0.35rem;
-  }
-
-  .group .logo {
-    scroll-snap-align: center;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0;
   }
 
   .clone {
