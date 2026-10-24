@@ -458,5 +458,15 @@
     "opticalHeight": 34,
     "lane": 1,
     "order": 46
+  },
+  {
+    "id": "trial-smoked-inc-fd54feab",
+    "name": "@smoked.inc",
+    "src": "/brand/huddle/client-logos/smoked-inc.webp",
+    "width": 210,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 1,
+    "order": 47
   }
 ]
