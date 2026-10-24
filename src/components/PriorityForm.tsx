@@ -87,7 +87,7 @@ export default function PriorityForm({ email }: Props) {
       <div className="waitlist-priority-done">
         <div className="waitlist-success-title">Priority application received.</div>
         <p className="waitlist-success-body">
-          Thanks — we&apos;ll bump you up the queue and reach out shortly.
+          Thanks. We&apos;ll move you up the list and be in touch soon.
         </p>
       </div>
     );
@@ -96,7 +96,7 @@ export default function PriorityForm({ email }: Props) {
   return (
     <form className="waitlist-priority-form" onSubmit={onSubmit} noValidate>
       <div className="waitlist-priority-intro">
-        Answer as many as you like — more detail helps us decide faster.
+        Answer as many as you like. More detail helps us decide faster.
       </div>
 
       <div className="waitlist-grid">
@@ -109,9 +109,9 @@ export default function PriorityForm({ email }: Props) {
             disabled={submitting}
           >
             <option value="">Pick one…</option>
-            <option value="Yes">Yes — at least weekly</option>
-            <option value="Sometimes">Sometimes — when we can</option>
-            <option value="No">No — barely posting</option>
+            <option value="Yes">Yes, at least weekly</option>
+            <option value="Sometimes">Sometimes, when we can</option>
+            <option value="No">No, barely posting</option>
           </select>
         </div>
 
@@ -124,9 +124,9 @@ export default function PriorityForm({ email }: Props) {
             disabled={submitting}
           >
             <option value="">Pick one…</option>
-            <option value="Yes">Yes — most of them</option>
+            <option value="Yes">Yes, most of them</option>
             <option value="Mix">Mix of copyrighted + royalty-free</option>
-            <option value="No">No — only royalty-free / original</option>
+            <option value="No">No, only royalty-free or original</option>
             <option value="Unsure">Not sure</option>
           </select>
         </div>
@@ -185,9 +185,9 @@ export default function PriorityForm({ email }: Props) {
             disabled={submitting}
           >
             <option value="">Pick one…</option>
-            <option value="Yes">Yes — bringing in customers</option>
+            <option value="Yes">Yes, bringing in customers</option>
             <option value="Somewhat">Somewhat</option>
-            <option value="No">No — no measurable impact</option>
+            <option value="No">No, no measurable impact</option>
           </select>
         </div>
 

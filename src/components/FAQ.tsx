@@ -8,19 +8,19 @@ const faqs: { question: string; highlight: string; answer: string }[] = [
     question: "How does the waitlist work?",
     highlight: "waitlist",
     answer:
-      "You tell us about your business, we review every applicant by hand, and we onboard new clients in waves as capacity opens up. We only take on businesses we believe we can move the needle for, so not every applicant gets a spot.",
+      "Tell us about your business and we read every one ourselves. We only take on a handful of new clients at a time, and only businesses we're confident we can help, so not everyone gets a spot.",
   },
   {
     question: "Who is this for?",
     highlight: "Who is this for",
     answer:
-      "Local businesses with a physical presence — restaurants, cafés, gyms, salons, clinics, dental practices, retail. If your customers walk through a door, we can help. We don't currently work with pure e-commerce or B2B SaaS.",
+      "Local businesses people visit in person: restaurants, cafés, gyms, salons, clinics, dental practices, shops. If your customers walk through a door, we can help. We don't currently work with online-only shops or software companies.",
   },
   {
     question: "How do I jump the queue?",
     highlight: "jump the queue",
     answer:
-      "After joining the waitlist you'll see a short follow-up form — seven questions about how content currently fits into your business. Answering it tells us you're serious and gives us the context to prioritise you ahead of less-engaged signups.",
+      "After you join, you'll see seven short questions about how content fits into your business right now. Answering them shows us you're serious and helps us get to you sooner.",
   },
   {
     question: "When will I hear back?",
@@ -29,16 +29,16 @@ const faqs: { question: string; highlight: string; answer: string }[] = [
       "We aim to respond to every signup within a few working days. If we have capacity for you, we'll book a short call to walk through what working together looks like and you can decide whether to move forward.",
   },
   {
-    question: "How is this different from a marketing agency?",
-    highlight: "different from a marketing agency",
+    question: "What does working with you look like?",
+    highlight: "working with you",
     answer:
-      "Traditional agencies onboard slowly, run a generic playbook, and charge thousands per month regardless of results. We use AI to do deep research on your specific audience, competitors, and local market before a single ad goes live — strategy built on data, not guesswork.",
+      "We get to know your business and your area, plan the campaigns, make the ads from your own photos and videos, then run them on Instagram and Facebook and keep adjusting them while they run. You deal with the same small team from the first call onwards, and you always know where your money is going.",
   },
   {
     question: "We have multiple locations. Does that matter?",
     highlight: "multiple locations",
     answer:
-      "It helps. Each location gets its own targeting and creative tailored to its local audience. Mention it in the brief info field — multi-location operators often jump the queue because the upside is bigger on both sides.",
+      "It helps. Each location gets its own targeting and ads built for the people nearby. Mention it in the form. Groups with several sites often get seen sooner because there's more to win on both sides.",
   },
 ];
 

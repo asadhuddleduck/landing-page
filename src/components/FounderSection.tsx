@@ -25,7 +25,7 @@ export default function FounderSection() {
       <p className="founder-bio">
         I was going to be an astrophysicist. My dad was a doctor, and
         would have been over the moon. He woke at 4am to do the work
-        before the work, and I grew up watching that — so I do the
+        before the work, and I grew up watching that, so I do the
         same. Then one day I dropped out. Flew far from home. Spent
         three years on marble floors with books older than most
         European capitals. The kind of quiet work most people

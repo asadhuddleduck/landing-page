@@ -34,25 +34,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Join the waitlist | Huddle Duck",
+  title: "Huddle Duck | Ad agency for local businesses",
   description:
-    "AI ads for local businesses, done for you. We onboard new clients in waves — tell us about your business and we'll bring you in if it's a fit.",
+    "We plan, make and run Instagram and Facebook ads for restaurants and local businesses. 125+ locations over 7 years. Tell us about your business.",
   metadataBase: new URL("https://huddleduck.co.uk"),
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "AI ads for local businesses, done for you.",
+    title: "Local ads that bring people through your door.",
     description:
-      "Join the Huddle Duck waitlist. We onboard new clients in waves — tell us about your business and we'll bring you in if it's a fit.",
+      "Huddle Duck is an ad agency for local businesses. We take on a few new clients at a time. Tell us about yours.",
     url: "https://huddleduck.co.uk",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Huddle Duck — AI ads for local businesses",
+        alt: "Huddle Duck, ad agency for local businesses",
       },
     ],
     siteName: "Huddle Duck",
@@ -60,9 +60,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI ads for local businesses, done for you.",
+    title: "Local ads that bring people through your door.",
     description:
-      "Join the Huddle Duck waitlist. We onboard new clients in waves.",
+      "An ad agency for local businesses. We take on a few new clients at a time.",
     images: ["/og-image.jpg"],
   },
 };

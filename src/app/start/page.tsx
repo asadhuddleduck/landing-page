@@ -188,7 +188,7 @@ export default function StartPage() {
         <section className={styles.hero} aria-labelledby="hero-title">
           <div className={styles.heroTop}>
             <span className={styles.eyebrow}>
-              <span className={styles.greenDot} /> THE HUDDLE DUCK AI AD ENGINE
+              <span className={styles.greenDot} /> HUDDLE DUCK AGENCY SERVICE
             </span>
             <span className={styles.heroIndex}>
               STRATEGY. CREATIVE. CAMPAIGNS.
@@ -489,7 +489,7 @@ export default function StartPage() {
             </div>
             <div className={styles.priceCard}>
               <span className={styles.priceEyebrow}>
-                THE HUDDLE DUCK AI AD ENGINE
+                HUDDLE DUCK AGENCY SERVICE
               </span>
               <div className={styles.priceAmount}>
                 £{HUDDLE_START.monthlyFee.toLocaleString("en-GB")}

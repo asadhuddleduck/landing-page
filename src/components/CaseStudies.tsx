@@ -7,7 +7,7 @@ const caseStudies = [
   {
     brand: "Phat Buns",
     logo: "/logos/phatbuns.png",
-    method: "AI campaigns launched across 15+ locations for a multi-location burger brand.",
+    method: "Campaigns launched across 15+ locations for a multi-location burger brand.",
     outcome: "Within days, their Uber Eats account manager called, stunned by the performance spike across every location.",
     quote: "\"What the hell have you guys done?\"",
     cite: "Uber Eats rep to Phat Buns",
@@ -15,7 +15,7 @@ const caseStudies = [
   {
     brand: "Shakedown",
     logo: "/logos/shakedown.png",
-    method: "AI ad campaigns built and launched for a growing milkshake and burger brand.",
+    method: "Ad campaigns planned, made and launched for a growing milkshake and burger brand.",
     outcome: "Demand outpaced what the kitchen could handle. Sam called and asked us to pause.",
     quote: "\"It was mental. We want to do more of this.\"",
     cite: "Sam, Shakedown",
@@ -23,7 +23,7 @@ const caseStudies = [
   {
     brand: "Burger & Sauce",
     logo: "/logos/burger-and-sauce.png",
-    method: "Single £100 test campaign using AI-remade content from their existing social media.",
+    method: "Single £100 test campaign, re-edited from content already on their social media.",
     outcome: "Client reported strong customer response. Repeat visits followed. They stayed on.",
   },
   {
@@ -41,13 +41,13 @@ const caseStudies = [
   {
     brand: "Chai Green",
     logo: "/logos/chai-green.png",
-    method: "Franchise enquiry flow built using AI campaigns. Targeted qualified investors, filtered tyre-kickers.",
-    outcome: "Client reported 676 franchise enquiries through the pipeline during the engagement.",
+    method: "Franchise enquiry campaigns aimed at serious investors, with time-wasters filtered out.",
+    outcome: "Client reported 676 franchise enquiries during the engagement.",
   },
   {
     brand: "Burger & Sauce",
     logo: "/logos/burger-and-sauce.png",
-    method: "Full AI ad campaign delivered end-to-end. Client asked to rate the experience.",
+    method: "Full ad campaign run end to end. Client asked to rate the experience.",
     outcome: "Perfect 10/10 NPS score. Praised communication, results, and accountability.",
     quote: "\"Is 20 an option?\"",
     cite: "Adam, Marketing Manager",
@@ -56,14 +56,14 @@ const caseStudies = [
     brand: "Boo Burger",
     logo: "/logos/boo.png",
     logoH: 14,
-    method: "AI ad campaigns delivered for a multi-location burger brand. Referred to us by another client.",
+    method: "Ad campaigns run for a multi-location burger brand. Referred to us by another client.",
     outcome: "Perfect 10/10 NPS score. Then referred two more brands who became clients.",
   },
   {
     brand: "Phat Buns",
     logo: "/logos/phatbuns.png",
-    method: "AI launch campaign for a new Liverpool location. Full campaign system deployed with ticket-based crowd management.",
-    outcome: "Hit capacity after spending just 31% of the allocated marketing budget. The AI found the audience before the budget ran out.",
+    method: "Launch campaign for a new Liverpool location, with ticketed entry to manage the crowd.",
+    outcome: "Hit capacity after spending just 31% of the budget. We found the right people before the money ran out.",
   },
 ];
 
