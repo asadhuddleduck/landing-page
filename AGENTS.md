@@ -74,6 +74,10 @@ shine and reduced-motion/busy/disabled states. Reuse it for progression actions
 rather than making a separate page animation. This route's premium refresh uses
 local Inter, Huddle Duck green, deep ink, quiet paper surfaces and generous space.
 Keep its styles scoped and preserve the existing homepage.
+The homepage and `/start` share the full SuperPulse public logo catalog at
+`https://www.superpulse.io/api/public/client-logo-catalog`, refreshed every five
+minutes. `src/lib/client-logo-fallback.json` and local marks keep it available
+during feed outages. Both companies may show all of these brands (Asad, 24 October 2026).
 The client logo bar reuses the SuperPulse two-row monochrome marquee treatment
 through `ClientLogoBar`. Keep the optical sizing, faded edges, opposing loops,
 continuous scrolling on desktop and mobile. The bar is passive: hover, focus,

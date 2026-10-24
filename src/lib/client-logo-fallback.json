@@ -1,0 +1,462 @@
+[
+  {
+    "id": "heavenly-desserts",
+    "name": "Heavenly Desserts",
+    "src": "/brand/huddle/client-logos/heavenly-desserts.webp",
+    "width": 1849,
+    "height": 192,
+    "opticalHeight": 22,
+    "lane": 1,
+    "order": 1
+  },
+  {
+    "id": "german-doner-kebab",
+    "name": "German Doner Kebab",
+    "src": "/brand/huddle/client-logos/german-doner-kebab.webp",
+    "width": 645,
+    "height": 192,
+    "opticalHeight": 28,
+    "lane": 2,
+    "order": 2
+  },
+  {
+    "id": "burger-and-sauce",
+    "name": "Burger & Sauce",
+    "src": "/brand/huddle/client-logos/burger-and-sauce.webp",
+    "width": 1099,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 1,
+    "order": 3
+  },
+  {
+    "id": "phat-buns",
+    "name": "PHAT Buns",
+    "src": "/brand/huddle/client-logos/phat-buns.webp",
+    "width": 237,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 4
+  },
+  {
+    "id": "mccain",
+    "name": "McCain",
+    "src": "/brand/huddle/client-logos/mccain.webp",
+    "width": 441,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 2,
+    "order": 5
+  },
+  {
+    "id": "uber-eats",
+    "name": "Uber Eats",
+    "src": "/brand/huddle/client-logos/uber-eats.webp",
+    "width": 1118,
+    "height": 192,
+    "opticalHeight": 28,
+    "lane": 1,
+    "order": 6
+  },
+  {
+    "id": "leicester-city-fc",
+    "name": "Leicester City FC",
+    "src": "/brand/huddle/client-logos/leicester-city-fc.webp",
+    "width": 192,
+    "height": 192,
+    "opticalHeight": 36,
+    "lane": 2,
+    "order": 7
+  },
+  {
+    "id": "munchies",
+    "name": "Love Munchies",
+    "src": "/brand/huddle/client-logos/munchies.webp",
+    "width": 486,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 8
+  },
+  {
+    "id": "dough-club",
+    "name": "Dough Club",
+    "src": "/brand/huddle/client-logos/dough-club.webp",
+    "width": 755,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 1,
+    "order": 9
+  },
+  {
+    "id": "chai-green",
+    "name": "Chai Green",
+    "src": "/brand/huddle/client-logos/chai-green.webp",
+    "width": 798,
+    "height": 192,
+    "opticalHeight": 32,
+    "lane": 2,
+    "order": 10
+  },
+  {
+    "id": "boo",
+    "name": "Boo",
+    "src": "/brand/huddle/client-logos/boo.webp",
+    "width": 477,
+    "height": 192,
+    "opticalHeight": 28,
+    "lane": 1,
+    "order": 11
+  },
+  {
+    "id": "drip-chicken",
+    "name": "Drip Chicken",
+    "src": "/brand/huddle/client-logos/drip-chicken.webp",
+    "width": 1581,
+    "height": 192,
+    "opticalHeight": 25,
+    "lane": 2,
+    "order": 12
+  },
+  {
+    "id": "burgshake",
+    "name": "Burgshake",
+    "src": "/brand/huddle/client-logos/burgshake.webp",
+    "width": 1279,
+    "height": 192,
+    "opticalHeight": 27,
+    "lane": 1,
+    "order": 13
+  },
+  {
+    "id": "zezu",
+    "name": "Zezu",
+    "src": "/brand/huddle/client-logos/zezu.webp",
+    "width": 350,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 2,
+    "order": 14
+  },
+  {
+    "id": "fusion-treats",
+    "name": "Fusion Treats",
+    "src": "/brand/huddle/client-logos/fusion-treats.webp",
+    "width": 426,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 2,
+    "order": 15
+  },
+  {
+    "id": "tasty-plaice",
+    "name": "Tasty Plaice",
+    "src": "/brand/huddle/client-logos/tasty-plaice.webp",
+    "width": 626,
+    "height": 192,
+    "opticalHeight": 28,
+    "lane": 1,
+    "order": 16
+  },
+  {
+    "id": "belgian-waffle-company",
+    "name": "Belgian Waffle Company",
+    "src": "/brand/huddle/client-logos/belgian-waffle-company.webp",
+    "width": 236,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 17
+  },
+  {
+    "id": "straight-outta-nashville",
+    "name": "Straight Outta Nashville",
+    "src": "/brand/huddle/client-logos/straight-outta-nashville.webp",
+    "width": 188,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 1,
+    "order": 18
+  },
+  {
+    "id": "dolce-desserts",
+    "name": "Dolce Desserts",
+    "src": "/brand/huddle/client-logos/dolce-desserts.webp",
+    "width": 207,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 19
+  },
+  {
+    "id": "msf-associates",
+    "name": "MSF Associates",
+    "src": "/brand/huddle/client-logos/msf-associates.webp",
+    "width": 830,
+    "height": 192,
+    "opticalHeight": 26,
+    "lane": 2,
+    "order": 20
+  },
+  {
+    "id": "ogs",
+    "name": "OGS",
+    "src": "/brand/huddle/client-logos/ogs.webp",
+    "width": 529,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 1,
+    "order": 21
+  },
+  {
+    "id": "pennington-dental",
+    "name": "Pennington Dental",
+    "src": "/brand/huddle/client-logos/pennington-dental.webp",
+    "width": 294,
+    "height": 192,
+    "opticalHeight": 32,
+    "lane": 1,
+    "order": 22
+  },
+  {
+    "id": "shakedown",
+    "name": "Shakedown",
+    "src": "/brand/huddle/client-logos/shakedown.webp",
+    "width": 177,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 23
+  },
+  {
+    "id": "hennys-chicken",
+    "name": "Henny's Chicken",
+    "src": "/brand/huddle/client-logos/hennys-chicken.webp",
+    "width": 563,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 1,
+    "order": 24
+  },
+  {
+    "id": "fryem",
+    "name": "Fryem",
+    "src": "/brand/huddle/client-logos/fryem.webp",
+    "width": 626,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 1,
+    "order": 25
+  },
+  {
+    "id": "prana",
+    "name": "Prana",
+    "src": "/brand/huddle/client-logos/prana.webp",
+    "width": 192,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 26
+  },
+  {
+    "id": "chilli-grill-ely",
+    "name": "Chilli Grill Ely",
+    "src": "/brand/huddle/client-logos/chilli-grill-ely.webp",
+    "width": 147,
+    "height": 192,
+    "opticalHeight": 36,
+    "lane": 1,
+    "order": 27
+  },
+  {
+    "id": "fregos",
+    "name": "Frego's",
+    "src": "/brand/huddle/client-logos/fregos.webp",
+    "width": 1007,
+    "height": 192,
+    "opticalHeight": 28,
+    "lane": 2,
+    "order": 28
+  },
+  {
+    "id": "bur-and-gur",
+    "name": "BUR & GUR",
+    "src": "/brand/huddle/client-logos/bur-and-gur.webp",
+    "width": 290,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 1,
+    "order": 29
+  },
+  {
+    "id": "dolci-vita",
+    "name": "Dolci Vita",
+    "src": "/brand/huddle/client-logos/dolci-vita.webp",
+    "width": 511,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 2,
+    "order": 30
+  },
+  {
+    "id": "lucali",
+    "name": "Lucali",
+    "src": "/brand/huddle/client-logos/lucali.webp",
+    "width": 546,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 1,
+    "order": 31
+  },
+  {
+    "id": "chesters-hanwell",
+    "name": "Chesters Hanwell",
+    "src": "/brand/huddle/client-logos/chesters-hanwell.webp",
+    "width": 179,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 32
+  },
+  {
+    "id": "ten-ten-burgers",
+    "name": "Ten Ten Burgers",
+    "src": "/brand/huddle/client-logos/ten-ten-burgers.webp",
+    "width": 140,
+    "height": 192,
+    "opticalHeight": 36,
+    "lane": 1,
+    "order": 33
+  },
+  {
+    "id": "gummy-gummy",
+    "name": "Gummy Gummy",
+    "src": "/brand/huddle/client-logos/gummy-gummy.webp",
+    "width": 566,
+    "height": 192,
+    "opticalHeight": 30,
+    "lane": 2,
+    "order": 34
+  },
+  {
+    "id": "patri",
+    "name": "Patri",
+    "src": "/brand/huddle/client-logos/patri.webp",
+    "width": 449,
+    "height": 192,
+    "opticalHeight": 31,
+    "lane": 1,
+    "order": 35
+  },
+  {
+    "id": "bellamira",
+    "name": "BellaMira",
+    "src": "/brand/huddle/client-logos/bellamira.webp",
+    "width": 192,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 36
+  },
+  {
+    "id": "stone-fired",
+    "name": "Stone Fired",
+    "src": "/brand/huddle/client-logos/stone-fired.webp",
+    "width": 1440,
+    "height": 192,
+    "opticalHeight": 27,
+    "lane": 1,
+    "order": 37
+  },
+  {
+    "id": "slice-house",
+    "name": "Slice House",
+    "src": "/brand/huddle/client-logos/slice-house.webp",
+    "width": 203,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 38
+  },
+  {
+    "id": "loop-studios",
+    "name": "Loop Studios",
+    "src": "/brand/huddle/client-logos/loop-studios.webp",
+    "width": 716,
+    "height": 192,
+    "opticalHeight": 28,
+    "lane": 1,
+    "order": 39
+  },
+  {
+    "id": "smokd-out",
+    "name": "Smok'd Out",
+    "src": "/brand/huddle/client-logos/smokd-out.webp",
+    "width": 309,
+    "height": 192,
+    "opticalHeight": 32,
+    "lane": 1,
+    "order": 40
+  },
+  {
+    "id": "altalia",
+    "name": "Altalia",
+    "src": "/brand/huddle/client-logos/altalia.webp",
+    "width": 192,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 41
+  },
+  {
+    "id": "shark-aesthetics",
+    "name": "Shark Aesthetics",
+    "src": "/brand/huddle/client-logos/shark-aesthetics.webp",
+    "width": 3072,
+    "height": 192,
+    "opticalHeight": 15,
+    "lane": 1,
+    "order": 42
+  },
+  {
+    "id": "storied-life",
+    "name": "Storied Life",
+    "src": "/brand/huddle/client-logos/storied-life.webp",
+    "width": 2632,
+    "height": 192,
+    "opticalHeight": 16,
+    "lane": 2,
+    "order": 43
+  },
+  {
+    "id": "sourmilk-studios",
+    "name": "Sourmilk Studios",
+    "src": "/brand/huddle/client-logos/sourmilk-studios.webp",
+    "width": 261,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 1,
+    "order": 44
+  },
+  {
+    "id": "lunar-park",
+    "name": "Lunar Park",
+    "src": "/brand/huddle/client-logos/lunar-park.svg",
+    "width": 392,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 2,
+    "order": 45
+  },
+  {
+    "id": "jerk-junction",
+    "name": "Jerk Junction",
+    "src": "/brand/huddle/client-logos/jerk-junction.webp",
+    "width": 296,
+    "height": 192,
+    "opticalHeight": 34,
+    "lane": 1,
+    "order": 46
+  }
+]
