@@ -2,6 +2,10 @@
   "ignoreCommand": "[ \"$VERCEL_GIT_COMMIT_REF\" = \"main\" ] && exit 1 || exit 0",
   "crons": [
     {
+      "path": "/api/agency/reconcile",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/email-reconcile",
       "schedule": "*/5 * * * *"
     }

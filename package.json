@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:email": "node --experimental-strip-types --test tests/email-source.test.mjs tests/landing-email.test.mjs",
+    "test:agency": "node --experimental-strip-types --test tests/agency.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
