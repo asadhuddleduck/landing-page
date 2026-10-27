@@ -32,5 +32,5 @@ export function checkOrigin(request: Request) {
 export function failure(error: unknown): Response {
   if (error instanceof AgencyInputError) return Response.json({ ok: false, error: error.message }, { status: error.status, headers: { "Cache-Control": "no-store" } });
   console.error("Agency request failed", error instanceof Error ? error.name : "unknown");
-  return Response.json({ ok: false, error: "We could not complete that step. Your saved enquiry is safe. Please try again shortly." }, { status: 503, headers: { "Cache-Control": "no-store" } });
+  return Response.json({ ok: false, error: "We could not complete that step. Please try again shortly." }, { status: 503, headers: { "Cache-Control": "no-store" } });
 }

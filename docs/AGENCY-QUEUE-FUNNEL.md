@@ -6,7 +6,7 @@ The public route is `/workwithus-waitlist`. Its native form writes to the existi
 
 ## Configuration and rollout
 
-Server-only settings: `CAL_API_KEY`, `AGENCY_CAL_EVENT_TYPE_ID`, `AGENCY_CAL_OWNER_ID`, `AGENCY_BOOKING_SECRET`, `AGENCY_CAL_WEBHOOK_SECRET`, `AGENCY_INTERNAL_TEST_KEY`, `AGENCY_NOTION_TOKEN`, `AGENCY_META_PIXEL_ID`, existing `META_ACCESS_TOKEN`, Turso settings and `CRON_SECRET`. Do not expose values in client code, source or logs.
+Server-only settings: `CAL_API_KEY`, `AGENCY_CAL_EVENT_TYPE_ID`, `AGENCY_CAL_OWNER_ID`, `AGENCY_BOOKING_SECRET`, `AGENCY_CAL_WEBHOOK_SECRET`, `AGENCY_INTERNAL_TEST_KEY`, `AGENCY_NOTION_TOKEN`, `AGENCY_META_PIXEL_ID`, `AGENCY_META_ACCESS_TOKEN` (or existing `META_ACCESS_TOKEN`), Turso settings and `CRON_SECRET`. Do not expose values in client code, source or logs.
 
 1. Run `npm run test:agency`, `npm run test:email`, typecheck, scoped lint and production build.
 2. Deploy a clean committed tree with the production settings configured.
