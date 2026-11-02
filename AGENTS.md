@@ -85,4 +85,11 @@ click and tap never pause it. Do not add links, focus stops, dragging or pointer
 controls. Reduced motion uses a static wrapped logo layout. Canonical URLs use the apex
 domain; `/start` must load directly without redirecting to a subdomain.
 
+## Shared sales CRM
+
+Agency enquiries and purchase updates use `src/lib/sales-crm.ts` and
+`SALES_CRM_DATABASE_ID`. Read `docs/SALES-CRM.md` before changing CRM writes.
+Preserve manually maintained next steps, follow-up dates and offer decisions.
+Do not restore writes to the historical agency database.
+
 CANARY-END-LANDINGPAGE-73A1
