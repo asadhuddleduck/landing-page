@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import {appendFileSync,writeFileSync} from 'node:fs';
 const stripe=new Stripe(process.env.CONSULT_STRIPE_SECRET_KEY.trim());
-const merchant=await stripe.accounts.retrieve();if(merchant.email!=='hello@asadshah.co.uk'||!merchant.charges_enabled)throw new Error('Consulting merchant identity or payment readiness does not match');
+const merchant=await stripe.accounts.retrieve();if(merchant.id!=='acct_1UY49ELVFRVnEz6h'||!merchant.charges_enabled)throw new Error('Consulting merchant identity or payment readiness does not match');
 const headers={Authorization:'Bearer '+process.env.CAL_API_KEY.trim(),'Content-Type':'application/json','cal-api-version':'2024-06-14'};
 async function cal(path,body){const r=await fetch('https://api.cal.com/v2'+path,{headers,method:body?'POST':'GET',...(body?{body:JSON.stringify(body)}:{})});const j=await r.json();if(!r.ok)throw new Error(JSON.stringify(j));return j.data;}
 const types=await cal('/event-types');const env={CONSULT_STRIPE_ACCOUNT_ID:merchant.id};
