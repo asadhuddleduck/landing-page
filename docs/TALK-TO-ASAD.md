@@ -4,7 +4,7 @@ Personal consultation route: /talk-to-asad. Created 4 November 2026.
 
 ## Offer
 
-Consulting belongs to Asad Shah’s separate business. All prices GBP, paid once: clarity £250 for 20 minutes; deep £500 for 60 minutes plus one 20-minute catch-up within 30 days; advisory £2,500 for ten 60-minute calls within 90 days of first call. First-call guarantee: full refund requested within 24 hours of first call, cancelling remaining sessions. Refund requests and written recaps are personally handled by Asad. Preparation is optional: one question and up to three links.
+Consulting is provided by Asad Social Media Ltd, company number 11747989, separately from Huddle Duck Ltd. Company number, active status and registered office were checked against Companies House on 4 November 2026 (https://find-and-update.company-information.service.gov.uk/company/11747989). All prices GBP, paid once: clarity £250 for 20 minutes; deep £500 for 60 minutes plus one 20-minute catch-up within 30 days; advisory £2,500 for ten 60-minute calls within 90 days of first call. First-call guarantee: full refund requested within 24 hours of first call, cancelling remaining sessions. Refund requests and written recaps are personally handled by Asad. Preparation is optional: one question and up to three links.
 
 FAMILY250 gives 100% off clarity only. This is a reusable owner-requested code, not a single-redemption invitation. Stripe owns code validity. Do not expose it in public page copy. Other new invitation codes should normally have max_redemptions=1 and use the same product-scoped coupon.
 
