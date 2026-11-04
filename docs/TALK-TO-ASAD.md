@@ -4,7 +4,7 @@ Personal consultation route: /talk-to-asad. Created 4 November 2026.
 
 ## Offer
 
-All prices GBP including VAT, paid once: clarity £250 for 20 minutes; deep £500 for 60 minutes plus one 20-minute catch-up within 30 days; advisory £2,500 for ten 60-minute calls within 90 days of first call. First-call guarantee: full refund requested within 24 hours of first call, cancelling remaining sessions. Refund requests and written recaps are personally handled by Asad. Preparation is optional: one question and up to three links.
+Consulting belongs to Asad Shah’s separate business. All prices GBP, paid once: clarity £250 for 20 minutes; deep £500 for 60 minutes plus one 20-minute catch-up within 30 days; advisory £2,500 for ten 60-minute calls within 90 days of first call. First-call guarantee: full refund requested within 24 hours of first call, cancelling remaining sessions. Refund requests and written recaps are personally handled by Asad. Preparation is optional: one question and up to three links.
 
 FAMILY250 gives 100% off clarity only. This is a reusable owner-requested code, not a single-redemption invitation. Stripe owns code validity. Do not expose it in public page copy. Other new invitation codes should normally have max_redemptions=1 and use the same product-scoped coupon.
 
@@ -12,11 +12,11 @@ FAMILY250 gives 100% off clarity only. This is a reusable owner-requested code, 
 
 New Cal event types use the existing owner and schedule, private visibility, mandatory confirmation, and Google Meet. Old consult and consult-follow-up event types remain unchanged. Server alone confirms entitlement-backed bookings. Server-priced embedded Stripe Checkout supports paid and zero-total orders. No plan or value sent by the browser overrides Stripe prices.
 
-A Turso order stores its Stripe session and a hash plus encrypted copy of its management token. Encryption currently uses the existing Stripe secret; key rotation needs migration of token_box first. Management tokens are links in the URL fragment, removed into session storage immediately. Analytics are disabled on the consultation route to keep these tokens out of tracking.
+A Turso order stores its Stripe session and a hash plus encrypted copy of its management token. New tokens use CONSULT_BOOKING_TOKEN_KEY, version 2. Legacy version 1 tokens retain the original Huddle Duck key for decryption until migrated. Orders carry stripe_account_id; never infer the merchant from the domain. Management tokens are links in the URL fragment, removed into session storage immediately. Analytics are disabled on the consultation route to keep these tokens out of tracking.
 
 A temporary Cal reservation precedes payment. Payment finalisation releases it and confirms the booking. A lost slot retains the paid order and permits another choice without repayment. Ambiguous Cal writes keep a creating record; reconciliation looks up the original metadata before another write. Never delete creating rows to retry without checking the provider. Reconciliation runs from Stripe's signed webhook, the management page and a five-minute authenticated cron.
 
-HatchFlow owns the confirmation email transport. Cal handles calendar invitations. Asad replies to preparation notes and supplies the written recap. Remaining sessions use the same authenticated page. Rescheduling should preserve one entitlement; timely cancellation restores it. Late changes go to Asad. Monitor creating calls and paid orders with no accepted first call.
+Legacy Huddle Duck orders retain their existing confirmation transport. New consulting orders use Cal booking confirmations and the consulting Stripe receipt; do not send them through the Huddle Duck VAT footer. Cal handles calendar invitations. Asad replies to preparation notes and supplies the written recap. Remaining sessions use the same authenticated page. Rescheduling should preserve one entitlement; timely cancellation restores it. Late changes go to Asad. Monitor creating calls and paid orders with no accepted first call.
 
 ## Environment and operations
 
@@ -30,4 +30,6 @@ npm run build -- --webpack
 
 Use synthetic orders and stubbed providers for payment/booking tests. Live read-only checks cover availability, product prices, coupon scope, owner identity, confirmation settings and the rendered page. Do not create a real customer booking or charge merely to test.
 
-UI: shared raised Huddle Duck buttons. Tier icons adapt Extra Love's layered floating and twinkling treatment using green, violet and gold faceted gems, increasing from one to three. Reduced motion and busy states stop animation. Keep panel height stable per viewport. Preserve £5/day to £2 million/month wording.
+UI: shared raised buttons use green, violet and gold tokens matching the offer. Tier icons adapt Extra Love's layered floating and twinkling treatment using green, violet and gold faceted gems, increasing from one to three. Reduced motion and busy states stop animation. Keep panel height stable per viewport. Preserve £5/day to £2 million/month wording.
+
+Consulting setup uses CONSULT_STRIPE_SECRET_KEY, CONSULT_STRIPE_PUBLISHABLE_KEY, CONSULT_STRIPE_ACCOUNT_ID, CONSULT_STRIPE_WEBHOOK_SECRET and CONSULT_BOOKING_TOKEN_KEY. HUDDLE_STRIPE_ACCOUNT_ID identifies historical orders. Existing global Stripe credentials remain assigned to Huddle Duck client services. Keep new checkout disabled until consulting credentials are verified.

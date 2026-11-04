@@ -1,0 +1,4 @@
+import {consultationStripe} from '@/lib/consultation-stripe';
+import {reconcileSession,refundIntent} from '@/lib/consultation';
+export async function POST(req:Request){let event;try{event=consultationStripe().webhooks.constructEvent(await req.text(),req.headers.get('stripe-signature')??'',process.env.CONSULT_STRIPE_WEBHOOK_SECRET!.trim());}catch{return new Response('Invalid signature',{status:400});}
+try{if(event.type==='checkout.session.completed'&&event.data.object.metadata?.product==='asad-consultation')await reconcileSession(event.data.object.id,process.env.CONSULT_STRIPE_ACCOUNT_ID);if(event.type==='charge.refunded'&&event.data.object.refunded&&typeof event.data.object.payment_intent==='string')await refundIntent(event.data.object.payment_intent,process.env.CONSULT_STRIPE_ACCOUNT_ID);return Response.json({received:true});}catch{return new Response('Retry required',{status:503});}}

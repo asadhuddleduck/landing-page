@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     if(session.metadata?.product === "asad-consultation") {
-      try { await reconcileSession(session.id); return NextResponse.json({received:true}); }
+      try { await reconcileSession(session.id,process.env.HUDDLE_STRIPE_ACCOUNT_ID); return NextResponse.json({received:true}); }
       catch { return NextResponse.json({error:"Consultation processing will retry"},{status:503}); }
     }
     try {

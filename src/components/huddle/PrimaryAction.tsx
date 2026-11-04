@@ -6,17 +6,18 @@ import styles from "./PrimaryAction.module.css";
 export default function PrimaryAction({
   children = "Set up your Direct Debit",
   href = HUDDLE_START.directDebitUrl,
-  onClick, disabled = false,
+  onClick, disabled = false, tone = "green",
 }: {
   children?: ReactNode;
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
+  tone?: "green" | "violet" | "gold";
 }) {
-  if (onClick) return <button type="button" disabled={disabled} onClick={onClick} className={`sp-primary sp-coin ${styles.action}`}>{children}</button>;
+  if (onClick) return <button type="button" disabled={disabled} onClick={onClick} data-tone={tone} className={`sp-primary sp-coin ${styles.action}`}>{children}</button>;
   return (
     <a
-      className={`sp-primary sp-coin ${styles.action}`}
+      data-tone={tone} className={`sp-primary sp-coin ${styles.action}`}
       href={href}
       target={href === HUDDLE_START.directDebitUrl ? "_blank" : undefined}
       rel="noopener noreferrer"

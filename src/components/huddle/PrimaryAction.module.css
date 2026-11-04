@@ -28,3 +28,6 @@
   white-space: nowrap;
   border: 0;
 }
+
+.action[data-tone="violet"] { --sp-coin-face:#9162df; --sp-coin-hover:#a77bea; --sp-coin-ink:#211036; --sp-fog:#9162df; }
+.action[data-tone="gold"] { --sp-coin-face:#eda431; --sp-coin-hover:#f4b94f; --sp-coin-ink:#382307; --sp-fog:#eda431; }
