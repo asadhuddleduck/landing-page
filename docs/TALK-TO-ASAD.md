@@ -44,6 +44,13 @@ Run with a private, ignored environment file containing STRIPE_SANDBOX_SECRET_KE
 
     node --env-file=.env.stripe-sandbox.local scripts/verify-consultation-sandbox.mjs
 
-Asad submitted the final company activation on 4 November 2026. Stripe now shows the live Asad Social Media Ltd dashboard. Monzo ending 2344 is the payout destination; included Radar Lite is selected, with tax calculation and climate contributions off. The dedicated restricted API key is prepared and awaiting Stripe's identity verification before creation. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
+Asad submitted the final company activation on 4 November 2026. Stripe now shows the live Asad Social Media Ltd dashboard. Monzo ending 2344 is the payout destination; included Radar Lite is selected, with tax calculation and climate contributions off. The dedicated restricted API key is prepared with 13 permissions. Stripe still requests a separate identity check before creating it; no live website secret has been issued or deployed yet. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
 
 Paid consultations request a post-payment invoice and explicitly supply the receipt email. Complimentary invitations use a zero-total Checkout Session without a paid invoice. Customer creation is explicit so both paths have a durable Stripe customer record. The new company identity, invoice footer and support email remain separate from Huddle Duck.
+
+
+## Live provisioning readback, 4 November 2026
+
+The official Stripe MCP OAuth connection is authenticated to the live company account only. The native account readback has charges_enabled and payouts_enabled true, with no currently_due, past_due or pending_verification requirements. Three live products and fixed GBP prices, the product-scoped 100 percent invitation coupon, FAMILY250, and the dedicated signed webhook have been created. Their IDs and the webhook secret are in ignored private configuration and the Vercel production environment. The live publishable key is also configured. Huddle Duck's global Stripe credentials are unchanged.
+
+The remaining cutover blocker is CONSULT_STRIPE_SECRET_KEY. Do not enable checkout or substitute the MCP OAuth access token. Asad asked to stop requesting new verification links after repeated attempts; preserve the current Stripe flow and do not send another request. Once a live restricted website key exists, verify its account against the company account, set it in Vercel production, deploy the clean tree, check the public promo and calendar APIs, and verify the rendered checkout. Do not make a live charge as a test.
