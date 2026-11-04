@@ -33,3 +33,15 @@ Use synthetic orders and stubbed providers for payment/booking tests. Live read-
 UI: shared raised buttons use green, violet and gold tokens matching the offer. Tier icons adapt Extra Love's layered floating and twinkling treatment using green, violet and gold faceted gems, increasing from one to three. Reduced motion and busy states stop animation. Keep panel height stable per viewport. Preserve £5/day to £2 million/month wording.
 
 Consulting setup uses CONSULT_STRIPE_SECRET_KEY, CONSULT_STRIPE_PUBLISHABLE_KEY, CONSULT_STRIPE_ACCOUNT_ID, CONSULT_STRIPE_WEBHOOK_SECRET and CONSULT_BOOKING_TOKEN_KEY. HUDDLE_STRIPE_ACCOUNT_ID identifies historical orders. Existing global Stripe credentials remain assigned to Huddle Duck client services. Keep new checkout disabled until consulting credentials are verified.
+
+## Stripe planner and sandbox verification, 4 November 2026
+
+The official Stripe plugin was already installed for Claude Code and was enabled. The Stripe MCP server was registered for Codex. The official MCP implementation planner was invoked using the separately supplied sandbox credential, and accepted guide iguide_61VhTk8ajJIdpKDFX41LOqiIQBhVG with embedded Checkout as the recommended integration shape. Persistent OAuth authorization remains separate from this verified per-session MCP connection.
+
+Sandbox account acct_1UY4BTLOqiIQBhVG is distinct from the live company account acct_1UY49ELVFRVnEz6h. Never deploy sandbox credentials into the public checkout. The sandbox script requires a sk_test credential and checks its exact account before creating objects. It verified 25000, 50000, 250000 GBP minor-unit totals and a FAMILY250 discounted total of zero, all with zero tax. The four verification Checkout Sessions were then expired. This checks real Stripe sandbox objects; it does not claim a live payment or completed card checkout.
+
+Run with a private, ignored environment file containing STRIPE_SANDBOX_SECRET_KEY:
+
+    node --env-file=.env.stripe-sandbox.local scripts/verify-consultation-sandbox.mjs
+
+The company verification form has accepted the existing ASAD SOCIAL MEDIA LTD business and Monzo bank details. Included Radar Lite was selected. Tax extras, climate extras and final review still require completion in the company account. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
