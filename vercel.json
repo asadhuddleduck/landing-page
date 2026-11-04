@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/email-reconcile",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/consultation/reconcile",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

@@ -5,14 +5,20 @@ import styles from "./PrimaryAction.module.css";
 
 export default function PrimaryAction({
   children = "Set up your Direct Debit",
+  href = HUDDLE_START.directDebitUrl,
+  onClick, disabled = false,
 }: {
   children?: ReactNode;
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
+  if (onClick) return <button type="button" disabled={disabled} onClick={onClick} className={`sp-primary sp-coin ${styles.action}`}>{children}</button>;
   return (
     <a
       className={`sp-primary sp-coin ${styles.action}`}
-      href={HUDDLE_START.directDebitUrl}
-      target="_blank"
+      href={href}
+      target={href === HUDDLE_START.directDebitUrl ? "_blank" : undefined}
       rel="noopener noreferrer"
     >
       {children}
@@ -31,7 +37,7 @@ export default function PrimaryAction({
           strokeLinejoin="round"
         />
       </svg>
-      <span className={styles.srOnly}> (opens GoCardless in a new tab)</span>
+      {href === HUDDLE_START.directDebitUrl && <span className={styles.srOnly}> (opens GoCardless in a new tab)</span>}
     </a>
   );
 }

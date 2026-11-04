@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Lato, Caveat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import TelemetryBoundary from "@/components/TelemetryBoundary";
 import TrackingScript from "@/components/TrackingScript";
 import MetaPixel from "@/components/MetaPixel";
 import CookieNotice from "@/components/CookieNotice";
@@ -76,10 +77,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${lato.variable} ${caveat.variable} ${lato.className}`}>
         {children}
-        <TrackingScript />
-        <MetaPixel />
+        <TelemetryBoundary><TrackingScript /><MetaPixel /><Analytics />{gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}</TelemetryBoundary>
         <CookieNotice />
-        <Analytics />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -96,9 +95,6 @@ export default function RootLayout({
             `,
           }}
         />
-        {gaMeasurementId && (
-          <GoogleAnalytics gaId={gaMeasurementId} />
-        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
