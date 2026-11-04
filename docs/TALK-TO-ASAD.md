@@ -44,4 +44,6 @@ Run with a private, ignored environment file containing STRIPE_SANDBOX_SECRET_KE
 
     node --env-file=.env.stripe-sandbox.local scripts/verify-consultation-sandbox.mjs
 
-The company verification form has accepted the existing ASAD SOCIAL MEDIA LTD business and Monzo bank details. Included Radar Lite was selected. Tax extras, climate extras and final review still require completion in the company account. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
+Asad submitted the final company activation on 4 November 2026. Stripe now shows the live Asad Social Media Ltd dashboard. Monzo ending 2344 is the payout destination; included Radar Lite is selected, with tax calculation and climate contributions off. The dedicated restricted API key is prepared for owner confirmation before creation. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
+
+Paid consultations request a post-payment invoice and explicitly supply the receipt email. Complimentary invitations use a zero-total Checkout Session without a paid invoice. Customer creation is explicit so both paths have a durable Stripe customer record. The new company identity, invoice footer and support email remain separate from Huddle Duck.

@@ -15,4 +15,4 @@ export async function POST(req:Request){try{
  else if(b.action==='book'){await book(await orderFor(token),String(b.start));result=await reconcile(token);}
  else throw new ConsultationError(400,'Unknown request.');
  return Response.json(result,{headers:{'Cache-Control':'no-store'}});
- }catch(e){return Response.json({error:e instanceof ConsultationError?e.message:'We could not complete that step. Your existing purchase is safe. Please try again or email asad@huddleduck.co.uk.'},{status:e instanceof ConsultationError?e.status:503});}}
+ }catch(e){return Response.json({error:e instanceof ConsultationError?e.message:'We could not complete that step. Your existing purchase is safe. Please try again or email hello@asadshah.co.uk.'},{status:e instanceof ConsultationError?e.status:503});}}
