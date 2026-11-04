@@ -35,7 +35,8 @@ export async function promo(code:string,plan:Plan){
  if(!code)return null;
  const results=await stripe.promotionCodes.list({code,active:true,limit:10});
  const p=results.data[0];if(!p)throw new ConsultationError(400,'That code is not available. Please check it and try again.');
- const coupon=await stripe.coupons.retrieve(typeof p.promotion.coupon==='string'?p.promotion.coupon:p.promotion.coupon.id,{expand:['applies_to']});
+ const ref=p.promotion.coupon;if(!ref)throw new ConsultationError(400,'That code is not available.');
+ const coupon=await stripe.coupons.retrieve(typeof ref==='string'?ref:ref.id,{expand:['applies_to']});
  const product=process.env[`CONSULT_PRODUCT_${plan.toUpperCase()}`];
  if(!coupon||!coupon.valid||!product||!coupon.applies_to?.products?.includes(product))throw new ConsultationError(400,'That code does not apply to this conversation.');
  p.promotion.coupon=coupon; return p;
