@@ -36,7 +36,7 @@ Consulting setup uses CONSULT_STRIPE_SECRET_KEY, CONSULT_STRIPE_PUBLISHABLE_KEY,
 
 ## Stripe planner and sandbox verification, 4 November 2026
 
-The official Stripe plugin was already installed for Claude Code and was enabled. The Stripe MCP server was registered for Codex. The official MCP implementation planner was invoked using the separately supplied sandbox credential, and accepted guide iguide_61VhTk8ajJIdpKDFX41LOqiIQBhVG with embedded Checkout as the recommended integration shape. Persistent OAuth authorization remains separate from this verified per-session MCP connection.
+The official Stripe plugin was already installed for Claude Code and was enabled. The Stripe MCP server was registered for Codex. The official MCP implementation planner was invoked using the separately supplied sandbox credential, and accepted guide iguide_61VhTk8ajJIdpKDFX41LOqiIQBhVG with embedded Checkout as the recommended integration shape. Persistent OAuth authorization was completed later the same day and the official MCP confirmed live access to Asad Social Media Ltd.
 
 Sandbox account acct_1UY4BTLOqiIQBhVG is distinct from the live company account acct_1UY49ELVFRVnEz6h. Never deploy sandbox credentials into the public checkout. The sandbox script requires a sk_test credential and checks its exact account before creating objects. It verified 25000, 50000, 250000 GBP minor-unit totals and a FAMILY250 discounted total of zero, all with zero tax. The four verification Checkout Sessions were then expired. This checks real Stripe sandbox objects; it does not claim a live payment or completed card checkout.
 
@@ -44,6 +44,6 @@ Run with a private, ignored environment file containing STRIPE_SANDBOX_SECRET_KE
 
     node --env-file=.env.stripe-sandbox.local scripts/verify-consultation-sandbox.mjs
 
-Asad submitted the final company activation on 4 November 2026. Stripe now shows the live Asad Social Media Ltd dashboard. Monzo ending 2344 is the payout destination; included Radar Lite is selected, with tax calculation and climate contributions off. The dedicated restricted API key is prepared for owner confirmation before creation. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
+Asad submitted the final company activation on 4 November 2026. Stripe now shows the live Asad Social Media Ltd dashboard. Monzo ending 2344 is the payout destination; included Radar Lite is selected, with tax calculation and climate contributions off. The dedicated restricted API key is prepared and awaiting Stripe's identity verification before creation. Do not enable tax collection: the owner's current instruction is that this consulting business is not VAT registered. The final services agreement and any identity verification requiring the account holder must be completed by Asad.
 
 Paid consultations request a post-payment invoice and explicitly supply the receipt email. Complimentary invitations use a zero-total Checkout Session without a paid invoice. Customer creation is explicit so both paths have a durable Stripe customer record. The new company identity, invoice footer and support email remain separate from Huddle Duck.
