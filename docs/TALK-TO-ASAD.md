@@ -30,7 +30,7 @@ npm run build -- --webpack
 
 Use synthetic orders and stubbed providers for payment/booking tests. Live read-only checks cover availability, product prices, coupon scope, owner identity, confirmation settings and the rendered page. Do not create a real customer booking or charge merely to test.
 
-UI: shared raised buttons use green, violet and gold tokens matching the offer. Tier icons adapt Extra Love's layered floating and twinkling treatment using green, violet and gold faceted gems, increasing from one to three. Reduced motion and busy states stop animation. Keep panel height stable per viewport. Preserve £5/day to £2 million/month wording.
+UI: shared raised buttons use green, violet and gold tokens matching the offer. Tier icons adapt Extra Love's layered floating and twinkling treatment using green, violet and gold faceted gems, increasing from one to three. Reduced motion and busy states stop animation. Use a minimum panel height per viewport and let longer content expand into the page. Do not create an internal scrollbar around the package cards or clip their content. Preserve £5/day to £2 million/month wording.
 
 Consulting setup uses CONSULT_STRIPE_SECRET_KEY, CONSULT_STRIPE_PUBLISHABLE_KEY, CONSULT_STRIPE_ACCOUNT_ID, CONSULT_STRIPE_WEBHOOK_SECRET and CONSULT_BOOKING_TOKEN_KEY. HUDDLE_STRIPE_ACCOUNT_ID identifies historical orders. Existing global Stripe credentials remain assigned to Huddle Duck client services. Keep new checkout disabled until consulting credentials are verified.
 
