@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import {getStripe} from './stripe';
 let client:Stripe|undefined;
+export function consultationCheckoutReady(){return ['CONSULT_STRIPE_SECRET_KEY','CONSULT_STRIPE_ACCOUNT_ID','CONSULT_STRIPE_PUBLISHABLE_KEY','CONSULT_STRIPE_WEBHOOK_SECRET','CONSULT_BOOKING_TOKEN_KEY'].every(name=>Boolean(process.env[name]?.trim()));}
 export function consultationStripe(account?:string):Stripe {
  if(account && account===process.env.HUDDLE_STRIPE_ACCOUNT_ID?.trim())return getStripe();
  if(account && account!==process.env.CONSULT_STRIPE_ACCOUNT_ID?.trim())throw new Error('Unknown consultation merchant');
