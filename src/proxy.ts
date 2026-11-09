@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // Deployment URLs (*.vercel.app) and localhost are left untouched for testing.
 const ASAD_APEX = "asadshah.co.uk";
 const ASAD_ORIGIN = `https://${ASAD_APEX}`;
-const HUDDLE_ORIGIN = "https://huddleduck.co.uk";
+const BRANDING_ORIGIN = `https://branding.${ASAD_APEX}`;
 const HUDDLE_HOSTS = new Set(["huddleduck.co.uk", "www.huddleduck.co.uk", "start.huddleduck.co.uk"]);
 
 // Paths that asadshah.co.uk passes straight through: its API, Next assets,
@@ -27,9 +27,10 @@ export function proxy(request: NextRequest) {
     if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return NextResponse.next();
     if (pathname === "/talk-to-asad") return NextResponse.redirect(`${ASAD_ORIGIN}/${search}`, 308);
     if (pathname === "/talk-to-asad/privacy") return NextResponse.redirect(`${ASAD_ORIGIN}/privacy`, 308);
+    if (/^\/(branding|brand|brand-kit|branding-kit)\/?$/i.test(pathname)) return NextResponse.redirect(BRANDING_ORIGIN, 307);
     if (ASAD_PASSTHROUGH.test(pathname) || /\.[a-z0-9]+$/i.test(pathname)) return NextResponse.next();
-    // Anything else belongs to Huddle Duck.
-    return NextResponse.redirect(`${HUDDLE_ORIGIN}${pathname}${search}`, 308);
+    // asadshah.co.uk never sends people to Huddle Duck (Asad, 9 Nov 2026): unknown pages go home.
+    return NextResponse.redirect(`${ASAD_ORIGIN}/`, 307);
   }
 
   if (HUDDLE_HOSTS.has(host)) {

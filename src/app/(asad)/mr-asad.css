@@ -31,7 +31,8 @@ body { margin: 0; background: var(--ma-ink); color: var(--ma-text); font-family:
   --bg: var(--ma-mint); --base: #6f8a6b;
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .5em;
   min-height: 56px; padding: 15px 26px; border: 2px solid #19231d; border-radius: 18px;
-  background: var(--bg); color: var(--ma-ink); font: 900 18px/1.2 "Proxima", Arial, sans-serif; text-decoration: none;
+  background: var(--bg); color: var(--ma-ink); font: 900 16px/1.2 "Proxima", Arial, sans-serif; text-decoration: none;
+  text-transform: uppercase; letter-spacing: .04em; /* 9 Nov 2026: button labels are always ALL CAPS */
   box-shadow: 0 6px 0 var(--base); overflow: hidden; cursor: pointer; transition: transform .12s, box-shadow .12s;
 }
 .ma-btn::after {
@@ -40,6 +41,7 @@ body { margin: 0; background: var(--ma-ink); color: var(--ma-text); font-family:
   transform: rotate(-25deg); animation: ma-shine 4s ease-in-out infinite; pointer-events: none;
 }
 .ma-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--base); }
+.ma-btn[data-size="sm"] { min-height: 42px; padding: 9px 16px; font-size: 13px; border-radius: 13px; box-shadow: 0 4px 0 var(--base); }
 .ma-btn[data-tone="blue"] { --bg: var(--ma-blue); --base: #4d7b9f; }
 .ma-btn[data-tone="mint"] { --bg: var(--ma-mint); --base: #6f8a6b; }
 .ma-btn[data-tone="yellow"] { --bg: var(--ma-yellow); --base: #a6a24d; }
@@ -49,6 +51,14 @@ body { margin: 0; background: var(--ma-ink); color: var(--ma-text); font-family:
 @keyframes ma-shine { 0%, 70% { left: -70%; opacity: 0 } 72% { opacity: 1 } 92%, 100% { left: 150%; opacity: 0 } }
 
 .ma-grad-alive { background: var(--ma-grad); background-size: 300% 300%; animation: ma-drift 12s ease-in-out infinite; }
+/* Gradient callout (9 Nov 2026): a thick living outline around a dark panel; buttons never sit on a gradient fill. */
+.ma-grad-frame {
+  border: 6px solid transparent;
+  background: linear-gradient(var(--ma-panel), var(--ma-panel)) padding-box,
+    linear-gradient(135deg, var(--ma-coral), var(--ma-yellow), var(--ma-mint), var(--ma-blue), var(--ma-coral)) border-box;
+  background-size: 100% 100%, 300% 300%; animation: ma-frame 6s linear infinite;
+}
+@keyframes ma-frame { 0% { background-position: 0 0, 0% 50% } 100% { background-position: 0 0, 300% 50% } }
 @keyframes ma-drift { 0% { background-position: 0% 0% } 50% { background-position: 100% 100% } 100% { background-position: 0% 0% } }
 
 /* Highlight swipe: a yellow marker sweeps behind one phrase. Background-based so it

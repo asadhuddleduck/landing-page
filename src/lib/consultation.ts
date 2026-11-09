@@ -95,7 +95,7 @@ export async function book(o:Order,start:string){
  const used=calls.filter(c=>c.state!=='cancelled').length;
  const idx=Array.from({length:plans[o.plan].calls},(_,i)=>i).find(i=>!calls.some(c=>c.idx===i&&c.state!=='cancelled'))??plans[o.plan].calls;
  if(used>=plans[o.plan].calls)throw new ConsultationError(400,'All your sessions have been booked.');
- const minutes=o.plan==='deep'&&idx>0?20:plans[o.plan].minutes;
+ const minutes=plans[o.plan].minutes;
  if(o.first_start){const until=Date.parse(o.first_start)+(o.plan==='deep'?30:90)*86400000;if(Date.parse(start)>until||Date.parse(start)<=Date.parse(o.first_start))throw new ConsultationError(400,'Please choose a time within your package period after the first call.');}
  if(o.reservation_uid){await cal('/slots/reservations/'+encodeURIComponent(o.reservation_uid),'DELETE').catch(()=>{});await db.execute({sql:'UPDATE consultation_orders SET reservation_uid=NULL WHERE id=?',args:[o.id]});}
  const available=await slots(minutes,o.timezone);if(!available.includes(start))throw new ConsultationError(409,'That time is no longer available. Please choose another.');

@@ -37,7 +37,7 @@ const faqs = [
   ['who is this for?', 'business owners, founders and anyone responsible for marketing who wants help thinking through their ads, their offer, the journey people take to buy, or what to do next.'],
   ['will I speak with you personally?', 'yes, every session is with me.'],
   ['do I need to prepare anything?', 'just bring the question you want help with. you can send your main question and up to 3 links beforehand, and you don’t need a presentation.'],
-  ['how do the extra calls work?', 'book your first call now and your confirmation includes a private link for the rest. use your 20-minute catch-up within 30 days of the first call, normally around 2 weeks later. the 10-call package runs for 90 days from your first call.'],
+  ['how do the extra calls work?', 'book your first call now and your confirmation includes a private link for the rest. the 1-month package gives you 3 calls within 30 days of your first call, and the 3-month package gives you 10 calls within 90 days.'],
   ['will you run my ads for me?', 'these sessions are for advice, planning and checking decisions. running campaigns is a separate service.'],
   ['can I change the time?', 'yes, your private booking link lets you reschedule with at least 24 hours’ notice. late cancellations and missed calls use up a session, and if I need to move a call, you keep that session.'],
   ['how does the refund promise work?', 'email hello@asadshah.co.uk within 24 hours of the end of your first conversation and I’ll refund the full package and cancel any remaining sessions. your statutory rights are unaffected.'],
@@ -47,8 +47,8 @@ export default function Page(){return <main className={styles.page}>
 <header className={styles.header}>
   {/* Full page load on purpose: "/" is rewritten by host in src/proxy.ts. */}
   {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-  <a href="/" className={styles.brand} aria-label="MR. ASAD home"><Image src="/brand/mr-asad/logo-2018.png" alt="" width={520} height={803} priority/><span>MR. ASAD</span></a>
-  <a href="#book" className={styles.headerLink}>book a call 📅</a>
+  <a href="/" className={styles.brand} aria-label="MR. ASAD home"><Image src="/brand/mr-asad/logo-2018.png" alt="MR. ASAD" width={520} height={803} priority/></a>
+  <a href="#book" className="ma-btn" data-tone="mint" data-size="sm">book a call 📅</a>
 </header>
 
 <section className={styles.hero}>
@@ -96,7 +96,7 @@ export default function Page(){return <main className={styles.page}>
   <blockquote>“thanks for your great service Assad ❤️”<cite>Yusuf, Ten Ten Burgers</cite></blockquote>
 </section>
 
-<section className={`${styles.promise} ma-grad-alive`}>
+<section className={`${styles.promise} ma-grad-frame`}>
   <p className={styles.eyebrow}>🤞 my promise to you</p>
   <h2>if our first call doesn’t give you a useful next step, you get your money back.</h2>
   <p>tell me within 24 hours of the end of our first conversation and I’ll refund your whole package. any remaining sessions get cancelled.</p>
