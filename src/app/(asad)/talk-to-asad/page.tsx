@@ -97,7 +97,7 @@ export default function Page(){return <main className={styles.page}>
 </section>
 
 <section className={`${styles.promise} ma-grad-frame`}>
-  <p className={styles.eyebrow}>🤞 my promise to you</p>
+  <p className={styles.eyebrow}>🤝 my promise to you</p>
   <h2>if our first call doesn’t give you a useful next step, you get your money back.</h2>
   <p>tell me within 24 hours of the end of our first conversation and I’ll refund your whole package. any remaining sessions get cancelled.</p>
   <a href="#book" className="ma-btn" data-tone="mint">choose your conversation 👇</a>
