@@ -33,6 +33,20 @@ const benefits = [
   ['📝', 'something to come back to', 'I’ll send you a short written recap of the main points and the next steps we agreed.'],
 ] as const;
 
+// Wins from the Proof Wall (Huddle Duck and SuperPulse clients), lightly reworded
+// into the client's voice with Asad's approval (9 Nov 2026). Facts stay as recorded.
+const proof = [
+  ['Is 20 an option?', 'Adam, marketing manager at Burger & Sauce', 'when asked to rate us out of 10, after hundreds of new customers in 8 days'],
+  ['What the hell have you done?', 'Phat Buns’ Uber Eats rep, one week after launch', 'sales jumped at every one of their 15+ locations'],
+  ['Main man is Asad Shah.', 'Far East Kitchens', 'on camera, no script'],
+  ['Please stop the ads, we can’t handle all these customers.', 'a burger restaurant owner', 'calling twice while we were at the gym'],
+  ['12,000 followers before we’d sold a single pizza.', 'Dough Club', 'then a queue on day one at every new location'],
+  ['We went from 1 location to 5, with a queue at every launch.', 'Shakedown', '4,000+ people at the Newcastle opening'],
+  ['10 out of 10. We made a whole video about working with you.', 'Lunar Park', null],
+  ['10/10, and we’ve sent two more businesses your way.', 'Boo Burger', null],
+  ['thanks for your great service Asad ❤️', 'Yusuf, Ten Ten Burgers', null],
+] as const;
+
 const faqs = [
   ['who is this for?', 'business owners, founders and anyone responsible for marketing who wants help thinking through their ads, their offer, the journey people take to buy, or what to do next.'],
   ['will I speak with you personally?', 'yes, every session is with me.'],
@@ -92,8 +106,7 @@ export default function Page(){return <main className={styles.page}>
 
 <section className={styles.proof}>
   <p className={styles.eyebrow}>💬 from people my team and I have worked with</p>
-  <blockquote>“Is 20 an option?”<cite>Adam, marketing manager at Burger &amp; Sauce<span>when asked to rate his experience out of 10</span></cite></blockquote>
-  <blockquote>“thanks for your great service Assad ❤️”<cite>Yusuf, Ten Ten Burgers</cite></blockquote>
+  <div className={styles.proofGrid}>{proof.map(([q,who,note],n)=><figure key={who} data-tone={n%4}><blockquote>“{q}”</blockquote><figcaption>{who}{note&&<span>{note}</span>}</figcaption></figure>)}</div>
 </section>
 
 <section className={`${styles.promise} ma-grad-frame`}>
