@@ -47,7 +47,7 @@ export default function Page(){return <main className={styles.page}>
 <header className={styles.header}>
   {/* Full page load on purpose: "/" is rewritten by host in src/proxy.ts. */}
   {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-  <a href="/" className={styles.brand} aria-label="MR. ASAD home"><Image src="/brand/mr-asad/logo-2018.png" alt="MR. ASAD" width={520} height={803} priority/></a>
+  <a href="/" className={styles.brand} aria-label="MR. ASAD home"><Image src="/brand/mr-asad/logo-dark.png" alt="MR. ASAD" width={650} height={990} priority/></a>
   <a href="#book" className="ma-btn" data-tone="mint" data-size="sm">book a call 📅</a>
 </header>
 

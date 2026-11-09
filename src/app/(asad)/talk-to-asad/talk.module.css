@@ -1,5 +1,5 @@
 .page{background:var(--ma-ink);color:var(--ma-text);font-family:"Proxima",Arial,sans-serif;line-height:1.6;padding:0 5vw;overflow-x:clip}
-.header{position:sticky;top:0;z-index:20;margin:0 -5vw;padding:12px 5vw;background:#fff;color:var(--ma-ink);display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 0 #0000001a}
+.header{position:sticky;top:0;z-index:20;margin:0 -5vw;padding:10px 5vw;padding-top:max(10px,env(safe-area-inset-top));background:rgb(16 18 20 / 82%);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--ma-line);display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:10px;color:var(--ma-ink);text-decoration:none;font-weight:900;font-size:20px;letter-spacing:-.01em}
 .brand img{height:46px;width:auto;display:block}
 .eyebrow{font-size:13px!important;font-weight:900;letter-spacing:.04em;color:var(--ma-muted);margin:0}

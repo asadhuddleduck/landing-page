@@ -9,7 +9,7 @@ export async function POST(req:Request){try{
  if(['checkout','promo'].includes(b.action)&&!consultationCheckoutReady())throw new ConsultationError(503,'Online booking is temporarily unavailable. Please email hello@asadshah.co.uk to arrange your conversation.');
  if(['checkout','promo'].includes(b.action))await limit(req.headers.get('x-forwarded-for')?.split(',')[0]??'unknown');
  let result;
- if(b.action==='slots'){if(!(Object.hasOwn(plans,b.plan)))throw new ConsultationError(400,'Choose a package.');const minutes=b.followup?20:plans[b.plan as Plan].minutes;result={slots:await slots(minutes,b.timezone)};}
+ if(b.action==='slots'){if(!(Object.hasOwn(plans,b.plan)))throw new ConsultationError(400,'Choose a package.');const minutes=b.followup?20:plans[b.plan as Plan].minutes;result={slots:await slots(minutes,b.timezone,b.first?'first':'later')};}
  else if(b.action==='promo'){if(!(Object.hasOwn(plans,b.plan)))throw new ConsultationError(400,'Choose a package.');const p=await promo(String(b.code??''),b.plan);const c=p?.promotion.coupon;result={valid:!!p,percent:c&&typeof c==='object'?c.percent_off:null};}
  else if(b.action==='checkout')result=await checkout(b,token);
  else if(b.action==='status')result=await reconcile(token);

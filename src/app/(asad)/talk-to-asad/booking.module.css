@@ -1,6 +1,5 @@
 /* Booking panel in the MR. ASAD brand: charcoal panel on the ink base, one pastel per package. */
-.shell{max-width:1120px;margin:auto;scroll-margin-top:80px;background:var(--ma-panel);border:1px solid var(--ma-line);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px #00000059}
-.top{display:flex;justify-content:space-between;gap:12px;background:var(--ma-grad);color:var(--ma-ink);padding:14px 30px;font-size:14px;font-weight:900}
+.shell{max-width:1120px;margin:auto;scroll-margin-top:80px;background:var(--ma-panel);border:1px solid var(--ma-line);border-radius:28px;overflow:visible;box-shadow:0 30px 80px #00000059}
 .panel{min-height:640px;padding:36px;overscroll-behavior:contain}
 .panel h2{font-size:clamp(26px,3vw,34px);font-weight:900;line-height:1.1;letter-spacing:-.025em;margin:0 0 28px}
 .panel p{font-size:16px}
@@ -18,7 +17,18 @@
 .plans article>p:not(.duration):not(.perCall){font-size:15px;font-weight:300;line-height:1.6;margin:0 0 24px;color:var(--ma-text)}
 .plans article>button{margin-top:auto;width:100%;font-size:16px;min-height:58px;padding:13px 14px}
 .badge{position:absolute;top:-17px;right:18px;background:var(--tier);color:var(--ma-ink);padding:5px 14px;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;border:2px solid #19231d}
-.plans .featured{box-shadow:0 0 0 1px var(--tier),0 18px 50px color-mix(in srgb,var(--tier) 22%,transparent);transform:translateY(-6px)}
+/* Best value card (9 Nov 2026): a rotating four-colour outline with a soft gradient glow. */
+@property --ma-spin{syntax:'<angle>';inherits:false;initial-value:0deg}
+.plans .featured{isolation:isolate;background:transparent;border:2px solid transparent;transform:translateY(-6px)}
+.plans .featured::before,.plans .featured::after{content:"";position:absolute;border-radius:inherit;pointer-events:none;animation:maSpin 5s linear infinite}
+.plans .featured::before{inset:-6px;z-index:-2;background:conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral));filter:blur(22px);opacity:.55}
+.plans .featured::after{inset:-2px;z-index:-1;border:4px solid transparent;background:linear-gradient(var(--ma-ink),var(--ma-ink)) padding-box,conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral)) border-box}
+@keyframes maSpin{to{--ma-spin:360deg}}
+.plans .featured>button{box-shadow:0 6px 0 var(--base),0 0 0 3px #f4f09333,0 0 34px #f4f09380;animation:maGlow 2.4s ease-in-out infinite}
+@keyframes maGlow{0%,100%{box-shadow:0 6px 0 var(--base),0 0 0 3px #f4f09333,0 0 24px #f4f09366}50%{box-shadow:0 6px 0 var(--base),0 0 0 5px #f4f09355,0 0 46px #f4f093aa}}
+.plans .featured>button:active{box-shadow:0 2px 0 var(--base),0 0 30px #f4f09380}
+.plans .featured>button:disabled{animation:none;box-shadow:0 6px 0 var(--base)}
+.was{font-size:.5em;color:var(--ma-muted);text-decoration-thickness:3px;text-decoration-color:var(--ma-coral);margin-right:.25em;vertical-align:middle}
 .perCall{font-size:13px!important;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--tier);margin:0 0 12px}
 .fine{text-align:center;font-size:14px!important;color:var(--ma-muted);margin:24px 0 0}
 .notice{font-size:16px!important;padding:14px 18px;margin:0 0 24px;border-radius:14px;background:#e9a19a1f;border:1px solid #e9a19a66;color:var(--ma-text)}
@@ -35,6 +45,21 @@
 .panel textarea{min-height:96px}
 .panel .check{display:flex;align-items:start;gap:10px;font-weight:300}
 .check input{width:20px;height:20px;flex:none;margin-top:2px}
+.picker{margin:22px 0 8px}
+.pickLabel{font-size:13px!important;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--ma-muted);margin:0 0 10px}
+.days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:14px;scroll-snap-type:x mandatory}
+.days button{flex:none;scroll-snap-align:start;min-width:108px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--ma-ink);color:var(--ma-text);border:2px solid var(--ma-line);border-radius:16px;padding:12px 16px;cursor:pointer;font-family:"Proxima",Arial,sans-serif;text-align:left}
+.days button span{font-size:13px;font-weight:900;color:var(--ma-muted)}
+.days button strong{font-size:22px;font-weight:900;line-height:1.1}
+.days button small{font-size:12px;color:var(--ma-muted)}
+.days button[aria-pressed=true]{border-color:var(--ma-mint);background:#cbe2c714}
+.days button[aria-pressed=true] span,.days button[aria-pressed=true] small{color:var(--ma-mint)}
+.times{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-bottom:22px}
+.times button{background:var(--ma-ink);color:var(--ma-text);border:2px solid var(--ma-line);border-radius:12px;padding:12px 8px;cursor:pointer;font:900 16px "Proxima",Arial,sans-serif;font-variant-numeric:tabular-nums}
+.times button:hover{border-color:var(--ma-muted)}
+.times button[aria-pressed=true]{background:var(--ma-mint);border-color:var(--ma-mint);color:var(--ma-ink)}
+.tz{margin:0 0 20px;font-size:14px;color:var(--ma-muted)}
+.tz summary{cursor:pointer}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-height:300px;overflow:auto;margin:20px 0}
 .slots button{background:var(--ma-ink);color:var(--ma-text);border:2px solid var(--ma-line);border-radius:12px;padding:12px;cursor:pointer;font:400 14px "Proxima",Arial,sans-serif}
 .slots button[aria-pressed=true]{background:var(--ma-mint);border-color:var(--ma-mint);color:var(--ma-ink);font-weight:900}
@@ -44,10 +69,12 @@
 @keyframes tierPop{from{transform:scale(0)}to{transform:scale(1)}}
 @keyframes tierFloat{0%,100%{translate:0 0;rotate:-4deg}50%{translate:0 -6px;rotate:4deg}}
 .panel[aria-busy=true] .tierEmoji{animation:none}
+@media(prefers-reduced-motion:reduce){.plans .featured::before,.plans .featured::after,.plans .featured>button{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.tierEmoji{animation:none!important}}
 @media(max-width:760px){
   .plans .featured{transform:none}
-  .top{padding:12px 18px;font-size:13px}.top span:last-child{display:none}
+  .plans article[data-level="3"]{order:1}.plans article[data-level="2"]{order:2}.plans article[data-level="1"]{order:3}
+  .plans{padding-top:6px}
   .panel{padding:24px 16px;min-height:0}
   .plans{grid-template-columns:1fr;gap:26px}
   .plans h3{min-height:0}

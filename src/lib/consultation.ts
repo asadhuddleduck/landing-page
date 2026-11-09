@@ -30,11 +30,32 @@ export async function cal(path:string,method='GET',body?:unknown,version?:string
  if(r.status===204)return {};
  const result=await r.json(); if(!r.ok||result.status!=='success')throw new ConsultationError(r.status>=400&&r.status<500?409:503,'The calendar could not complete that step. Please try again.'); return result.data;
 }
-export async function slots(minutes:number,timezone:string){
+// First calls (Asad, 9 Nov 2026): only today or tomorrow in Europe/London, from
+// 1 hour ahead, extended once to day three when fewer than 2 times exist. Cal
+// removes anything that clashes with Asad's connected Google calendars.
+// "confirm" re-checks a first-call time chosen at checkout (same window, no
+// notice, so payment time cannot invalidate it). Later package calls keep 30
+// days ahead with 24 hours' notice.
+export type SlotWindow='first'|'confirm'|'later';
+function londonDayEnd(daysAhead:number){
+ const today=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+ const d=new Date(Date.parse(today+'T12:00:00Z')+daysAhead*86400000).toISOString().slice(0,10);
+ const guess=Date.parse(d+'T23:59:59Z');
+ const local=Date.parse(new Date(guess).toLocaleString('sv-SE',{timeZone:'Europe/London'}).replace(' ','T')+'Z');
+ return new Date(guess-(local-guess));
+}
+async function calSlots(minutes:number,timezone:string,end:Date){
+ const q=new URLSearchParams({eventTypeId:String(eventId(minutes)),start:new Date().toISOString(),end:end.toISOString(),timeZone:timezone});
+ const data=await cal('/slots?'+q);return Object.values(data).flatMap(v=>Array.isArray(v)?v:[]).map((v)=>typeof v==='string'?v:v.start??v.time).map((s:string)=>new Date(s).toISOString());
+}
+export async function slots(minutes:number,timezone:string,window:SlotWindow='later'){
  if(!eventId(minutes))throw new ConsultationError(503,'Booking is being prepared. Please email hello@asadshah.co.uk.');
  try{new Intl.DateTimeFormat('en',{timeZone:timezone});}catch{throw new ConsultationError(400,'Please select a valid timezone.');}
- const q=new URLSearchParams({eventTypeId:String(eventId(minutes)),start:new Date().toISOString(),end:new Date(Date.now()+30*86400000).toISOString(),timeZone:timezone});
- const data=await cal('/slots?'+q);return Object.values(data).flatMap(v=>Array.isArray(v)?v:[]).map((v)=>typeof v==='string'?v:v.start??v.time).filter((s:string)=>Date.parse(s)>Date.now()+24*3600000).map((s:string)=>new Date(s).toISOString());
+ if(window==='later')return (await calSlots(minutes,timezone,new Date(Date.now()+30*86400000))).filter(s=>Date.parse(s)>Date.now()+24*3600000);
+ const notice=window==='first'?3600000:0;
+ const within=async(days:number)=>(await calSlots(minutes,timezone,londonDayEnd(days))).filter(s=>Date.parse(s)>Date.now()+notice);
+ if(window==='confirm')return within(2);
+ const two=await within(1);return two.length>=2?two:within(2);
 }
 export async function limit(key:string){await init();const now=Date.now();await db.execute({sql:'DELETE FROM consultation_limits WHERE expires<?',args:[now]});const r=await db.execute({sql:'INSERT INTO consultation_limits(key,count,expires) VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET count=count+1 RETURNING count',args:[hash(key),now+600000]});if(Number(r.rows[0].count)>25)throw new ConsultationError(429,'Please wait a few minutes before trying again.');}
 export async function promo(code:string,plan:Plan){
@@ -56,7 +77,7 @@ export async function checkout(raw:unknown,token:string){
  await init(); const existing=await db.execute({sql:'SELECT * FROM consultation_orders WHERE id=?',args:[p.requestId]});
  if(existing.rows[0]){const o=await orderFor(token);if(o.plan!==p.plan||o.start!==p.start||o.email!==p.email.toLowerCase())throw new ConsultationError(409,'Checkout already started. Reload to choose a different package or time.');if(o.id!==p.requestId)throw new ConsultationError(403,'Please reload and try again.');if(o.session_id){const s=await consultationStripe(o.stripe_account_id).checkout.sessions.retrieve(o.session_id);if(s.status==='open'&&o.stripe_account_id!==process.env.CONSULT_STRIPE_ACCOUNT_ID)throw new ConsultationError(409,'Please reload to restart checkout with the consulting business.');if(s.status==='open')return {clientSecret:s.client_secret,publishableKey:consultationPublicKey(o.stripe_account_id)};if(s.status==='complete')return {complete:true};throw new ConsultationError(409,'Checkout expired. Reload to choose a time again.');}}
  if(existing.rows[0]?.reservation_uid)await cal('/slots/reservations/'+encodeURIComponent(String(existing.rows[0].reservation_uid)),'DELETE').catch(()=>{});
- const available=await slots(plans[p.plan].minutes,p.timezone);if(!available.includes(p.start))throw new ConsultationError(409,'That time is no longer available. Please choose another.');
+ const available=await slots(plans[p.plan].minutes,p.timezone,'first');if(!available.includes(p.start))throw new ConsultationError(409,'That time is no longer available. Please choose another.');
  const promotion=await promo(p.code,p.plan);
  const price=process.env[`CONSULT_PRICE_${p.plan.toUpperCase()}`];if(!price)throw new ConsultationError(503,'Checkout is temporarily unavailable.');
  await db.execute({sql:'INSERT INTO consultation_orders(id,token_hash,plan,name,email,timezone,question,start,total,token_box,stripe_account_id,token_key_version) VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING',args:[p.requestId,hash(token),p.plan,p.name,p.email.toLowerCase(),p.timezone,p.question,p.start,plans[p.plan].price,seal(token),process.env.CONSULT_STRIPE_ACCOUNT_ID!.trim(),2]});
@@ -98,7 +119,7 @@ export async function book(o:Order,start:string){
  const minutes=plans[o.plan].minutes;
  if(o.first_start){const until=Date.parse(o.first_start)+(o.plan==='deep'?30:90)*86400000;if(Date.parse(start)>until||Date.parse(start)<=Date.parse(o.first_start))throw new ConsultationError(400,'Please choose a time within your package period after the first call.');}
  if(o.reservation_uid){await cal('/slots/reservations/'+encodeURIComponent(o.reservation_uid),'DELETE').catch(()=>{});await db.execute({sql:'UPDATE consultation_orders SET reservation_uid=NULL WHERE id=?',args:[o.id]});}
- const available=await slots(minutes,o.timezone);if(!available.includes(start))throw new ConsultationError(409,'That time is no longer available. Please choose another.');
+ const available=await slots(minutes,o.timezone,idx===0?'confirm':'later');if(!available.includes(start))throw new ConsultationError(409,'That time is no longer available. Please choose another.');
  const id=randomBytes(16).toString('hex');
  // A unique position is the atomic guard against double booking across workers.
  const r=await db.execute({sql:"INSERT INTO consultation_calls(id,order_id,idx,start,minutes,state) VALUES(?,?,?,?,?,'creating') ON CONFLICT(order_id,idx) DO UPDATE SET id=excluded.id,start=excluded.start,minutes=excluded.minutes,state='creating',uid=NULL,url=NULL WHERE consultation_calls.state='cancelled'",args:[id,o.id,idx,start,minutes]});if(!r.rowsAffected)throw new ConsultationError(409,'Your booking is already being processed.');
