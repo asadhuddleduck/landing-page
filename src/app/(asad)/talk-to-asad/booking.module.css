@@ -18,7 +18,7 @@
 .badge{position:absolute;top:-17px;right:18px;background:var(--tier);color:var(--ma-ink);padding:5px 14px;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;border:2px solid #19231d}
 /* Best value card (9 Nov 2026): a rotating four-colour outline with a soft gradient glow. */
 @property --ma-spin{syntax:'<angle>';inherits:false;initial-value:0deg}
-.plans .featured{isolation:isolate;background:transparent;border:2px solid transparent;transform:translateY(-6px)}
+.plans .featured{isolation:isolate;background:transparent;border:2px solid transparent}
 .plans .featured::before,.plans .featured::after{content:"";position:absolute;border-radius:inherit;pointer-events:none;animation:maSpin 12s linear infinite}
 .plans .featured::before{inset:-6px;z-index:-2;background:conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral));filter:blur(24px);opacity:.45}
 .plans .featured::after{inset:-2px;z-index:-1;border:4px solid transparent;background:linear-gradient(var(--ma-ink),var(--ma-ink)) padding-box,conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral)) border-box}
@@ -72,7 +72,6 @@
 @media(prefers-reduced-motion:reduce){.plans .featured::before,.plans .featured::after,.plans .featured>button{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.tierEmoji{animation:none!important}}
 @media(max-width:760px){
-  .plans .featured{transform:none}
   .plans article[data-level="3"]{order:1}.plans article[data-level="2"]{order:2}.plans article[data-level="1"]{order:3}
   .plans{padding-top:6px}
   .panel{padding:24px 16px;min-height:0}
@@ -81,3 +80,12 @@
   .plans .duration{min-height:0}
   .slots{grid-template-columns:repeat(2,1fr)}
 }
+
+/* Alignment (9 Nov 2026): every card shares the same rows, so emoji, name, price,
+   duration, per-call line, blurb and button line up across the three packages. */
+.plans{grid-template-rows:repeat(7,auto);row-gap:0;column-gap:20px}
+.plans article{display:grid;grid-row:span 7;grid-template-rows:subgrid;align-items:start}
+.plans article>button{align-self:end}
+.plans h3{min-height:0}
+.plans .duration{min-height:0}
+@media(max-width:760px){.plans{row-gap:26px}.plans article{row-gap:0}}
