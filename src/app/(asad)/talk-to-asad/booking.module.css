@@ -24,10 +24,11 @@
 .plans .featured::before{inset:-6px;z-index:-2;background:conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral));filter:blur(22px);opacity:.55}
 .plans .featured::after{inset:-2px;z-index:-1;border:4px solid transparent;background:linear-gradient(var(--ma-ink),var(--ma-ink)) padding-box,conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral)) border-box}
 @keyframes maSpin{to{--ma-spin:360deg}}
-.plans .featured>button{box-shadow:0 6px 0 var(--base),0 0 0 3px #f4f09333,0 0 34px #f4f09380;animation:maGlow 2.4s ease-in-out infinite}
-@keyframes maGlow{0%,100%{box-shadow:0 6px 0 var(--base),0 0 0 3px #f4f09333,0 0 24px #f4f09366}50%{box-shadow:0 6px 0 var(--base),0 0 0 5px #f4f09355,0 0 46px #f4f093aa}}
-.plans .featured>button:active{box-shadow:0 2px 0 var(--base),0 0 30px #f4f09380}
-.plans .featured>button:disabled{animation:none;box-shadow:0 6px 0 var(--base)}
+.plans article>button{white-space:nowrap}
+/* Best value button: same raised shape, filled with the four-colour gradient that keeps moving. */
+.plans .featured>button{--base:#7d6f86;background:linear-gradient(110deg,var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral));background-size:300% 100%;animation:maFill 3s linear infinite}
+@keyframes maFill{to{background-position:300% 0}}
+.plans .featured>button:disabled{animation:none}
 .was{font-size:.5em;color:var(--ma-muted);text-decoration-thickness:3px;text-decoration-color:var(--ma-coral);margin-right:.25em;vertical-align:middle}
 .perCall{font-size:13px!important;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--tier);margin:0 0 12px}
 .fine{text-align:center;font-size:14px!important;color:var(--ma-muted);margin:24px 0 0}
