@@ -40,7 +40,10 @@
 .promise p:not(.eyebrow){max-width:620px;margin:0 auto 30px;font-weight:400}
 .faq{max-width:820px;margin:100px auto}
 .faq details{border-bottom:1px solid var(--ma-line);padding:18px 0}
-.faq summary{cursor:pointer;font-weight:900;font-size:20px;list-style-position:outside}
+.faq summary{cursor:pointer;font-weight:900;font-size:20px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--ma-mint);font-size:24px;line-height:1;transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}
 .faq details p{font-weight:300;color:var(--ma-text);margin:12px 0 0}
 .letter{max-width:760px;margin:90px auto 70px}
 .letter p{font-weight:300}
@@ -53,7 +56,7 @@
 @keyframes emojiFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 @media(max-width:700px){
   .brand img{height:40px}
-  .hero{margin:44px auto 40px}.hero h1{font-size:44px}
+  .hero{margin:44px auto 40px}.hero h1{font-size:clamp(34px,10.6vw,44px)}
   .intro{font-size:17px}
   .bullets{grid-template-columns:1fr;font-size:16px;gap:10px;margin-top:32px}
   .split,.about{grid-template-columns:1fr;gap:18px;margin:70px auto}

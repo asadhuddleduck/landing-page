@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'a private one to one call with Asad about your ads, your offer or your next move. from £250.',
   alternates: {canonical: 'https://asadshah.co.uk/'},
   openGraph: {
-    title: 'know exactly what to fix before you spend another pound',
+    title: 'know exactly what to fix before you spend another penny',
     description: 'a private one to one call with Asad about your marketing. from £250.',
     url: 'https://asadshah.co.uk/',
     siteName: 'MR. ASAD',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 const bullets = [
   '🔎 what your ad results might be hiding from you',
-  '💸 what to fix before you spend another penny',
+  '💸 what to fix before you put more money into ads',
   '🧲 why your offer could be the thing holding you back',
   '✂️ what you can stop wasting your time on',
   '📈 whether to fix it, test it or scale it',
@@ -67,7 +67,7 @@ export default function Page(){return <main className={styles.page}>
 
 <section className={styles.hero}>
   <p className={styles.eyebrow}><span className="ma-float">🙋‍♂️</span> one to one with MR. ASAD</p>
-  <h1>know exactly what to fix in your marketing <span className="ma-swipe">before you spend another pound.</span></h1>
+  <h1>know exactly what to fix in your marketing <span className="ma-swipe">before you spend another penny.</span></h1>
   <p className={styles.intro}>I’ve run ads on budgets from <strong>£5 a day to £2 million a month</strong>. bring me the question that’s been sitting in your head for weeks, and we’ll work through it together until you know exactly what you’re doing on monday morning.</p>
   <a href="#book" className="ma-btn" data-tone="mint">pick your call 👇</a>
   <ul className={styles.bullets}>{bullets.map(b=><li key={b}>{b}</li>)}</ul>
@@ -113,7 +113,7 @@ export default function Page(){return <main className={styles.page}>
   <p className={styles.eyebrow}>🤝 my promise to you</p>
   <h2>if our first call doesn’t give you a useful next step, you get your money back.</h2>
   <p>tell me within 24 hours of the end of our first conversation and I’ll refund your whole package. any remaining sessions get cancelled.</p>
-  <a href="#book" className="ma-btn" data-tone="mint">choose your conversation 👇</a>
+  <a href="#book" className="ma-btn" data-tone="mint">pick your call 👇</a>
 </section>
 
 <section className={styles.faq}>

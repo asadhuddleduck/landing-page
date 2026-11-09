@@ -3,7 +3,7 @@
 .panel{min-height:640px;padding:36px;overscroll-behavior:contain}
 .panel h2{font-size:clamp(26px,3vw,34px);font-weight:900;line-height:1.1;letter-spacing:-.025em;margin:0 0 28px}
 .panel p{font-size:16px}
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .plans article{--tier:var(--ma-mint);position:relative;display:flex;flex-direction:column;background:var(--ma-ink);border:2px solid color-mix(in srgb,var(--tier) 70%,transparent);border-radius:22px;padding:26px 24px 24px}
 .plans article[data-level="2"]{--tier:var(--ma-blue)}
 .plans article[data-level="3"]{--tier:var(--ma-yellow)}
@@ -23,7 +23,7 @@
 .plans .featured::before{inset:-6px;z-index:-2;background:conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral));filter:blur(24px);opacity:.45}
 .plans .featured::after{inset:-2px;z-index:-1;border:4px solid transparent;background:linear-gradient(var(--ma-ink),var(--ma-ink)) padding-box,conic-gradient(from var(--ma-spin),var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral)) border-box}
 @keyframes maSpin{to{--ma-spin:360deg}}
-.plans article>button{white-space:nowrap}
+.plans article>button{white-space:nowrap;font-size:clamp(14px,1.35vw,16px);padding-inline:12px}
 /* Best value button: same raised shape, filled with the four-colour gradient that keeps moving. */
 .plans .featured>button{--base:#7d6f86;background:linear-gradient(110deg,var(--ma-coral),var(--ma-yellow),var(--ma-mint),var(--ma-blue),var(--ma-coral));background-size:300% 100%;animation:maFill 9s linear infinite}
 @keyframes maFill{to{background-position:300% 0}}
@@ -71,11 +71,14 @@
 .panel[aria-busy=true] .tierEmoji{animation:none}
 @media(prefers-reduced-motion:reduce){.plans .featured::before,.plans .featured::after,.plans .featured>button{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.tierEmoji{animation:none!important}}
-@media(max-width:760px){
+/* Below 960px three columns get cramped: one column, most expensive first. */
+@media(max-width:960px){
+  .plans{grid-template-columns:minmax(0,1fr);padding-top:6px}
   .plans article[data-level="3"]{order:1}.plans article[data-level="2"]{order:2}.plans article[data-level="1"]{order:3}
-  .plans{padding-top:6px}
+  .plans article>button{font-size:16px}
+}
+@media(max-width:760px){
   .panel{padding:24px 16px;min-height:0}
-  .plans{grid-template-columns:1fr;gap:26px}
   .plans h3{min-height:0}
   .plans .duration{min-height:0}
   .slots{grid-template-columns:repeat(2,1fr)}
@@ -88,4 +91,4 @@
 .plans article>button{align-self:end}
 .plans h3{min-height:0}
 .plans .duration{min-height:0}
-@media(max-width:760px){.plans{row-gap:26px}.plans article{row-gap:0}}
+@media(max-width:960px){.plans{grid-template-rows:none;row-gap:26px}.plans article{display:flex;flex-direction:column;grid-row:auto}.plans article>button{margin-top:4px}}
