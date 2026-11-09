@@ -1,6 +1,12 @@
 # Talk to Asad
 
-Personal consultation route: /talk-to-asad. Created 4 November 2026.
+Personal consultation, created 4 November 2026. Since 9 November 2026 it is the
+home page of asadshah.co.uk in the MR. ASAD brand (source `src/app/(asad)/talk-to-asad`,
+served at "/" by `src/proxy.ts`; terms at /privacy). huddleduck.co.uk/talk-to-asad
+redirects there and keeps the #booking= fragment. Brand source of truth:
+`brand-kits/mr-asad` and the branding-kit site; copy follows the MR. ASAD voice
+(lowercase except I and names, emojis, numerals, no dashes). Buttons are `.ma-btn`
+in `src/app/(asad)/mr-asad.css`: clarity mint, deep blue, advisory yellow.
 
 ## Offer
 

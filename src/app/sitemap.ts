@@ -1,8 +1,15 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // asadshah.co.uk (MR. ASAD) and huddleduck.co.uk share this app; list each site's own pages.
+  if (((await headers()).get("host") ?? "").toLowerCase().startsWith("asadshah.co.uk")) {
+    return [
+      {url: "https://asadshah.co.uk/", lastModified: new Date("2026-11-09"), changeFrequency: "monthly", priority: 1},
+      {url: "https://asadshah.co.uk/privacy", lastModified: new Date("2026-11-09"), changeFrequency: "yearly", priority: 0.3},
+    ];
+  }
   return [
-    {url: "https://huddleduck.co.uk/talk-to-asad", lastModified: new Date("2026-11-04"), changeFrequency: "monthly", priority: 0.8},
     {
       url: "https://huddleduck.co.uk",
       lastModified: new Date(),

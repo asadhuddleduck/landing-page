@@ -36,7 +36,14 @@ from historical documentation.
 
 ## Current structure
 
-- `src/app/page.tsx`: current page assembly.
+- Two sites share this app (9 November 2026). `src/proxy.ts` routes by host.
+  `src/app/(huddle)/` holds every Huddle Duck page and its shell (fonts,
+  trackers, cookie notice); `src/app/(asad)/` is the MR. ASAD site for
+  asadshah.co.uk, whose home page is the Talk to Asad consultation
+  (`(asad)/talk-to-asad`, rewritten from "/"). `src/app/layout.tsx` only owns
+  `<html>`/`<body>`. Never add Huddle Duck trackers to the (asad) group.
+  huddleduck.co.uk/talk-to-asad redirects to asadshah.co.uk.
+- `src/app/(huddle)/page.tsx`: current Huddle Duck page assembly.
 - `src/components/HeroWaitlist.tsx`, `WaitlistForm.tsx`, and related components:
   waitlist UI.
 - `src/app/api/waitlist/`: waitlist endpoints.

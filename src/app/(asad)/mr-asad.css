@@ -1,0 +1,73 @@
+/* MR. ASAD brand (source of truth: brand-kits/mr-asad and branding-kit).
+   Dark base, warm pale text, four pastels, Proxima Nova. Loaded only by the
+   (asad) route group, so it never reaches Huddle Duck pages. */
+@font-face { font-family: "Proxima"; src: url("/fonts/mr-asad/pn-black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "Proxima"; src: url("/fonts/mr-asad/pn-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Proxima"; src: url("/fonts/mr-asad/pn-light.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+
+:root {
+  --ma-ink: #101214;
+  --ma-panel: #1c2023;
+  --ma-line: #343a3e;
+  --ma-text: #ece8e0;
+  --ma-muted: #adb1af;
+  --ma-blue: #8bbee5;
+  --ma-mint: #cbe2c7;
+  --ma-yellow: #f4f093;
+  --ma-coral: #e9a19a;
+  --ma-grad: linear-gradient(135deg, var(--ma-coral) 0%, var(--ma-yellow) 35%, var(--ma-mint) 65%, var(--ma-blue) 100%);
+}
+
+html { scroll-behavior: smooth; background: var(--ma-ink); color-scheme: dark; }
+body { margin: 0; background: var(--ma-ink); color: var(--ma-text); font-family: "Proxima", Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+.ma-site { min-height: 100dvh; }
+.ma-site *, .ma-site *::before, .ma-site *::after { box-sizing: border-box; }
+.ma-site h1, .ma-site h2, .ma-site h3 { text-wrap: balance; }
+.ma-site a:focus-visible, .ma-site button:focus-visible, .ma-site input:focus-visible,
+.ma-site textarea:focus-visible, .ma-site summary:focus-visible { outline: 3px solid var(--ma-blue); outline-offset: 3px; }
+
+/* Buttons: one pastel, ink text, raised base in a deeper shade, one shine sweep. */
+.ma-btn {
+  --bg: var(--ma-mint); --base: #6f8a6b;
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  min-height: 56px; padding: 15px 26px; border: 2px solid #19231d; border-radius: 18px;
+  background: var(--bg); color: var(--ma-ink); font: 900 18px/1.2 "Proxima", Arial, sans-serif; text-decoration: none;
+  box-shadow: 0 6px 0 var(--base); overflow: hidden; cursor: pointer; transition: transform .12s, box-shadow .12s;
+}
+.ma-btn::after {
+  content: ""; position: absolute; inset: -60% auto -60% -70%; width: 25%;
+  background: linear-gradient(90deg, transparent, #ffffff80, transparent);
+  transform: rotate(-25deg); animation: ma-shine 4s ease-in-out infinite; pointer-events: none;
+}
+.ma-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--base); }
+.ma-btn[data-tone="blue"] { --bg: var(--ma-blue); --base: #4d7b9f; }
+.ma-btn[data-tone="mint"] { --bg: var(--ma-mint); --base: #6f8a6b; }
+.ma-btn[data-tone="yellow"] { --bg: var(--ma-yellow); --base: #a6a24d; }
+.ma-btn[data-tone="coral"] { --bg: var(--ma-coral); --base: #a65f58; }
+.ma-btn:disabled, .ma-btn[aria-busy="true"] { cursor: default; transform: none; transition: none; opacity: .55; }
+.ma-btn:disabled::after, .ma-btn[aria-busy="true"]::after { animation: none; display: none; }
+@keyframes ma-shine { 0%, 70% { left: -70%; opacity: 0 } 72% { opacity: 1 } 92%, 100% { left: 150%; opacity: 0 } }
+
+.ma-grad-alive { background: var(--ma-grad); background-size: 300% 300%; animation: ma-drift 12s ease-in-out infinite; }
+@keyframes ma-drift { 0% { background-position: 0% 0% } 50% { background-position: 100% 100% } 100% { background-position: 0% 0% } }
+
+/* Highlight swipe: a yellow marker sweeps behind one phrase. Background-based so it
+   follows the text across line breaks. */
+.ma-swipe {
+  color: var(--ma-ink); padding: 0 .12em; border-radius: .12em;
+  background: linear-gradient(var(--ma-yellow), var(--ma-yellow)) no-repeat 0 60% / 100% 88%;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  animation: ma-swipe 1s .4s cubic-bezier(.3,1.2,.5,1) both;
+}
+@keyframes ma-swipe { from { background-size: 0% 88%; color: var(--ma-text) } 40% { color: var(--ma-ink) } to { background-size: 100% 88% } }
+
+.ma-float { display: inline-block; animation: ma-float 3s ease-in-out infinite; }
+@keyframes ma-float { 0%, 100% { transform: translateY(0) rotate(-4deg) } 50% { transform: translateY(-8px) rotate(4deg) } }
+.ma-pop { display: inline-block; animation: ma-pop .7s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes ma-pop { from { transform: scale(0) } to { transform: scale(1) } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ma-site *, .ma-site *::before, .ma-site *::after { animation: none !important; transition: none !important; }
+  .ma-btn:active { transform: none; box-shadow: 0 6px 0 var(--base); }
+}
