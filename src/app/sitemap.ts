@@ -23,6 +23,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: "https://huddleduck.co.uk/wins",
+      lastModified: new Date("2026-11-12"),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: "https://huddleduck.co.uk/privacy",
       lastModified: new Date(),
       changeFrequency: "monthly",

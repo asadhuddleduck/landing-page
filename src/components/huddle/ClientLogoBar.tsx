@@ -39,8 +39,18 @@ function LogoGroup({
   );
 }
 
-export default async function ClientLogoBar({ tone = "light" }: { tone?: "light" | "dark" }) {
-  const logos = await getClientLogos();
+export default async function ClientLogoBar({
+  tone = "light",
+  exclude = [],
+}: {
+  tone?: "light" | "dark";
+  /** Names to leave out on this page only (case-insensitive substring match). */
+  exclude?: readonly string[];
+}) {
+  const hidden = exclude.map((name) => name.toLowerCase());
+  const logos = (await getClientLogos()).filter(
+    (logo) => !hidden.some((name) => logo.name.toLowerCase().includes(name)),
+  );
   const lanes = [
     logos.filter((logo) => logo.lane === 1),
     logos.filter((logo) => logo.lane === 2),
