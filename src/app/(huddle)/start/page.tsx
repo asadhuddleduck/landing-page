@@ -18,20 +18,11 @@ export const metadata: Metadata = {
     url: HUDDLE_START.canonicalUrl,
     siteName: "Huddle Duck",
     type: "website",
-    images: [
-      {
-        url: "/start/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: HUDDLE_START.headline,
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: HUDDLE_START.title,
     description: HUDDLE_START.description,
-    images: ["/start/opengraph-image"],
   },
 };
 

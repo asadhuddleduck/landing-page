@@ -34,13 +34,11 @@ export const metadata: Metadata = {
     url: CANONICAL,
     siteName: "Huddle Duck",
     type: "website",
-    images: [{ url: "/wins/opengraph-image", width: 1200, height: 630, alt: "Huddle Duck wins" }],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/wins/opengraph-image"],
   },
 };
 
